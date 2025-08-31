@@ -1,0 +1,47 @@
+[project]
+name = "agentic-internet"
+version = "0.1.0"
+description = "An intelligent agent system powered by smolagents for autonomous internet interactions"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "smolagents>=0.1.0",
+    "transformers>=4.40.0",
+    "huggingface-hub>=0.23.0",
+    "torch>=2.0.0",
+    "accelerate>=0.30.0",
+    "requests>=2.31.0",
+    "beautifulsoup4>=4.12.0",
+    "duckduckgo-search>=6.2.0",
+    "pydantic>=2.0.0",
+    "python-dotenv>=1.0.0",
+    "rich>=13.7.0",
+    "typer>=0.12.0",
+    "httpx>=0.27.0",
+    "playwright>=1.40.0",
+    "pillow>=10.0.0",
+    "numpy>=1.24.0",
+    "pandas>=2.0.0",
+    "google-search-results>=2.4.0",
+    "litellm>=1.0.0",
+    "dotenv>=0.9.9",
+    "browser-use-sdk>=1.0.2",
+]
+
+[tool.rye]
+managed = true
+
+
+[project.scripts]
+agentic-internet = "agentic_internet.cli:app"
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=4.1.0",
+    "mypy>=1.8.0",
+    "ruff>=0.3.0",
+    "black>=24.0.0",
+    "ipython>=8.20.0",
+]
