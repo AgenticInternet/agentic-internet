@@ -234,17 +234,21 @@ def multi(
             progress.add_task("Initializing multi-model system...", total=None)
             
             # Set environment variables if needed
-            if not os.getenv("SERP_API_KEY"):
-                console.print("[yellow]Warning: SERP_API_KEY not set. SerpAPI tools may not work.[/yellow]")
+            if not os.getenv("SERPAPI_API_KEY"):
+                console.print("[yellow]Warning: SERPAPI_API_KEY not set. SerpAPI tools may not work.[/yellow]")
             
             system = MultiModelSerpAPISystem(
                 serpapi_key=os.getenv("SERPAPI_API_KEY"),
                 context_window_size=16384
             )
-            system.setup_multi_model_workers()
+            # Setup workers with the specified model if provided
+            default_model = models[0] if models else None
+            system.setup_multi_model_workers(default_model=default_model)
         
         # Run the task
         console.print(f"\n[bold cyan]Executing task:[/bold cyan] {task}")
+        if models:
+            console.print(f"[bold green]Using model:[/bold green] {models[0]}")
         
         with Progress(
             SpinnerColumn(),
@@ -256,8 +260,10 @@ def multi(
             # Run asynchronously
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
+            # Use the first model from the list if provided, otherwise use default
+            orchestrator_model = models[0] if models else "claude-4"
             result = loop.run_until_complete(
-                system.execute_multi_model_workflow(task, timeout=600)
+                system.execute_multi_model_workflow(task, timeout=600, orchestrator_model=orchestrator_model)
             )
             loop.close()
         
