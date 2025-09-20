@@ -45,7 +45,18 @@ def initialize_model(model_id: Optional[str] = None, verbose: bool = False) -> O
     
     # Initialize based on provider
     try:
-        if provider in ["openrouter", "openai", "anthropic"]:
+        if provider == "openrouter":
+            # Ensure OpenRouter models have the correct prefix for LiteLLM
+            if not model_id.startswith("openrouter/"):
+                model_id = f"openrouter/{model_id}"
+            return LiteLLMModel(
+                model_id=model_id,
+                api_key=api_key,
+                temperature=settings.model.temperature,
+                max_tokens=settings.model.max_tokens,
+                top_p=settings.model.top_p
+            )
+        elif provider in ["openai", "anthropic"]:
             return LiteLLMModel(
                 model_id=model_id,
                 api_key=api_key,
@@ -94,7 +105,18 @@ def get_any_available_model(verbose: bool = False) -> Optional[Any]:
             continue
         
         try:
-            if provider in ["openrouter", "openai", "anthropic"]:
+            if provider == "openrouter":
+                # Ensure OpenRouter models have the correct prefix for LiteLLM
+                if not model_id.startswith("openrouter/"):
+                    model_id = f"openrouter/{model_id}"
+                return LiteLLMModel(
+                    model_id=model_id,
+                    api_key=api_key,
+                    temperature=settings.model.temperature,
+                    max_tokens=settings.model.max_tokens,
+                    top_p=settings.model.top_p
+                )
+            elif provider in ["openai", "anthropic"]:
                 return LiteLLMModel(
                     model_id=model_id,
                     api_key=api_key,

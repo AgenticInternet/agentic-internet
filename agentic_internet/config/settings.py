@@ -21,9 +21,11 @@ class ModelConfig(BaseModel):
     # Model provider configurations
     openrouter_models: Dict[str, str] = Field(
         default={
+            "grok-code-fast": "openrouter/x-ai/grok-code-fast-1",
             "claude-sonnet-4": "openrouter/anthropic/claude-sonnet-4",
             "deepseek-r1": "openrouter/deepseek/deepseek-r1-0528",
             "deepseek-chat-v3": "openrouter/deepseek/deepseek-chat-v3.1",
+            "deepseek/deepseek-chat-v3.1": "openrouter/deepseek/deepseek-chat-v3.1",  # Map direct ID to OpenRouter
             "mistral-small": "openrouter/mistralai/mistral-small-3.2-24b-instruct",
             "sonar": "openrouter/perplexity/sonar",
             "sonar-reasoning": "openrouter/perplexity/sonar-reasoning",
@@ -38,7 +40,12 @@ class ModelConfig(BaseModel):
             "llama-4-scout": "openrouter/meta-llama/llama-4-scout:nitro",
             "grok-3-mini": "openrouter/x-ai/grok-3-mini-beta",
             "gpt-5": "openrouter/openai/gpt-5",
-            "kimi-k2": "openrouter/moonshotai/kimi-k2"
+            "kimi-k2": "openrouter/moonshotai/kimi-k2",
+            "grok-4-fast": "openrouter/x-ai/grok-4-fast:free",
+            "tongyi-deepsearch": "openrouter/alibaba/tongyi-deepresearch-30b-a3b",
+            "qwen3-coder-plus": "openrouter/qwen/qwen3-coder-plus",
+            "qwen3-coder-flash": "openrouter/qwen/qwen3-coder-flash",
+
         },
         description="Available OpenRouter models"
     )
@@ -71,7 +78,7 @@ class ModelConfig(BaseModel):
     # Fallback model preferences by provider
     fallback_models: Dict[str, str] = Field(
         default={
-            "openrouter": "openrouter/anthropic/claude-sonnet-4",
+            "openrouter": "openrouter/x-ai/grok-code-fast-1",
             "openai": "gpt-5",
             "anthropic": "claude-3-7-sonnet",
             "huggingface": "llama-4-scout"
@@ -155,22 +162,47 @@ class Settings(BaseModel):
         """Determine the provider for a given model ID."""
         model_id = model_id or self.model.name
         
+        # First check if the model exists in our configured model lists
+        # This gives us explicit control over provider mapping
+        for model_key, full_id in self.model.openrouter_models.items():
+            if model_id == full_id or model_id.endswith(full_id):
+                return "openrouter"
+        
+        for model_key, full_id in self.model.openai_models.items():
+            if model_id == full_id:
+                return "openai"
+        
+        for model_key, full_id in self.model.anthropic_models.items():
+            if model_id == full_id:
+                return "anthropic"
+        
+        for model_key, full_id in self.model.huggingface_models.items():
+            if model_id == full_id:
+                return "huggingface"
+        
+        # Fallback to pattern matching for models not in our lists
         # Check if it's explicitly an OpenRouter model
         if "openrouter/" in model_id.lower():
             return "openrouter"
         # Check if it matches OpenAI patterns
-        elif any(name in model_id.lower() for name in ["gpt-3.5", "gpt-4", "gpt", "o3"]):
+        elif any(name in model_id.lower() for name in ["gpt-3.5", "gpt-4", "gpt", "o3", "o1"]):
             return "openai"
         # Check if it matches Anthropic patterns  
         elif "claude" in model_id.lower():
             return "anthropic"
+        # Check for common model providers that typically use OpenRouter
+        elif any(provider in model_id.lower() for provider in ["deepseek/", "perplexity/", "x-ai/", "alibaba/", "mistral/", "qwen/"]):
+            # These are typically accessed via OpenRouter
+            if self.openrouter_api_key:
+                return "openrouter"
         # Check if it matches HuggingFace patterns
-        elif any(org in model_id.lower() for org in ["microsoft/", "meta-llama/", "qwen/", "mistralai/", "google/"]):
+        elif "/" in model_id and any(org in model_id.lower() for org in ["microsoft/", "meta-llama/", "huggingface/", "google/"]):
             return "huggingface"
         
         # Auto-detect based on available API keys
         if self.model.provider == "auto":
-            if self.openrouter_api_key:
+            # For unknown models with slashes, prefer OpenRouter if available
+            if "/" in model_id and self.openrouter_api_key:
                 return "openrouter"
             elif self.openai_api_key:
                 return "openai"

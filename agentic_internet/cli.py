@@ -29,7 +29,7 @@ def chat(
     model: Optional[str] = typer.Option(
         None,
         "--model", "-m",
-        help="Model to use (e.g., claude-4, gpt-5-chat, gemini-2.5-flash)"
+        help="Model to use (e.g., claude-4, gpt-5-chat, gemini-2.5-flash, grok-code-fast, grok-4-fast, tongyi-deepsearch, qwen3-coder, qwen3-coder-plus, qwen3-coder-flash)"
     ),
     verbose: bool = typer.Option(
         True,
@@ -61,7 +61,7 @@ def run(
     model: Optional[str] = typer.Option(
         None,
         "--model", "-m",
-        help="Model to use"
+        help="Model to use (e.g., claude-4, gpt-5-chat, gemini-2.5-flash, grok-code-fast, grok-4-fast, tongyi-deepsearch, qwen3-coder, qwen3-coder-plus, qwen3-coder-flash)"
     ),
     verbose: bool = typer.Option(
         True,
@@ -109,7 +109,7 @@ def research(
     model: Optional[str] = typer.Option(
         None,
         "--model", "-m",
-        help="Model to use"
+        help="Model to use (e.g., claude-4, gpt-5-chat, gemini-2.5-flash, grok-code-fast, grok-4-fast, tongyi-deepsearch, qwen3-coder, qwen3-coder-plus, qwen3-coder-flash)"
     ),
     output: Optional[Path] = typer.Option(
         None,

@@ -17,6 +17,7 @@ import pandas as pd
 from datetime import datetime
 
 from ..config.settings import settings
+from ..utils.model_utils import initialize_model
 from ..tools.web_search import WebSearchTool, WebScraperTool, NewsSearchTool
 from ..tools.code_execution import PythonExecutorTool, DataAnalysisTool
 from ..tools.browser_use import BrowserUseTool, AsyncBrowserUseTool, StructuredBrowserUseTool
@@ -78,35 +79,11 @@ class InternetAgent:
             ))
     
     def _initialize_model(self, model_id: Optional[str] = None) -> Any:
-        """Initialize the LLM model."""
-        model_id = model_id or settings.model.name
-        
-        # Check if we should use OpenRouter models
-        if "openrouter/" in model_id.lower():
-            if not settings.openrouter_api_key:
-                raise ValueError("OpenRouter API key not found. Please set OPENROUTER_API_KEY environment variable.")
-            return LiteLLMModel(
-                model_id=model_id,
-                api_key=settings.openrouter_api_key
-            )
-        # Check if we should use OpenAI via LiteLLM
-        elif settings.openai_api_key and "gpt" in model_id.lower():
-            return LiteLLMModel(
-                model_id=model_id,
-                api_key=settings.openai_api_key
-            )
-        # Check if we should use Anthropic via LiteLLM
-        elif settings.anthropic_api_key and "claude" in model_id.lower():
-            return LiteLLMModel(
-                model_id=model_id,
-                api_key=settings.anthropic_api_key
-            )
-        else:
-            # Use HuggingFace model
-            return InferenceClientModel(
-                model_id=model_id,
-                token=settings.huggingface_token
-            )
+        """Initialize the LLM model using centralized model initialization."""
+        model = initialize_model(model_id, verbose=self.verbose)
+        if not model:
+            raise ValueError(f"Failed to initialize model: {model_id or settings.model.name}")
+        return model
     
     def _create_agent(self):
         """Create the appropriate agent based on agent_type."""
