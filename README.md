@@ -108,8 +108,10 @@ uv run python -m agentic_internet.cli --help
 │ models        List and manage available AI models.                                                                                                                           │
 │ version       Display version information.
 ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+```
 
 ### Interactive Chat
+
 ```bash
 # Start chat with default model
 uv run python -m agentic_internet.cli chat --verbose
@@ -122,6 +124,7 @@ uv run python -m agentic_internet.cli run "Describe the latest AI breakthroughs"
 ```
 
 ### Run Single Task
+
 ```bash
 # Run a task
 uv run python -m agentic_internet.cli run "Search for Python tutorials" --verbose
