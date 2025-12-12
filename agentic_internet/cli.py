@@ -636,6 +636,273 @@ def models(
         console.print("[dim]Example: agentic-internet chat --model gpt-5-chat[/dim]")
 
 
+# MCP subcommand group
+mcp_app = typer.Typer(
+    name="mcp",
+    help="Manage MCP (Model Context Protocol) servers",
+    add_completion=False
+)
+app.add_typer(mcp_app, name="mcp")
+
+
+@mcp_app.command("list")
+def mcp_list():
+    """List available MCP servers configured in environment."""
+    try:
+        from .tools.mcp_integration import (
+            is_mcp_available,
+            load_mcp_config_from_env,
+        )
+        
+        if not is_mcp_available():
+            console.print("[yellow]MCP packages not installed.[/yellow]")
+            console.print("Install with: [cyan]pip install smolagents mcp[/cyan]")
+            raise typer.Exit(1)
+        
+        # Load configs from environment
+        configs = load_mcp_config_from_env()
+        
+        if not configs:
+            console.print("[yellow]No MCP servers configured in environment.[/yellow]")
+            console.print("\n[dim]Configure servers using environment variables:[/dim]")
+            console.print("  MCP_SERVER_1_TYPE=stdio")
+            console.print("  MCP_SERVER_1_PATH=/path/to/server.py")
+            console.print("  MCP_SERVER_1_NAME=my-server")
+            console.print("  MCP_SERVER_1_TRUST=true")
+            return
+        
+        # Display configured servers
+        table = Table(title="Configured MCP Servers", show_header=True, header_style="bold cyan")
+        table.add_column("Name", style="cyan")
+        table.add_column("Type", style="magenta")
+        table.add_column("Config", style="white")
+        table.add_column("Trust", style="yellow")
+        
+        for config in configs:
+            trust_marker = "✓" if config.trust_remote_code else "✗"
+            table.add_row(
+                config.name,
+                config.transport_type,
+                str(config.server_config)[:50],
+                trust_marker
+            )
+        
+        console.print(table)
+        
+    except Exception as e:
+        console.print(f"[bold red]Error:[/bold red] {str(e)}")
+        raise typer.Exit(1)
+
+
+@mcp_app.command("info")
+def mcp_info():
+    """Show MCP integration status and information."""
+    try:
+        from .tools.mcp_integration import is_mcp_available, MCP_AVAILABLE
+        
+        console.print(Panel.fit(
+            "[bold cyan]MCP Integration Status[/bold cyan]",
+            title="MCP Info"
+        ))
+        
+        if is_mcp_available():
+            console.print("[green]✓ MCP packages installed[/green]")
+            console.print("  - smolagents: [green]available[/green]")
+            console.print("  - mcp: [green]available[/green]")
+        else:
+            console.print("[red]✗ MCP packages not installed[/red]")
+            console.print("\n[dim]Install with:[/dim]")
+            console.print("  [cyan]pip install smolagents mcp[/cyan]")
+            console.print("  [cyan]pip install fastmcp[/cyan] (for creating servers)")
+            return
+        
+        console.print("\n[bold]Supported Transports:[/bold]")
+        console.print("  • [cyan]stdio[/cyan] - Local servers via subprocess")
+        console.print("  • [cyan]streamable-http[/cyan] - Remote servers via HTTP")
+        
+        console.print("\n[bold]Environment Variables:[/bold]")
+        console.print("  MCP_SERVER_N_TYPE     - Server type (stdio/http)")
+        console.print("  MCP_SERVER_N_PATH     - Path for stdio servers")
+        console.print("  MCP_SERVER_N_URL      - URL for http servers")
+        console.print("  MCP_SERVER_N_NAME     - Server name")
+        console.print("  MCP_SERVER_N_TRUST    - Trust remote code (true/false)")
+        console.print("  MCP_SERVER_N_ENV_*    - Environment variables for server")
+        
+        console.print("\n[bold]Documentation:[/bold]")
+        console.print("  See docs/MCP_INTEGRATION.md for detailed usage")
+        
+    except Exception as e:
+        console.print(f"[bold red]Error:[/bold red] {str(e)}")
+        raise typer.Exit(1)
+
+
+@mcp_app.command("run")
+def mcp_run(
+    task: str = typer.Argument(..., help="The task to execute with MCP tools"),
+    server_path: Optional[str] = typer.Option(
+        None,
+        "--server", "-s",
+        help="Path to MCP server script (for stdio transport)"
+    ),
+    server_url: Optional[str] = typer.Option(
+        None,
+        "--url", "-u",
+        help="URL of MCP server (for http transport)"
+    ),
+    trust: bool = typer.Option(
+        False,
+        "--trust/--no-trust", "-t/-T",
+        help="Trust remote code execution (required for MCP tools)"
+    ),
+    model: Optional[str] = typer.Option(
+        None,
+        "--model", "-m",
+        help="Model to use for the agent"
+    ),
+    verbose: bool = typer.Option(
+        True,
+        "--verbose/--quiet", "-v/-q",
+        help="Enable verbose output"
+    ),
+    output: Optional[Path] = typer.Option(
+        None,
+        "--output", "-o",
+        help="Save output to file"
+    ),
+):
+    """Run a task using MCP tools from a server."""
+    try:
+        from .tools.mcp_integration import is_mcp_available, mcp_tools
+        
+        if not is_mcp_available():
+            console.print("[red]MCP packages not installed.[/red]")
+            console.print("Install with: [cyan]pip install smolagents mcp[/cyan]")
+            raise typer.Exit(1)
+        
+        if not server_path and not server_url:
+            console.print("[red]Error: Must provide --server or --url[/red]")
+            raise typer.Exit(1)
+        
+        if not trust:
+            console.print("[yellow]Warning: MCP tools require --trust flag to execute.[/yellow]")
+            console.print("Add [cyan]--trust[/cyan] or [cyan]-t[/cyan] to enable tool execution.")
+            raise typer.Exit(1)
+        
+        console.print(Panel.fit(
+            f"[bold cyan]Task:[/bold cyan] {task}\n"
+            f"[bold cyan]Server:[/bold cyan] {server_path or server_url}\n"
+            f"[bold cyan]Trust:[/bold cyan] {'Enabled' if trust else 'Disabled'}",
+            title="MCP Run"
+        ))
+        
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            console=console
+        ) as progress:
+            progress.add_task("Connecting to MCP server...", total=None)
+            
+            # Connect to MCP server and run task
+            with mcp_tools(
+                server_path=server_path,
+                server_url=server_url,
+                trust_remote_code=trust,
+            ) as tools:
+                progress.add_task(f"Loaded {len(tools)} MCP tools", total=None)
+                
+                # Create agent with MCP tools
+                agent = InternetAgent(
+                    model_id=model,
+                    tools=list(tools),
+                    verbose=verbose,
+                )
+                
+                progress.add_task("Executing task...", total=None)
+                result = agent.run(task)
+        
+        if output:
+            output.write_text(str(result))
+            console.print(f"\n[green]Output saved to {output}[/green]")
+        else:
+            console.print("\n[bold green]Result:[/bold green]")
+            console.print(result)
+        
+    except Exception as e:
+        console.print(f"[bold red]Error:[/bold red] {str(e)}")
+        raise typer.Exit(1)
+
+
+@mcp_app.command("test")
+def mcp_test(
+    server_path: Optional[str] = typer.Option(
+        None,
+        "--server", "-s",
+        help="Path to MCP server script to test"
+    ),
+    server_url: Optional[str] = typer.Option(
+        None,
+        "--url", "-u",
+        help="URL of MCP server to test"
+    ),
+):
+    """Test connection to an MCP server and list available tools."""
+    try:
+        from .tools.mcp_integration import is_mcp_available, mcp_tools
+        
+        if not is_mcp_available():
+            console.print("[red]MCP packages not installed.[/red]")
+            console.print("Install with: [cyan]pip install smolagents mcp[/cyan]")
+            raise typer.Exit(1)
+        
+        if not server_path and not server_url:
+            console.print("[red]Error: Must provide --server or --url[/red]")
+            raise typer.Exit(1)
+        
+        server_display = server_path or server_url
+        console.print(f"[cyan]Testing connection to:[/cyan] {server_display}")
+        
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            console=console
+        ) as progress:
+            progress.add_task("Connecting to MCP server...", total=None)
+            
+            try:
+                with mcp_tools(
+                    server_path=server_path,
+                    server_url=server_url,
+                    trust_remote_code=True,  # Required to load tools
+                ) as tools:
+                    console.print(f"\n[green]✓ Connected successfully![/green]")
+                    console.print(f"[green]✓ Found {len(tools)} tools[/green]\n")
+                    
+                    if tools:
+                        table = Table(
+                            title="Available MCP Tools",
+                            show_header=True,
+                            header_style="bold cyan"
+                        )
+                        table.add_column("Tool Name", style="cyan")
+                        table.add_column("Description", style="white")
+                        
+                        for tool in tools:
+                            desc = getattr(tool, 'description', 'No description')[:80]
+                            table.add_row(tool.name, desc)
+                        
+                        console.print(table)
+                    else:
+                        console.print("[yellow]No tools found on server[/yellow]")
+                        
+            except Exception as conn_error:
+                console.print(f"\n[red]✗ Connection failed:[/red] {str(conn_error)}")
+                raise typer.Exit(1)
+        
+    except Exception as e:
+        console.print(f"[bold red]Error:[/bold red] {str(e)}")
+        raise typer.Exit(1)
+
+
 @app.command()
 def version():
     """Display version information."""

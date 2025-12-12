@@ -16,7 +16,7 @@ from agentic_internet import InternetAgent
 
 agent = InternetAgent(
     agent_type="tool_calling",
-    model_id="openrouter/anthropic/claude-sonnet-4"
+    model_id="openrouter/anthropic/claude-sonnet-4.5"
 )
 ```
 
@@ -28,7 +28,7 @@ agent = InternetAgent(
 ```python
 agent = InternetAgent(
     agent_type="code",
-    model_id="openrouter/anthropic/claude-sonnet-4",
+    model_id="openrouter/anthropic/claude-sonnet-4.5",
     additional_authorized_imports=["scipy", "sklearn"]  # Add extra imports
 )
 ```
@@ -216,7 +216,7 @@ from agentic_internet import InternetAgent
 
 # Create an agent
 agent = InternetAgent(
-    model_id="openrouter/anthropic/claude-sonnet-4",
+    model_id="openrouter/anthropic/claude-sonnet-4.5",
     agent_type="tool_calling",
     verbose=True
 )

@@ -11,7 +11,7 @@ load_dotenv()
 
 class ModelConfig(BaseModel):
     """Configuration for LLM models."""
-    name: str = Field(default="openrouter/anthropic/claude-sonnet-4", description="Default model name")
+    name: str = Field(default="openrouter/anthropic/claude-sonnet-4.5", description="Default model name")
     provider: str = Field(default="auto", description="Model provider (auto, openrouter, openai, anthropic, huggingface)")
     api_key: Optional[str] = Field(default=None, description="API key for the model provider")
     temperature: float = Field(default=0.7, description="Temperature for generation")
@@ -22,10 +22,10 @@ class ModelConfig(BaseModel):
     openrouter_models: Dict[str, str] = Field(
         default={
             "grok-code-fast": "openrouter/x-ai/grok-code-fast-1",
-            "claude-sonnet-4": "openrouter/anthropic/claude-sonnet-4",
+            "claude-sonnet-4": "openrouter/anthropic/claude-sonnet-4.5",
             "deepseek-r1": "openrouter/deepseek/deepseek-r1-0528",
-            "deepseek-chat-v3": "openrouter/deepseek/deepseek-chat-v3.1",
-            "deepseek/deepseek-chat-v3.1": "openrouter/deepseek/deepseek-chat-v3.1",  # Map direct ID to OpenRouter
+            "deepseek-chat-v3": "openrouter/deepseek/deepseek-v3.2",
+            "deepseek/deepseek-chat-v3.1": "openrouter/deepseek/deepseek-v3.2",  # Map direct ID to OpenRouter
             "mistral-small": "openrouter/mistralai/mistral-small-3.2-24b-instruct",
             "sonar": "openrouter/perplexity/sonar",
             "sonar-reasoning": "openrouter/perplexity/sonar-reasoning",

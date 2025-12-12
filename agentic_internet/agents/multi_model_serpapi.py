@@ -39,7 +39,7 @@ class ModelManager:
         
         try:
             self.claude = LiteLLMModel(
-                model_id="openrouter/anthropic/claude-sonnet-4", 
+                model_id="openrouter/anthropic/claude-sonnet-4.5", 
                 api_key=api_key, 
                 temperature=0.7
             )
@@ -50,7 +50,7 @@ class ModelManager:
         # Initialize all other models with error handling
         models_config = [
             ('deepseek', "openrouter/deepseek/deepseek-r1-0528", 0.6),
-            ('deepseek_chat', "openrouter/deepseek/deepseek-chat-v3.1", 0.6),
+            ('deepseek_chat', "openrouter/deepseek/deepseek-v3.2", 0.6),
             ('mistral_small', "openrouter/mistralai/mistral-small-3.2-24b-instruct", 0.8),
             ('sonar', "openrouter/perplexity/sonar", 0.8),
             ('sonar_reasoning', "openrouter/perplexity/sonar-reasoning", None),

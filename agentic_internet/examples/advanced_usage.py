@@ -49,7 +49,7 @@ def example_agent_types():
     # MultiStepAgent - Best for complex reasoning
     #console.print("\n[yellow]3. MultiStepAgent[/yellow]")
     # agent3 = InternetAgent(
-    #     model_id="openrouter/anthropic/claude-sonnet-4",
+    #     model_id="openrouter/anthropic/claude-sonnet-4.5",
     #     agent_type="multi_step",
     #     verbose=True
     # )
@@ -79,7 +79,7 @@ def example_browser_automation():
         return None
     
     agent = BrowserAutomationAgent(
-        model_id="openrouter/anthropic/claude-sonnet-4",
+        model_id="openrouter/anthropic/claude-sonnet-4.5",
         verbose=True
     )
     
@@ -109,7 +109,7 @@ def example_data_analysis():
     console.print("\n[bold cyan]Example: Data Analysis Agent[/bold cyan]")
     
     agent = DataAnalysisAgent(
-        model_id="openrouter/anthropic/claude-sonnet-4",
+        model_id="openrouter/anthropic/claude-sonnet-4.5",
         verbose=True
     )
     
@@ -136,7 +136,7 @@ def example_content_creation():
     console.print("\n[bold cyan]Example: Content Creation Agent[/bold cyan]")
     
     agent = ContentCreationAgent(
-        model_id="openrouter/anthropic/claude-sonnet-4",
+        model_id="openrouter/anthropic/claude-sonnet-4.5",
         verbose=True
     )
     
@@ -165,7 +165,7 @@ def example_market_research():
     console.print("\n[bold cyan]Example: Market Research Agent[/bold cyan]")
     
     agent = MarketResearchAgent(
-        model_id="openrouter/anthropic/claude-sonnet-4",
+        model_id="openrouter/anthropic/claude-sonnet-4.5",
         verbose=True
     )
     
@@ -183,7 +183,7 @@ def example_technical_support():
     console.print("\n[bold cyan]Example: Technical Support Agent[/bold cyan]")
     
     agent = TechnicalSupportAgent(
-        model_id="openrouter/anthropic/claude-sonnet-4",
+        model_id="openrouter/anthropic/claude-sonnet-4.5",
         verbose=True
     )
     

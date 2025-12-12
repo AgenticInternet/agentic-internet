@@ -26,6 +26,7 @@ dependencies = [
     "litellm>=1.0.0",
     "dotenv>=0.9.9",
     "browser-use-sdk>=1.0.2",
+    "mcp>=1.0.0",
 ]
 
 [tool.rye]

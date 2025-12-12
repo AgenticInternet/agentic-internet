@@ -94,7 +94,7 @@ def example_multi_tool_task():
     console.print("\n[bold cyan]Example 5: Multi-Tool Task[/bold cyan]")
     
     agent = InternetAgent(
-        model_id="openrouter/anthropic/claude-sonnet-4",
+        model_id="openrouter/anthropic/claude-sonnet-4.5",
         verbose=True, 
         max_iterations=15
     )
