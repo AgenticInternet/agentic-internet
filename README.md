@@ -117,10 +117,10 @@ uv run python -m agentic_internet.cli --help
 uv run python -m agentic_internet.cli chat --verbose
 
 # Use a specific model
-uv run python -m agentic_internet.cli run "Write a short story on GPT-5 models" --model gpt-5 --verbose
+uv run python -m agentic_internet.cli run "Write a short story on GPT-5 models" --model gpt-5.2 --verbose
 
 # Quiet mode (less verbose)
-uv run python -m agentic_internet.cli run "Describe the latest AI breakthroughs" --model gpt-5 --verbose --quiet
+uv run python -m agentic_internet.cli run "Describe the latest AI breakthroughs" --model gemini-3-flash --verbose --quiet
 ```
 
 ### Run Single Task
@@ -133,7 +133,7 @@ uv run python -m agentic_internet.cli run "Search for Python tutorials" --verbos
 uv run python -m agentic_internet.cli run "Analyze crypto market trends" --output results.txt --verbose
 
 # Specify model and iterations
-uv run python -m agentic_internet.cli run "Complex research task" --model claude-4 --max-iterations 15 --verbose
+uv run python -m agentic_internet.cli run "Complex research task" --model claude-opus-4.5 --max-iterations 15 --verbose
 ```
 
 ### Research Mode
@@ -152,7 +152,7 @@ uv run python -m agentic_internet.cli research "climate change" --format json --
 
 ```bash
 # Multi-model task
-uv run python -m agentic_internet.cli multi "Analyze the impact of AI on healthcare" --models gpt-5-chat --models claude-4 --workers 3 --output results.json
+uv run python -m agentic_internet.cli multi "Analyze the impact of AI on healthcare" --models gpt-5.2 --models claude-opus-4.5 --workers 3 --output results.json
 
 # News analysis
 uv run python -m agentic_internet.cli news "artificial intelligence breakthroughs" --time 7d --sources "TechCrunch" --sources "Wired" --limit 20 --format markdown --output news_report.md
@@ -162,7 +162,7 @@ uv run python -m agentic_internet.cli news "artificial intelligence breakthrough
 
 ```bash
 # Orchestrated task
-uv run python -m agentic_internet.cli orchestrate "Develop a business plan for an AI startup" --coordinator gpt-5-chat --workers claude-4 --output business_plan.json
+uv run python -m agentic_internet.cli orchestrate "Develop a business plan for an AI startup" --coordinator gpt-5.2 --workers claude-opus-4.5 --output business_plan.json
 ```
 
 
@@ -385,20 +385,29 @@ result = asyncio.run(run_analysis())
 agentic-internet/
 ├── agentic_internet/
 │   ├── __init__.py
-│   ├── agents/          # Agent implementations
-│   │   └── internet_agent.py
-│   ├── tools/           # Custom tools
+│   ├── __main__.py          # CLI entry point
+│   ├── exceptions.py        # Custom exception hierarchy
+│   ├── cli.py               # CLI interface
+│   ├── agents/              # Agent implementations
+│   │   ├── internet_agent.py
+│   │   ├── basic_agent.py
+│   │   ├── multi_model_serpapi.py
+│   │   ├── search_orchestrator.py
+│   │   └── specialized_agents.py
+│   ├── tools/               # Custom tools
 │   │   ├── web_search.py
-│   │   └── code_execution.py
-│   ├── config/          # Configuration
+│   │   ├── code_execution.py
+│   │   ├── browser_use.py
+│   │   └── mcp_integration.py
+│   ├── config/              # Configuration
 │   │   └── settings.py
-│   ├── examples/        # Usage examples
-│   │   └── basic_usage.py
-│   └── cli.py          # CLI interface
-├── tests/              # Test suite
-├── pyproject.toml      # Project configuration
-├── README.md          # Documentation
-└── .env               # Environment variables
+│   ├── utils/               # Utilities
+│   │   └── model_utils.py
+│   └── examples/            # Usage examples
+├── tests/                   # Test suite (102 tests)
+├── pyproject.toml           # Project configuration
+├── README.md
+└── .env                     # Environment variables
 ```
 
 ## ⚙️ Configuration
@@ -444,26 +453,55 @@ agent = InternetAgent(tools=[MyCustomTool()])
 
 ## 🔄 Supported Models
 
-- **HuggingFace Models**: Llama, Mistral, etc. (via HuggingFace API)
-- **OpenAI**: GPT-4, GPT-3.5-turbo (via OpenAI API)
-- **Anthropic**: Claude 3 family (via Anthropic API)
-- **Local Models**: Any model compatible with HuggingFace Transformers
+All models are accessed via [OpenRouter](https://openrouter.ai/) for unified API access, with optional direct provider APIs.
+
+### Flagship Models
+| Provider | Model | Best For |
+|----------|-------|----------|
+| Anthropic | Claude Opus 4.5, Sonnet 4.5, Haiku 4.5 | Reasoning, planning, orchestration |
+| OpenAI | GPT-5.2, GPT-5.1, O4-Mini, O3 | General tasks, coding, reasoning |
+| Google | Gemini 3 Pro, Gemini 3 Flash | Multimodal, fast responses |
+| DeepSeek | V3.2, V3.2 Speciale, R1 | Open-weight reasoning, specialized |
+| xAI | Grok 4.1 Fast, Grok 4, Grok Code Fast | Creative tasks, fast coding |
+| Mistral | Large 2512, Devstral 2, Magistral Medium | Business analysis, agentic coding |
+| Qwen | Qwen3 Coder, Qwen3 Max, Qwen3 235B | Coding, multilingual, synthesis |
+| Meta | Llama 4 Maverick, Llama 4 Scout | Open source general tasks |
+| MoonshotAI | Kimi K2.5 | Long context specialist |
+| Perplexity | Sonar Pro, Sonar Reasoning Pro | Search-optimized research |
+| MiniMax | M2.1 | Balanced reasoning |
+| Xiaomi | MiMo V2 Flash | Cost-effective coding |
+
+### Direct Provider APIs
+- **OpenAI**: GPT-5.2, GPT-5.1, GPT-5, GPT-4.1, O4-Mini, O3 (via OpenAI API)
+- **Anthropic**: Claude Opus 4.5, Sonnet 4.5, Opus 4.1, Haiku 4.5 (via Anthropic API)
+- **HuggingFace**: Llama 4 Scout/Maverick, Qwen3 235B (via HuggingFace API)
 
 ## 🧪 Development
 
 ### Running Tests
 ```bash
+# Run all tests (102 tests)
 uv run pytest tests/
+
+# Run with verbose output
+uv run pytest tests/ -v
+
+# Run specific test file
+uv run pytest tests/test_code_execution.py
 ```
 
-### Code Formatting
+### Code Quality
 ```bash
-uv run black agentic_internet/
+# Lint with ruff
 uv run ruff check agentic_internet/
-```
 
-### Type Checking
-```bash
+# Auto-fix lint issues
+uv run ruff check --fix agentic_internet/
+
+# Format with black
+uv run black agentic_internet/
+
+# Type checking
 uv run mypy agentic_internet/
 ```
 

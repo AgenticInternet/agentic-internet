@@ -3,11 +3,13 @@ Example usage of the Multi-Model SerpAPI Enhanced System
 """
 
 import asyncio
-import os
-from agentic_internet.agents.multi_model_serpapi import MultiModelSerpAPISystem
-from rich.console import Console
 import json
+import os
+
 from dotenv import load_dotenv
+from rich.console import Console
+
+from agentic_internet.agents.multi_model_serpapi import MultiModelSerpAPISystem
 
 load_dotenv()
 
@@ -17,7 +19,7 @@ console = Console()
 # Workflow Templates
 class MultiModelWorkflowTemplates:
     """Advanced workflow templates optimized for multi-model coordination"""
-    
+
     @staticmethod
     def comprehensive_competitive_analysis(company: str, industry: str = None) -> str:
         industry_context = f" in the {industry} industry" if industry else ""
@@ -46,7 +48,7 @@ class MultiModelWorkflowTemplates:
         
         DELIVERABLE: Multi-model validated competitive intelligence dossier with strategic recommendations
         """
-    
+
     @staticmethod
     def advanced_market_opportunity_assessment(market: str, geography: str = "global") -> str:
         return f"""
@@ -81,7 +83,7 @@ class MultiModelWorkflowTemplates:
         
         DELIVERABLE: Comprehensive market opportunity report with multi-model validated insights
         """
-    
+
     @staticmethod
     def technology_landscape_analysis(technology: str, timeframe: str = "2024-2026") -> str:
         return f"""
@@ -115,60 +117,60 @@ class MultiModelWorkflowTemplates:
 
 async def demonstrate_system():
     """Demonstrate the Multi-Model SerpAPI System"""
-    
+
     # Check for API keys
     serpapi_key = os.environ.get("SERPAPI_API_KEY")
     openrouter_key = os.environ.get("OPENROUTER_API_KEY")
-    
+
     if not serpapi_key:
         console.print("[yellow]Warning: No SERPAPI_API_KEY found. System will run with limited functionality.[/yellow]")
         console.print("To use SerpAPI features, set your API key:")
         console.print("export SERPAPI_API_KEY='your_key_here'")
-    
+
     if not openrouter_key:
         console.print("[yellow]Warning: No OPENROUTER_API_KEY found. Using free models.[/yellow]")
         console.print("To use premium models via OpenRouter, set your API key:")
         console.print("export OPENROUTER_API_KEY='your_key_here'")
-    
+
     # Initialize the system
     console.print("\n[bold cyan]🚀 Initializing Multi-Model SerpAPI System[/bold cyan]")
     orchestrator = MultiModelSerpAPISystem(
         serpapi_key=serpapi_key,
         context_window_size=32768
     )
-    
+
     # Setup workers
     console.print("[bold]Setting up specialized workers...[/bold]")
     orchestrator.setup_multi_model_workers()
-    
+
     # Display system configuration
     console.print("\n[bold green]✅ System Configuration:[/bold green]")
-    console.print(f"  • Context Window: 32,768 tokens")
+    console.print("  • Context Window: 32,768 tokens")
     console.print(f"  • Workers Created: {len(orchestrator.workers)}")
     console.print(f"  • SerpAPI Status: {'✅ Connected' if serpapi_key else '❌ Not configured'}")
     console.print(f"  • Model Provider: {'OpenRouter' if openrouter_key else 'Free HuggingFace'}")
-    
+
     if orchestrator.workers:
         console.print("\n[bold]Available Specialists:[/bold]")
         for name in orchestrator.workers.keys():
             console.print(f"  • {name}")
-    
+
     # Example 1: Simple search task
     console.print("\n" + "="*60)
     console.print("[bold cyan]Example 1: Simple Web Search[/bold cyan]")
     console.print("="*60)
-    
+
     simple_task = "Search for the latest developments in AI agents and multi-agent systems"
-    
+
     try:
         result = await orchestrator.execute_multi_model_workflow(
             simple_task,
             timeout=300  # 5 minutes
         )
-        
+
         result_data = json.loads(result)
         console.print("\n[bold green]Results:[/bold green]")
-        
+
         if 'error' in result_data:
             console.print(f"[red]Error: {result_data['error']}[/red]")
         else:
@@ -176,46 +178,46 @@ async def demonstrate_system():
                 console.print(f"Primary Result: {str(result_data['primary_result'])[:500]}...")
             if 'search_performance' in result_data:
                 console.print(f"\nSearch Performance: {result_data['search_performance']}")
-    
+
     except Exception as e:
-        console.print(f"[red]Error: {str(e)}[/red]")
-    
+        console.print(f"[red]Error: {e!s}[/red]")
+
     # Example 2: Market Analysis (if API keys are available)
     if serpapi_key or openrouter_key:
         console.print("\n" + "="*60)
         console.print("[bold cyan]Example 2: Market Opportunity Assessment[/bold cyan]")
         console.print("="*60)
-        
+
         market_task = MultiModelWorkflowTemplates.advanced_market_opportunity_assessment(
             "AI-powered code generation tools",
             "North America"
         )
-        
+
         try:
             result = await orchestrator.execute_multi_model_workflow(
                 market_task,
                 timeout=600  # 10 minutes
             )
-            
+
             result_data = json.loads(result)
             console.print("\n[bold green]Market Analysis Results:[/bold green]")
-            
+
             if 'error' in result_data:
                 console.print(f"[red]Error: {result_data['error']}[/red]")
             else:
                 console.print(json.dumps(result_data, indent=2)[:1000] + "...[truncated]")
-        
+
         except Exception as e:
-            console.print(f"[red]Error: {str(e)}[/red]")
-    
+            console.print(f"[red]Error: {e!s}[/red]")
+
     # System Summary
     console.print("\n" + "="*60)
     console.print("[bold cyan]System Performance Summary[/bold cyan]")
     console.print("="*60)
-    
+
     summary = orchestrator.get_comprehensive_summary()
     console.print(json.dumps(summary, indent=2))
-    
+
     console.print("\n[bold green]✅ Demonstration Complete![/bold green]")
     console.print("\nTo fully utilize this system:")
     console.print("1. Set SERPAPI_API_KEY for advanced search capabilities")
@@ -226,13 +228,13 @@ def main():
     """Main entry point"""
     console.print("[bold magenta]Multi-Model SerpAPI Enhanced System Demo[/bold magenta]")
     console.print("="*60)
-    
+
     try:
         asyncio.run(demonstrate_system())
     except KeyboardInterrupt:
         console.print("\n[yellow]Demo interrupted by user[/yellow]")
     except Exception as e:
-        console.print(f"\n[red]Unexpected error: {str(e)}[/red]")
+        console.print(f"\n[red]Unexpected error: {e!s}[/red]")
         import traceback
         traceback.print_exc()
 

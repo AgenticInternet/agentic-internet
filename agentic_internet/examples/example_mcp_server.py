@@ -11,7 +11,6 @@ except ImportError:
         "FastMCP is required for this example. Install it with: pip install fastmcp"
     )
 
-from typing import Dict, List
 
 # Create the MCP server
 mcp = FastMCP(name="Example MCP Server")
@@ -48,7 +47,7 @@ def calculate_product(a: float, b: float) -> float:
 
 
 @mcp.tool
-def get_weather(city: str) -> Dict[str, str]:
+def get_weather(city: str) -> dict[str, str]:
     """
     Get mock weather information for a city.
     
@@ -70,7 +69,7 @@ def get_weather(city: str) -> Dict[str, str]:
 
 
 @mcp.tool
-def analyze_sentiment(text: str) -> Dict[str, str]:
+def analyze_sentiment(text: str) -> dict[str, str]:
     """
     Perform basic sentiment analysis on text.
     
@@ -83,18 +82,18 @@ def analyze_sentiment(text: str) -> Dict[str, str]:
     # Simple mock sentiment analysis
     positive_words = ["good", "great", "excellent", "amazing", "wonderful", "fantastic"]
     negative_words = ["bad", "terrible", "awful", "horrible", "poor"]
-    
+
     text_lower = text.lower()
     positive_count = sum(1 for word in positive_words if word in text_lower)
     negative_count = sum(1 for word in negative_words if word in text_lower)
-    
+
     if positive_count > negative_count:
         sentiment = "positive"
     elif negative_count > positive_count:
         sentiment = "negative"
     else:
         sentiment = "neutral"
-    
+
     return {
         "text": text,
         "sentiment": sentiment,
@@ -104,7 +103,7 @@ def analyze_sentiment(text: str) -> Dict[str, str]:
 
 
 @mcp.tool
-def search_items(query: str, limit: int = 5) -> List[Dict[str, str]]:
+def search_items(query: str, limit: int = 5) -> list[dict[str, str]]:
     """
     Search for items based on a query (mock data).
     
@@ -128,7 +127,7 @@ def search_items(query: str, limit: int = 5) -> List[Dict[str, str]]:
 
 
 @mcp.resource("config://settings")
-def get_server_config() -> Dict[str, str]:
+def get_server_config() -> dict[str, str]:
     """
     Provide server configuration information.
     
@@ -144,7 +143,7 @@ def get_server_config() -> Dict[str, str]:
 
 
 @mcp.resource("data://{dataset_name}")
-def get_dataset(dataset_name: str) -> Dict[str, any]:
+def get_dataset(dataset_name: str) -> dict[str, any]:
     """
     Provide mock dataset information.
     
@@ -171,7 +170,7 @@ def get_dataset(dataset_name: str) -> Dict[str, any]:
             "columns": ["id", "user_id", "product_id", "quantity", "order_date"]
         }
     }
-    
+
     return datasets.get(dataset_name, {"error": f"Dataset '{dataset_name}' not found"})
 
 

@@ -1,14 +1,21 @@
 """Browser Use tool for advanced web automation and scraping."""
 
-import os
 import asyncio
-from typing import Optional, Dict, Any, List
-from smolagents import Tool
 import logging
+import os
+
 from pydantic import BaseModel
-from browser_use_sdk import BrowserUse, AsyncBrowserUse
+from smolagents import Tool
 
 logger = logging.getLogger(__name__)
+
+try:
+    from browser_use_sdk import AsyncBrowserUse, BrowserUse
+    HAS_BROWSER_USE = True
+except ImportError:
+    HAS_BROWSER_USE = False
+    BrowserUse = None  # type: ignore[assignment,misc]
+    AsyncBrowserUse = None  # type: ignore[assignment,misc]
 
 
 class BrowserUseTool(Tool):
@@ -16,15 +23,15 @@ class BrowserUseTool(Tool):
     Tool for web automation using Browser Use Cloud API.
     Enables agents to interact with websites, fill forms, and extract structured data.
     """
-    
+
     name = "browser_use"
-    description = """Advanced browser automation tool for interacting with websites, filling forms, 
-    clicking buttons, and extracting structured data. Use this when you need to interact with 
+    description = """Advanced browser automation tool for interacting with websites, filling forms,
+    clicking buttons, and extracting structured data. Use this when you need to interact with
     dynamic websites or perform complex web automation tasks."""
-    
+
     inputs = {
         "task": {
-            "type": "string", 
+            "type": "string",
             "description": "Description of the task to perform in the browser"
         },
         "structured_output": {
@@ -34,47 +41,45 @@ class BrowserUseTool(Tool):
         }
     }
     output_type = "string"
-    
-    def __init__(self, api_key: Optional[str] = None):
+
+    def __init__(self, api_key: str | None = None):
         """Initialize the Browser Use tool with API key."""
         super().__init__()
         self.api_key = api_key or os.environ.get("BROWSER_USE_API_KEY")
-        
-        if not self.api_key:
-            logger.warning("Browser Use API key not found. Tool will have limited functionality.")
+
+        if not self.api_key or not HAS_BROWSER_USE:
+            if not HAS_BROWSER_USE:
+                logger.warning("browser-use-sdk not installed. Install with: pip install browser-use-sdk")
+            else:
+                logger.warning("Browser Use API key not found. Tool will have limited functionality.")
             self.client = None
         else:
             self.client = BrowserUse(api_key=self.api_key)
-    
+
     def forward(self, task: str, structured_output: bool = False) -> str:
         """Execute a browser automation task."""
         if not self.client:
-            return "Browser Use API key not configured. Please set BROWSER_USE_API_KEY environment variable."
-        
+            return "Browser Use not available. Check API key and browser-use-sdk installation."
+
         try:
-            # Run the task
             result = self.client.tasks.run(task=task)
-            
             if result.done_output:
                 return result.done_output
-            else:
-                return f"Task completed but no output was returned. Status: {result.status if hasattr(result, 'status') else 'unknown'}"
-                
+            return f"Task completed but no output was returned. Status: {getattr(result, 'status', 'unknown')}"
         except Exception as e:
-            error_msg = f"Browser automation failed: {str(e)}"
-            logger.error(error_msg)
-            return error_msg
+            logger.error("Browser automation failed: %s", e)
+            return f"Browser automation failed: {e}"
 
 
 class AsyncBrowserUseTool(Tool):
     """
     Async version of Browser Use tool for web automation.
     """
-    
+
     name = "async_browser_use"
-    description = """Async browser automation tool for high-performance web interactions. 
+    description = """Async browser automation tool for high-performance web interactions.
     Use this for complex scraping tasks that require parallel execution or streaming updates."""
-    
+
     inputs = {
         "task": {
             "type": "string",
@@ -87,69 +92,58 @@ class AsyncBrowserUseTool(Tool):
         }
     }
     output_type = "string"
-    
-    def __init__(self, api_key: Optional[str] = None):
+
+    def __init__(self, api_key: str | None = None):
         """Initialize the Async Browser Use tool."""
         super().__init__()
         self.api_key = api_key or os.environ.get("BROWSER_USE_API_KEY")
-        
-        if not self.api_key:
-            logger.warning("Browser Use API key not found. Tool will have limited functionality.")
+
+        if not self.api_key or not HAS_BROWSER_USE:
+            if not HAS_BROWSER_USE:
+                logger.warning("browser-use-sdk not installed.")
+            else:
+                logger.warning("Browser Use API key not found. Tool will have limited functionality.")
             self.client = None
         else:
             self.client = AsyncBrowserUse(api_key=self.api_key)
-    
+
     def forward(self, task: str, stream: bool = False) -> str:
         """Execute an async browser automation task."""
         if not self.client:
-            return "Browser Use API key not configured. Please set BROWSER_USE_API_KEY environment variable."
-        
+            return "Browser Use not available. Check API key and browser-use-sdk installation."
+
         try:
-            # Run async task in sync context
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            
-            try:
-                if stream:
-                    result = loop.run_until_complete(self._run_with_stream(task))
-                else:
-                    result = loop.run_until_complete(self._run_simple(task))
-                return result
-            finally:
-                loop.close()
-                
+            coro = self._run_with_stream(task) if stream else self._run_simple(task)
+            return asyncio.run(coro)
         except Exception as e:
-            error_msg = f"Async browser automation failed: {str(e)}"
-            logger.error(error_msg)
-            return error_msg
-    
+            logger.error("Async browser automation failed: %s", e)
+            return f"Async browser automation failed: {e}"
+
     async def _run_simple(self, task: str) -> str:
         """Run a simple async task."""
         result = await self.client.tasks.run(task=task)
-        
         if result.done_output:
             return result.done_output
-        else:
-            return f"Task completed. Status: {result.status if hasattr(result, 'status') else 'completed'}"
-    
+        return f"Task completed. Status: {getattr(result, 'status', 'completed')}"
+
     async def _run_with_stream(self, task: str) -> str:
         """Run a task with streaming updates."""
         # Create the task
         created_task = await self.client.tasks.create(task=task)
-        
+
         updates = []
         # Stream updates
         async for update in self.client.tasks.stream(created_task.id):
             if len(update.steps) > 0:
                 last_step = update.steps[-1]
                 updates.append(f"Step: {last_step.url if hasattr(last_step, 'url') else 'processing'} - {last_step.next_goal if hasattr(last_step, 'next_goal') else 'working'}")
-            
+
             if update.status == "finished":
                 if update.done_output:
                     return update.done_output
                 else:
-                    return f"Task completed.\nSteps performed:\n" + "\n".join(updates)
-        
+                    return "Task completed.\nSteps performed:\n" + "\n".join(updates)
+
         return "Task stream ended without completion."
 
 
@@ -157,11 +151,11 @@ class StructuredBrowserUseTool(Tool):
     """
     Browser Use tool with structured output support using Pydantic models.
     """
-    
+
     name = "structured_browser_use"
-    description = """Browser automation with structured data extraction. 
+    description = """Browser automation with structured data extraction.
     Use this when you need to extract specific structured information from websites."""
-    
+
     inputs = {
         "task": {
             "type": "string",
@@ -174,44 +168,38 @@ class StructuredBrowserUseTool(Tool):
         }
     }
     output_type = "string"
-    
-    def __init__(self, api_key: Optional[str] = None):
+
+    def __init__(self, api_key: str | None = None):
         """Initialize the Structured Browser Use tool."""
         super().__init__()
         self.api_key = api_key or os.environ.get("BROWSER_USE_API_KEY")
-        
-        if not self.api_key:
-            logger.warning("Browser Use API key not found. Tool will have limited functionality.")
+
+        if not self.api_key or not HAS_BROWSER_USE:
+            if not HAS_BROWSER_USE:
+                logger.warning("browser-use-sdk not installed.")
+            else:
+                logger.warning("Browser Use API key not found. Tool will have limited functionality.")
             self.client = None
         else:
             self.client = AsyncBrowserUse(api_key=self.api_key)
-    
-    def forward(self, task: str, schema: Optional[str] = None) -> str:
+
+    def forward(self, task: str, schema: str | None = None) -> str:
         """Execute browser automation with structured output."""
         if not self.client:
-            return "Browser Use API key not configured. Please set BROWSER_USE_API_KEY environment variable."
-        
+            return "Browser Use not available. Check API key and browser-use-sdk installation."
+
         try:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            
-            try:
-                result = loop.run_until_complete(self._extract_structured_data(task, schema))
-                return result
-            finally:
-                loop.close()
-                
+            return asyncio.run(self._extract_structured_data(task, schema))
         except Exception as e:
-            error_msg = f"Structured browser extraction failed: {str(e)}"
-            logger.error(error_msg)
-            return error_msg
-    
-    async def _extract_structured_data(self, task: str, schema: Optional[str] = None) -> str:
+            logger.error("Structured browser extraction failed: %s", e)
+            return f"Structured browser extraction failed: {e}"
+
+    async def _extract_structured_data(self, task: str, schema: str | None = None) -> str:
         """Extract structured data from web pages."""
         # For now, we'll use the standard run method
         # In a real implementation, you'd parse the schema and use it
         result = await self.client.tasks.run(task=task)
-        
+
         if result.done_output:
             return result.done_output
         else:
@@ -222,8 +210,8 @@ class StructuredBrowserUseTool(Tool):
 class WebArticle(BaseModel):
     """Model for web article extraction."""
     title: str
-    author: Optional[str] = None
-    date: Optional[str] = None
+    author: str | None = None
+    date: str | None = None
     content: str
     url: str
 
@@ -232,24 +220,24 @@ class ProductInfo(BaseModel):
     """Model for e-commerce product extraction."""
     name: str
     price: str
-    availability: Optional[str] = None
-    rating: Optional[float] = None
-    reviews_count: Optional[int] = None
-    description: Optional[str] = None
-    image_url: Optional[str] = None
+    availability: str | None = None
+    rating: float | None = None
+    reviews_count: int | None = None
+    description: str | None = None
+    image_url: str | None = None
 
 
 class ContactInfo(BaseModel):
     """Model for contact information extraction."""
-    name: Optional[str] = None
-    email: Optional[str] = None
-    phone: Optional[str] = None
-    address: Optional[str] = None
-    website: Optional[str] = None
+    name: str | None = None
+    email: str | None = None
+    phone: str | None = None
+    address: str | None = None
+    website: str | None = None
 
 
 class SearchResults(BaseModel):
     """Model for search results extraction."""
-    results: List[Dict[str, str]]
-    total_results: Optional[int] = None
-    next_page_url: Optional[str] = None
+    results: list[dict[str, str]]
+    total_results: int | None = None
+    next_page_url: str | None = None

@@ -4,70 +4,79 @@ Multi-model orchestration with specialized model assignment for optimal performa
 """
 
 import asyncio
-import os
 import json
-from typing import List, Dict, Optional, Any, Union, Tuple
+import logging
+import os
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from pydantic import BaseModel
-from serpapi import GoogleSearch, GoogleScholarSearch, BingSearch, YahooSearch, BaiduSearch
-from smolagents import (
-    CodeAgent,
-    ToolCallingAgent, 
-    Tool,
-    LiteLLMModel
-)
-from .basic_agent import BasicAgent
+from datetime import datetime
+from typing import Any, Union
 
 from dotenv import load_dotenv
+from pydantic import BaseModel
+from serpapi import BaiduSearch, BingSearch, GoogleScholarSearch, GoogleSearch, YahooSearch
+from smolagents import (
+    CodeAgent,
+    LiteLLMModel,
+    Tool,
+    ToolCallingAgent,
+)
+
+from .basic_agent import BasicAgent
+
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 # Multi-Model Configuration for Specialized Tasks
 # Multi-Model Configuration for Specialized Tasks
 class ModelManager:
     """Manages multiple LiteLLM models with strategic assignment"""
-    
+
     def __init__(self):
         # Initialize comprehensive model suite
         api_key = os.environ.get("OPENROUTER_API_KEY")
         if not api_key:
-            print("Warning: OPENROUTER_API_KEY not found. Model initialization will be skipped.")
+            logger.warning("OPENROUTER_API_KEY not found. Model initialization will be skipped.")
             self.models_available = False
             return
-        
+
         self.models_available = True
-        
+
         try:
             self.claude = LiteLLMModel(
-                model_id="openrouter/anthropic/claude-sonnet-4.5", 
-                api_key=api_key, 
+                model_id="openrouter/anthropic/claude-opus-4.5",
+                api_key=api_key,
                 temperature=0.7
             )
         except Exception as e:
-            print(f"Warning: Failed to initialize Claude model: {e}")
+            logger.warning("Failed to initialize Claude model: %s", e)
             self.claude = None
-        
-        # Initialize all other models with error handling
+
+        # Initialize all other models with error handling (updated Feb 2026)
         models_config = [
             ('deepseek', "openrouter/deepseek/deepseek-r1-0528", 0.6),
             ('deepseek_chat', "openrouter/deepseek/deepseek-v3.2", 0.6),
+            ('deepseek_speciale', "openrouter/deepseek/deepseek-v3.2-speciale", 0.6),
             ('mistral_small', "openrouter/mistralai/mistral-small-3.2-24b-instruct", 0.8),
-            ('sonar', "openrouter/perplexity/sonar", 0.8),
-            ('sonar_reasoning', "openrouter/perplexity/sonar-reasoning", None),
-            ('openai_o3', "openrouter/openai/o3-mini", None),
-            ('mistral_large', "openrouter/mistralai/mistral-large-2411", 0.8),
-            ('gemini', "openrouter/google/gemini-2.5-flash", 0.7),
+            ('sonar', "openrouter/perplexity/sonar-pro", 0.8),
+            ('sonar_reasoning', "openrouter/perplexity/sonar-reasoning-pro", None),
+            ('openai_o4', "openrouter/openai/o4-mini", None),
+            ('mistral_large', "openrouter/mistralai/mistral-large-2512", 0.8),
+            ('gemini', "openrouter/google/gemini-3-flash-preview", 0.7),
             ('gpt_oss', "openrouter/openai/gpt-oss-120b", None),
-            ('gemini_pro', "openrouter/google/gemini-2.5-pro", 0.6),
-            ('chatgpt', "openrouter/openai/gpt-5-chat", 0.5),
-            ('qwen3_coder', "openrouter/qwen3-coder", 0.6),
+            ('gemini_pro', "openrouter/google/gemini-3-pro-preview", 0.6),
+            ('chatgpt', "openrouter/openai/gpt-5.2-chat", 0.5),
+            ('qwen3_coder', "openrouter/qwen/qwen3-coder", 0.6),
             ('qwen_big', "openrouter/qwen/qwen3-235b-a22b", 0.6),
-            ('scout', "openrouter/meta-llama/llama-4-scout:nitro", 0.6),
-            ('xai', "x-ai/grok-4", 0.8),
-            ('gpt5', "openrouter/openai/gpt-5", 0.6),
-            ('kimi', "openrouter/moonshotai/kimi-k2", 0.6)
+            ('llama4', "openrouter/meta-llama/llama-4-maverick", 0.6),
+            ('xai', "openrouter/x-ai/grok-4.1-fast", 0.8),
+            ('gpt5', "openrouter/openai/gpt-5.2", 0.6),
+            ('kimi', "openrouter/moonshotai/kimi-k2.5", 0.6),
+            ('devstral', "openrouter/mistralai/devstral-2512", 0.6),
+            ('mimo', "openrouter/xiaomi/mimo-v2-flash", 0.7),
+            ('minimax', "openrouter/minimax/minimax-m2.1", 0.6),
         ]
-        
+
         for attr_name, model_id, temp in models_config:
             try:
                 if temp is not None:
@@ -83,114 +92,134 @@ class ModelManager:
                     )
                 setattr(self, attr_name, model)
             except Exception as e:
-                print(f"Warning: Failed to initialize {attr_name} model: {e}")
+                logger.warning("Failed to initialize %s model: %s", attr_name, e)
                 setattr(self, attr_name, None)
-    
-    def get_model_for_role(self, role: str) -> Optional[LiteLLMModel]:
+
+    def get_model_for_role(self, role: str) -> LiteLLMModel | None:
         """Strategic model assignment based on agent role and capabilities"""
         if not self.models_available:
             return None
-        
+
         # First check if the role corresponds to a direct model name
         # This allows users to specify models like 'gpt-5', 'claude-4', etc.
         model_name_mappings = {
+            'gpt-5.2': 'gpt5',
             'gpt-5': 'gpt5',
-            'claude-4': 'claude',
+            'claude-opus-4.5': 'claude',
             'claude': 'claude',
             'deepseek': 'deepseek',
+            'deepseek-v3.2': 'deepseek_chat',
+            'deepseek-speciale': 'deepseek_speciale',
             'gemini': 'gemini',
+            'gemini-3-flash': 'gemini',
+            'gemini-3-pro': 'gemini_pro',
             'gemini-pro': 'gemini_pro',
             'sonar': 'sonar',
+            'sonar-pro': 'sonar',
             'sonar-reasoning': 'sonar_reasoning',
             'mistral': 'mistral_large',
             'mistral-small': 'mistral_small',
             'mistral-large': 'mistral_large',
+            'devstral': 'devstral',
             'qwen': 'qwen_big',
             'qwen-coder': 'qwen3_coder',
             'xai': 'xai',
             'grok': 'xai',
+            'grok-4.1': 'xai',
             'kimi': 'kimi',
+            'kimi-k2.5': 'kimi',
             'chatgpt': 'chatgpt',
-            'o3': 'openai_o3'
+            'o4-mini': 'openai_o4',
+            'o3': 'openai_o4',
+            'mimo': 'mimo',
+            'minimax': 'minimax',
+            'llama-4': 'llama4',
         }
-        
+
         # Check if the role is a direct model specification
         if role.lower() in model_name_mappings:
             model_attr = model_name_mappings[role.lower()]
             model = getattr(self, model_attr, None)
             if model is not None:
-                print(f"Using specified model: {role}")
+                logger.info("Using specified model: %s", role)
                 return model
             else:
-                print(f"Warning: Requested model {role} is not available")
-        
-        # Fall back to role-based assignments
+                logger.warning("Requested model %s is not available", role)
+
+        # Fall back to role-based assignments (updated Feb 2026)
         model_assignments = {
             # Orchestrator: Needs excellent reasoning and coordination
-            "orchestrator": getattr(self, 'claude', None),  # Claude Sonnet 4 - Superior reasoning and planning
-            
+            "orchestrator": getattr(self, 'claude', None),  # Claude Opus 4.5
+
             # Search Researcher: Needs broad knowledge and search optimization
-            "search_researcher": getattr(self, 'sonar', None),  # Perplexity Sonar - Optimized for search tasks
-            
+            "search_researcher": getattr(self, 'sonar', None),  # Perplexity Sonar Pro
+
             # E-commerce Analyst: Needs structured analysis and price comparison
-            "ecommerce_analyst": getattr(self, 'gemini_pro', None),  # Gemini 2.5 Pro - Excellent at structured data analysis
-            
+            "ecommerce_analyst": getattr(self, 'gemini_pro', None),  # Gemini 3 Pro
+
             # Local Business Analyst: Needs location awareness and business intelligence
-            "local_business_analyst": getattr(self, 'mistral_large', None),  # Mistral Large - Good at business analysis
-            
+            "local_business_analyst": getattr(self, 'mistral_large', None),  # Mistral Large 2512
+
             # Academic Researcher: Needs research methodology and citation analysis
-            "academic_researcher": getattr(self, 'sonar_reasoning', None),  # Perplexity Sonar Reasoning - Research-focused
-            
+            "academic_researcher": getattr(self, 'sonar_reasoning', None),  # Sonar Reasoning Pro
+
             # Data Analyst: Needs coding and mathematical capabilities
-            "data_analyst": getattr(self, 'qwen3_coder', None),  # Qwen3 Coder - Optimized for code and data analysis
-            
+            "data_analyst": getattr(self, 'qwen3_coder', None),  # Qwen3 Coder
+
             # Browser Navigator: Needs web interaction understanding
-            "browser_navigator": getattr(self, 'gpt5', None),
-            
+            "browser_navigator": getattr(self, 'gpt5', None),  # GPT-5.2
+
             # Competitive Intelligence: Needs synthesis and strategic analysis
-            "competitive_analyst": getattr(self, 'gpt5', None),  # GPT-5 - Advanced reasoning for strategic analysis
-            
+            "competitive_analyst": getattr(self, 'gpt5', None),  # GPT-5.2
+
             # Market Research Synthesizer: Needs comprehensive analysis
-            "market_synthesizer": getattr(self, 'qwen_big', None),  # Qwen3 235B - Massive context for synthesis
-            
+            "market_synthesizer": getattr(self, 'qwen_big', None),  # Qwen3 235B
+
             # Creative/Content Tasks: Needs creative capabilities
-            "content_creator": getattr(self, 'xai', None),  # Grok 3 - Creative and innovative thinking
-            
+            "content_creator": getattr(self, 'xai', None),  # Grok 4.1 Fast
+
             # Fast Response Tasks: Needs speed
-            "quick_responder": getattr(self, 'gemini', None),  # Gemini 2.5 Flash - Speed optimized
-            
+            "quick_responder": getattr(self, 'gemini', None),  # Gemini 3 Flash
+
             # Reasoning Tasks: Needs deep logical thinking
-            "deep_reasoner": getattr(self, 'openai_o3', None),  # O3 Mini - Advanced reasoning
-            
+            "deep_reasoner": getattr(self, 'openai_o4', None),  # O4 Mini
+
             # Conversational Tasks: Needs natural dialogue
-            "conversationalist": getattr(self, 'chatgpt', None),  # GPT-5 Chat - Conversation optimized
-            
+            "conversationalist": getattr(self, 'chatgpt', None),  # GPT-5.2 Chat
+
             # Long Context Tasks: Needs extensive memory
-            "long_context": getattr(self, 'kimi', None),  # Kimi K2 - Long context specialist
+            "long_context": getattr(self, 'kimi', None),  # Kimi K2.5
+
+            # Agentic Coding: Needs strong code understanding
+            "agentic_coder": getattr(self, 'devstral', None),  # Devstral 2
+
+            # Cost-effective: Good performance at low cost
+            "cost_effective": getattr(self, 'mimo', None),  # MiMo-V2-Flash
         }
-        
+
         model = model_assignments.get(role, getattr(self, 'claude', None))  # Default to Claude
-        
+
         # If the requested model is None, try to find any available model
         if model is None:
-            for attr_name in ['claude', 'gemini', 'mistral_small', 'deepseek']:
+            for attr_name in ['claude', 'deepseek_chat', 'gemini', 'mistral_small']:
                 fallback_model = getattr(self, attr_name, None)
                 if fallback_model is not None:
-                    print(f"Warning: Using fallback model {attr_name} for role {role}")
+                    logger.warning("Using fallback model %s for role %s", attr_name, role)
                     return fallback_model
-        
+
         return model
-    
-    def get_model_capabilities(self) -> Dict[str, Dict[str, Any]]:
+
+    def get_model_capabilities(self) -> dict[str, dict[str, Any]]:
         """Get detailed capabilities of each model for optimization"""
         return {
             "claude": {"strengths": ["reasoning", "planning", "analysis"], "best_for": "orchestration"},
             "deepseek": {"strengths": ["reasoning", "math", "logic"], "best_for": "complex_analysis"},
             "deepseek_chat": {"strengths": ["conversation", "reasoning"], "best_for": "interactive_tasks"},
+            "deepseek_speciale": {"strengths": ["reasoning", "specialized"], "best_for": "expert_tasks"},
             "mistral_small": {"strengths": ["efficiency", "speed"], "best_for": "quick_tasks"},
             "sonar": {"strengths": ["search", "web_knowledge"], "best_for": "research_tasks"},
             "sonar_reasoning": {"strengths": ["research", "citations"], "best_for": "academic_research"},
-            "openai_o3": {"strengths": ["reasoning", "problem_solving"], "best_for": "complex_reasoning"},
+            "openai_o4": {"strengths": ["reasoning", "problem_solving"], "best_for": "complex_reasoning"},
             "mistral_large": {"strengths": ["analysis", "business"], "best_for": "business_intelligence"},
             "gemini": {"strengths": ["speed", "multimodal"], "best_for": "fast_response"},
             "gpt_oss": {"strengths": ["general", "balanced"], "best_for": "general_tasks"},
@@ -198,53 +227,56 @@ class ModelManager:
             "chatgpt": {"strengths": ["conversation", "creativity"], "best_for": "chat_tasks"},
             "qwen3_coder": {"strengths": ["coding", "technical"], "best_for": "programming_analysis"},
             "qwen_big": {"strengths": ["context", "synthesis"], "best_for": "comprehensive_analysis"},
-            "scout": {"strengths": ["navigation", "exploration"], "best_for": "web_navigation"},
-            "xai": {"strengths": ["creativity", "innovation"], "best_for": "creative_tasks"},
+            "llama4": {"strengths": ["navigation", "exploration"], "best_for": "web_navigation"},
+            "xai": {"strengths": ["creativity", "innovation", "speed"], "best_for": "creative_tasks"},
             "gpt5": {"strengths": ["advanced_reasoning", "strategy"], "best_for": "strategic_analysis"},
-            "kimi": {"strengths": ["long_context", "memory"], "best_for": "extended_analysis"}
+            "kimi": {"strengths": ["long_context", "memory"], "best_for": "extended_analysis"},
+            "devstral": {"strengths": ["coding", "agentic"], "best_for": "agentic_coding"},
+            "mimo": {"strengths": ["efficiency", "cost"], "best_for": "cost_effective_tasks"},
+            "minimax": {"strengths": ["reasoning", "balanced"], "best_for": "general_reasoning"},
         }
 # Enhanced Pydantic Models for SerpAPI
 class SearchResult(BaseModel):
-    position: Optional[int] = None
+    position: int | None = None
     title: str
     link: str
-    snippet: Optional[str] = None
-    source: Optional[str] = None
-    date: Optional[str] = None
+    snippet: str | None = None
+    source: str | None = None
+    date: str | None = None
 
 class LocalResult(BaseModel):
     title: str
     address: str
-    phone: Optional[str] = None
-    rating: Optional[float] = None
-    reviews: Optional[int] = None
-    place_id: Optional[str] = None
-    website: Optional[str] = None
+    phone: str | None = None
+    rating: float | None = None
+    reviews: int | None = None
+    place_id: str | None = None
+    website: str | None = None
 
 class ShoppingResult(BaseModel):
     title: str
     price: str
     source: str
     link: str
-    rating: Optional[float] = None
-    reviews: Optional[int] = None
-    shipping: Optional[str] = None
+    rating: float | None = None
+    reviews: int | None = None
+    shipping: str | None = None
 
 class NewsResult(BaseModel):
     title: str
     link: str
     source: str
-    date: Optional[str] = None
-    snippet: Optional[str] = None
+    date: str | None = None
+    snippet: str | None = None
 
 class ScholarResult(BaseModel):
     title: str
     link: str
-    authors: Optional[List[str]] = None
-    publication: Optional[str] = None
-    year: Optional[int] = None
-    cited_by: Optional[int] = None
-    snippet: Optional[str] = None
+    authors: list[str] | None = None
+    publication: str | None = None
+    year: int | None = None
+    cited_by: int | None = None
+    snippet: str | None = None
 
 class ImageResult(BaseModel):
     title: str
@@ -252,8 +284,8 @@ class ImageResult(BaseModel):
     original: str
     thumbnail: str
     source: str
-    width: Optional[int] = None
-    height: Optional[int] = None
+    width: int | None = None
+    height: int | None = None
 
 # Context Engineering Components
 @dataclass
@@ -261,30 +293,30 @@ class ContextWindow:
     """Manages context window size and content prioritization"""
     max_tokens: int = 8192
     current_tokens: int = 0
-    priority_content: List[str] = field(default_factory=list)
-    working_memory: Dict[str, Any] = field(default_factory=dict)
+    priority_content: list[str] = field(default_factory=list)
+    working_memory: dict[str, Any] = field(default_factory=dict)
     compression_threshold: float = 0.8
-    
+
     def add_content(self, content: str, priority: int = 1) -> bool:
         estimated_tokens = len(content.split()) * 1.3
-        
+
         if self.current_tokens + estimated_tokens > self.max_tokens * self.compression_threshold:
             self._compress_context()
-        
+
         if priority > 3:
             self.priority_content.insert(0, content)
         else:
             self.priority_content.append(content)
-        
+
         self.current_tokens += estimated_tokens
         return True
-    
+
     def _compress_context(self):
         if len(self.priority_content) > 5:
             compressed_middle = f"[COMPRESSED: {len(self.priority_content[2:-2])} items summarized]"
             self.priority_content = (
-                self.priority_content[:2] + 
-                [compressed_middle] + 
+                self.priority_content[:2] +
+                [compressed_middle] +
                 self.priority_content[-2:]
             )
             self.current_tokens = int(self.max_tokens * 0.6)
@@ -292,14 +324,14 @@ class ContextWindow:
 @dataclass
 class AgentMemory:
     """Enhanced memory system with search pattern learning"""
-    short_term: Dict[str, Any] = field(default_factory=dict)
-    long_term: Dict[str, Any] = field(default_factory=dict)
-    episodic: List[Dict[str, Any]] = field(default_factory=list)
-    semantic: Dict[str, List[str]] = field(default_factory=dict)
-    search_patterns: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    short_term: dict[str, Any] = field(default_factory=dict)
+    long_term: dict[str, Any] = field(default_factory=dict)
+    episodic: list[dict[str, Any]] = field(default_factory=list)
+    semantic: dict[str, list[str]] = field(default_factory=dict)
+    search_patterns: dict[str, dict[str, Any]] = field(default_factory=dict)
     max_episodes: int = 50
-    
-    def remember_search_pattern(self, query_type: str, engine: str, success_metrics: Dict[str, Any]):
+
+    def remember_search_pattern(self, query_type: str, engine: str, success_metrics: dict[str, Any]):
         """Remember successful search patterns for different query types"""
         pattern_key = f"{query_type}_{engine}"
         if pattern_key not in self.search_patterns:
@@ -310,17 +342,17 @@ class AgentMemory:
                 'best_params': {},
                 'common_issues': []
             }
-        
+
         pattern = self.search_patterns[pattern_key]
         pattern['total_attempts'] += 1
-        
+
         if success_metrics.get('success', False):
             pattern['success_count'] += 1
             pattern['avg_results'] = (pattern['avg_results'] + success_metrics.get('result_count', 0)) / 2
             if success_metrics.get('params'):
                 pattern['best_params'] = success_metrics['params']
 
-    def get_search_recommendations(self, query_type: str, engine: str) -> Dict[str, Any]:
+    def get_search_recommendations(self, query_type: str, engine: str) -> dict[str, Any]:
         """Get recommendations based on past search patterns"""
         pattern_key = f"{query_type}_{engine}"
         if pattern_key in self.search_patterns:
@@ -334,11 +366,11 @@ class TaskContext:
     objective: str
     current_step: int = 0
     total_steps: int = 0
-    context_data: Dict[str, Any] = field(default_factory=dict)
-    progress_markers: List[str] = field(default_factory=list)
-    search_history: List[Dict[str, Any]] = field(default_factory=list)
-    cross_engine_results: Dict[str, List[Dict]] = field(default_factory=dict)
-    
+    context_data: dict[str, Any] = field(default_factory=dict)
+    progress_markers: list[str] = field(default_factory=list)
+    search_history: list[dict[str, Any]] = field(default_factory=list)
+    cross_engine_results: dict[str, list[dict]] = field(default_factory=dict)
+
     def log_search(self, engine: str, query: str, results_count: int, success: bool):
         """Log search attempts for analysis and optimization"""
         self.search_history.append({
@@ -349,7 +381,7 @@ class TaskContext:
             'timestamp': datetime.now(),
             'step': self.current_step
         })
-    
+
     def get_progress_summary(self) -> str:
         """Get a summary of current task progress"""
         return f"Task: {self.task_id}, Step {self.current_step}/{self.total_steps}, Searches: {len(self.search_history)}"
@@ -367,18 +399,18 @@ class GoogleSearchTool(Tool):
         "date_filter": {"type": "string", "description": "Date filter: qdr:d (day), qdr:w (week), qdr:m (month), qdr:y (year)", "nullable": True}
     }
     output_type = "string"
-    
+
     def __init__(self, api_key: str, context_engine=None):
         super().__init__()
         self.api_key = api_key
         self.context_engine = context_engine
-    
-    def forward(self, query: str, location: str = None, language: str = "en", 
+
+    def forward(self, query: str, location: str = None, language: str = "en",
                 country: str = "us", num_results: int = 10, date_filter: str = None) -> str:
         """Execute Google search with advanced parameters"""
         if not self.api_key:
             return "SerpAPI client not initialized. Please provide an API key."
-        
+
         try:
             params = {
                 'api_key': self.api_key,
@@ -387,25 +419,25 @@ class GoogleSearchTool(Tool):
                 'gl': country,
                 'num': num_results
             }
-            
+
             if location:
                 params['location'] = location
             if date_filter:
                 params['tbs'] = date_filter
-            
+
             # Get recommendations from memory if context engine exists
             if self.context_engine:
                 recommendations = self.context_engine.memory.get_search_recommendations('web_search', 'google')
                 if recommendations.get('best_params'):
                     params.update(recommendations['best_params'])
-            
+
             search = GoogleSearch(params)
             results = search.get_dict()
-            
+
             # Process results
             organic_results = results.get('organic_results', [])
             processed_results = []
-            
+
             for i, result in enumerate(organic_results):
                 processed_results.append({
                     'position': i + 1,
@@ -414,7 +446,7 @@ class GoogleSearchTool(Tool):
                     'snippet': result.get('snippet', ''),
                     'source': result.get('source', '')
                 })
-            
+
             # Update context and memory if available
             if self.context_engine:
                 success_metrics = {
@@ -423,14 +455,14 @@ class GoogleSearchTool(Tool):
                     'params': params
                 }
                 self.context_engine.memory.remember_search_pattern('web_search', 'google', success_metrics)
-                
+
                 if hasattr(self.context_engine, 'current_task_context') and self.context_engine.current_task_context:
                     self.context_engine.current_task_context.log_search('google', query, len(processed_results), True)
-            
+
             return json.dumps({'results': processed_results, 'total': len(processed_results)}, indent=2)
-            
+
         except Exception as e:
-            error_msg = f"Google search failed: {str(e)}"
+            error_msg = f"Google search failed: {e!s}"
             if self.context_engine and hasattr(self.context_engine, 'current_task_context') and self.context_engine.current_task_context:
                 self.context_engine.current_task_context.log_search('google', query, 0, False)
             return error_msg
@@ -446,24 +478,24 @@ class GoogleShoppingTool(Tool):
         "sort_by": {"type": "string", "description": "Sort by: r (rating), rv (reviews), p (price)", "nullable": True}
     }
     output_type = "string"
-    
+
     def __init__(self, api_key: str, context_engine=None):
         super().__init__()
         self.api_key = api_key
         self.context_engine = context_engine
-    
-    def forward(self, query: str, location: str = None, min_price: int = None, 
+
+    def forward(self, query: str, location: str = None, min_price: int = None,
                 max_price: int = None, sort_by: str = None) -> str:
         """Search Google Shopping with filters"""
         if not self.api_key:
             return "SerpAPI client not initialized. Please provide an API key."
-        
+
         try:
             params = {
                 'api_key': self.api_key,
                 'q': query
             }
-            
+
             if location:
                 params['location'] = location
             if min_price:
@@ -472,13 +504,13 @@ class GoogleShoppingTool(Tool):
                 params['max_price'] = max_price
             if sort_by:
                 params['sort_by'] = sort_by
-            
+
             # Google Shopping needs to be handled through GoogleSearch with shopping params
             search = GoogleSearch(params)
             search.params_dict['tbm'] = 'shop'
             results = search.get_dict()
             shopping_results = results.get('shopping_results', [])
-            
+
             processed_results = []
             for result in shopping_results:
                 processed_results.append({
@@ -490,7 +522,7 @@ class GoogleShoppingTool(Tool):
                     'reviews': result.get('reviews'),
                     'shipping': result.get('shipping')
                 })
-            
+
             # Update memory if available
             if self.context_engine:
                 success_metrics = {
@@ -499,11 +531,11 @@ class GoogleShoppingTool(Tool):
                     'params': params
                 }
                 self.context_engine.memory.remember_search_pattern('shopping', 'google', success_metrics)
-            
+
             return json.dumps({'shopping_results': processed_results, 'total': len(processed_results)}, indent=2)
-            
+
         except Exception as e:
-            return f"Google Shopping search failed: {str(e)}"
+            return f"Google Shopping search failed: {e!s}"
 
 class GoogleMapsLocalTool(Tool):
     name = "google_maps_local"
@@ -514,33 +546,33 @@ class GoogleMapsLocalTool(Tool):
         "type": {"type": "string", "description": "Place type filter (restaurant, hotel, etc.)", "nullable": True}
     }
     output_type = "string"
-    
+
     def __init__(self, api_key: str, context_engine=None):
         super().__init__()
         self.api_key = api_key
         self.context_engine = context_engine
-    
+
     def forward(self, query: str, location: str, type: str = None) -> str:
         """Search Google Maps for local businesses"""
         if not self.api_key:
             return "SerpAPI client not initialized. Please provide an API key."
-        
+
         try:
             params = {
                 'api_key': self.api_key,
                 'q': query,
-                'll': f'@{location}' if not ',' in location else location,
+                'll': f'@{location}' if ',' not in location else location,
                 'type': 'search'
             }
-            
+
             if type:
                 params['type'] = type
-            
+
             # Google Maps search through regular Google Search
             search = GoogleSearch(params)
             results = search.get_dict()
             local_results = results.get('local_results', [])
-            
+
             processed_results = []
             for result in local_results:
                 processed_results.append({
@@ -552,11 +584,11 @@ class GoogleMapsLocalTool(Tool):
                     'website': result.get('website'),
                     'place_id': result.get('place_id')
                 })
-            
+
             return json.dumps({'local_results': processed_results, 'total': len(processed_results)}, indent=2)
-            
+
         except Exception as e:
-            return f"Google Maps search failed: {str(e)}"
+            return f"Google Maps search failed: {e!s}"
 
 class GoogleScholarTool(Tool):
     name = "google_scholar"
@@ -568,35 +600,35 @@ class GoogleScholarTool(Tool):
         "sort_by": {"type": "string", "description": "Sort by: relevance or date", "nullable": True}
     }
     output_type = "string"
-    
+
     def __init__(self, api_key: str, context_engine=None):
         super().__init__()
         self.api_key = api_key
         self.context_engine = context_engine
-    
+
     def forward(self, query: str, year_low: int = None, year_high: int = None, sort_by: str = None) -> str:
         """Search Google Scholar for academic content"""
         if not self.api_key:
             return "SerpAPI client not initialized. Please provide an API key."
-        
+
         try:
             params = {
                 'api_key': self.api_key,
                 'q': query
             }
-            
+
             if year_low:
                 params['as_ylo'] = year_low
             if year_high:
                 params['as_yhi'] = year_high
             if sort_by == 'date':
                 params['scisbd'] = 1
-            
+
             # Use GoogleScholarSearch for Scholar queries
             search = GoogleScholarSearch(params)
             results = search.get_dict()
             organic_results = results.get('organic_results', [])
-            
+
             processed_results = []
             for result in organic_results:
                 processed_results.append({
@@ -605,11 +637,11 @@ class GoogleScholarTool(Tool):
                     'snippet': result.get('snippet', ''),
                     'publication_info': result.get('publication_info', {})
                 })
-            
+
             return json.dumps({'scholar_results': processed_results, 'total': len(processed_results)}, indent=2)
-            
+
         except Exception as e:
-            return f"Google Scholar search failed: {str(e)}"
+            return f"Google Scholar search failed: {e!s}"
 
 class MultiEngineSearchTool(Tool):
     name = "multi_engine_search"
@@ -620,25 +652,25 @@ class MultiEngineSearchTool(Tool):
         "compare": {"type": "boolean", "description": "Whether to compare results across engines", "nullable": True}
     }
     output_type = "string"
-    
+
     def __init__(self, api_key: str, context_engine=None):
         super().__init__()
         self.api_key = api_key
         self.context_engine = context_engine
-    
+
     def forward(self, query: str, engines: str = "google,bing", compare: bool = True) -> str:
         """Search multiple engines and optionally compare results"""
         if not self.api_key:
             return "SerpAPI client not initialized. Please provide an API key."
-        
+
         try:
             engine_list = [e.strip() for e in engines.split(',')]
             all_results = {}
-            
+
             for engine in engine_list:
                 try:
                     params = {'api_key': self.api_key, 'q': query}
-                    
+
                     # Use appropriate search class for each engine
                     if engine == 'google':
                         search = GoogleSearch(params)
@@ -651,9 +683,9 @@ class MultiEngineSearchTool(Tool):
                     else:
                         all_results[engine] = f"Error: Unsupported engine {engine}"
                         continue
-                    
+
                     results = search.get_dict()
-                    
+
                     organic_results = results.get('organic_results', [])
                     processed = [
                         {
@@ -664,72 +696,72 @@ class MultiEngineSearchTool(Tool):
                         }
                         for i, r in enumerate(organic_results[:10])
                     ]
-                    
+
                     all_results[engine] = processed
-                    
+
                     # Store results for cross-engine comparison
                     if self.context_engine and hasattr(self.context_engine, 'current_task_context') and self.context_engine.current_task_context:
                         if engine not in self.context_engine.current_task_context.cross_engine_results:
                             self.context_engine.current_task_context.cross_engine_results[engine] = []
                         self.context_engine.current_task_context.cross_engine_results[engine].extend(processed)
-                    
+
                 except Exception as e:
-                    all_results[engine] = f"Error: {str(e)}"
-            
+                    all_results[engine] = f"Error: {e!s}"
+
             if compare and len(all_results) > 1:
                 # Find common results across engines
                 common_links = self._find_common_results(all_results)
                 all_results['comparison'] = {
                     'common_results': common_links,
-                    'engine_coverage': {engine: len(results) if isinstance(results, list) else 0 
+                    'engine_coverage': {engine: len(results) if isinstance(results, list) else 0
                                       for engine, results in all_results.items() if engine != 'comparison'}
                 }
-            
+
             return json.dumps(all_results, indent=2)
-            
+
         except Exception as e:
-            return f"Multi-engine search failed: {str(e)}"
-    
-    def _find_common_results(self, all_results: Dict) -> List[Dict]:
+            return f"Multi-engine search failed: {e!s}"
+
+    def _find_common_results(self, all_results: dict) -> list[dict]:
         """Find results that appear across multiple engines"""
         common_results = []
         engine_results = {k: v for k, v in all_results.items() if isinstance(v, list)}
-        
+
         if len(engine_results) < 2:
             return []
-        
+
         # Get first engine results as baseline
         baseline_engine = list(engine_results.keys())[0]
         baseline_results = engine_results[baseline_engine]
-        
+
         for result in baseline_results:
             result_link = result.get('link', '')
             if not result_link:
                 continue
-                
+
             # Check if this link appears in other engines
             appearances = [baseline_engine]
             for other_engine, other_results in engine_results.items():
                 if other_engine == baseline_engine:
                     continue
-                    
+
                 for other_result in other_results:
                     if other_result.get('link', '') == result_link:
                         appearances.append(other_engine)
                         break
-            
+
             if len(appearances) > 1:
                 common_results.append({
                     **result,
                     'appears_in': appearances,
                     'cross_engine_rank': len(appearances)
                 })
-        
+
         return sorted(common_results, key=lambda x: x['cross_engine_rank'], reverse=True)
 
 class AgentTool(Tool):
     """Wrapper to use agents as tools for orchestration"""
-    
+
     def __init__(self, agent, agent_name: str, agent_description: str):
         self.name = agent_name
         self.description = agent_description
@@ -737,7 +769,7 @@ class AgentTool(Tool):
         self.output_type = 'string'
         super().__init__()
         self.agent = agent
-    
+
     def forward(self, task: str) -> str:
         """Execute the agent with the given task"""
         try:
@@ -746,17 +778,17 @@ class AgentTool(Tool):
                 return str(result)
             return f"Agent {self.name} is not available"
         except Exception as e:
-            return f"Agent {self.name} failed: {str(e)}"
+            return f"Agent {self.name} failed: {e!s}"
 
 class ContextEngineeringMixin:
     """Enhanced mixin with SerpAPI context awareness"""
-    
+
     def __init__(self):
         self.context_window = ContextWindow()
         self.memory = AgentMemory()
-        self.current_task_context: Optional[TaskContext] = None
-    
-    def prepare_search_context(self, query: str, search_type: str, engine: str) -> Dict[str, Any]:
+        self.current_task_context: TaskContext | None = None
+
+    def prepare_search_context(self, query: str, search_type: str, engine: str) -> dict[str, Any]:
         """Prepare context-aware search parameters based on query and history"""
         context = {
             'base_query': query,
@@ -764,17 +796,17 @@ class ContextEngineeringMixin:
             'engine': engine,
             'recommendations': self.memory.get_search_recommendations(search_type, engine)
         }
-        
+
         # Add relevant search history
         if self.current_task_context:
             relevant_searches = [
-                s for s in self.current_task_context.search_history 
+                s for s in self.current_task_context.search_history
                 if s['engine'] == engine and s['success']
             ]
             context['recent_successful_searches'] = relevant_searches[-3:]  # Last 3 successful
-        
+
         return context
-    
+
     def prepare_agent_context(self, task: str, agent_role: str) -> str:
         """Prepare context for agent initialization"""
         return f"""
@@ -783,7 +815,7 @@ Role: {agent_role}
 Memory Status: {len(self.memory.episodic)} episodes, {len(self.memory.search_patterns)} search patterns
 Current Context: {self.context_window.current_tokens}/{self.context_window.max_tokens} tokens
 """
-    
+
     def update_context_from_result(self, agent_name: str, task: str, result: Any, success: bool):
         """Update context based on agent results"""
         self.memory.episodic.append({
@@ -793,16 +825,16 @@ Current Context: {self.context_window.current_tokens}/{self.context_window.max_t
             'success': success,
             'timestamp': datetime.now()
         })
-        
+
         # Keep episodic memory bounded
         if len(self.memory.episodic) > self.memory.max_episodes:
             self.memory.episodic = self.memory.episodic[-self.memory.max_episodes:]
-    
-    def analyze_search_performance(self) -> Dict[str, Any]:
+
+    def analyze_search_performance(self) -> dict[str, Any]:
         """Analyze search performance across engines and query types"""
         if not self.current_task_context or not self.current_task_context.search_history:
             return {'message': 'No search history available'}
-        
+
         analysis = {
             'total_searches': len(self.current_task_context.search_history),
             'success_rate': 0,
@@ -810,10 +842,10 @@ Current Context: {self.context_window.current_tokens}/{self.context_window.max_t
             'query_patterns': {},
             'recommendations': []
         }
-        
+
         successful_searches = [s for s in self.current_task_context.search_history if s['success']]
         analysis['success_rate'] = len(successful_searches) / len(self.current_task_context.search_history)
-        
+
         # Analyze by engine
         for search in self.current_task_context.search_history:
             engine = search['engine']
@@ -821,43 +853,43 @@ Current Context: {self.context_window.current_tokens}/{self.context_window.max_t
                 analysis['engine_performance'][engine] = {
                     'total': 0, 'successful': 0, 'avg_results': 0
                 }
-            
+
             perf = analysis['engine_performance'][engine]
             perf['total'] += 1
             if search['success']:
                 perf['successful'] += 1
                 perf['avg_results'] = (perf['avg_results'] + search['results_count']) / perf['successful']
-        
+
         # Calculate success rates
         for engine, perf in analysis['engine_performance'].items():
             perf['success_rate'] = perf['successful'] / perf['total'] if perf['total'] > 0 else 0
-        
+
         return analysis
-    
-    def _analyze_cross_engine_results(self) -> Dict[str, Any]:
+
+    def _analyze_cross_engine_results(self) -> dict[str, Any]:
         """Analyze results across different search engines"""
         if not self.current_task_context or not self.current_task_context.cross_engine_results:
             return {'message': 'No cross-engine results available'}
-        
+
         analysis = {
             'engines_used': list(self.current_task_context.cross_engine_results.keys()),
             'total_unique_results': 0,
             'common_results': 0,
             'engine_specific_results': {}
         }
-        
+
         # Find unique results across all engines
         all_links = set()
         for engine, results in self.current_task_context.cross_engine_results.items():
             engine_links = {r.get('link', '') for r in results if isinstance(r, dict)}
             analysis['engine_specific_results'][engine] = len(engine_links)
             all_links.update(engine_links)
-        
+
         analysis['total_unique_results'] = len(all_links)
-        
+
         return analysis
-    
-    def get_comprehensive_summary(self) -> Dict[str, Any]:
+
+    def get_comprehensive_summary(self) -> dict[str, Any]:
         """Get comprehensive summary of system state and performance"""
         return {
             'memory_state': {
@@ -884,29 +916,29 @@ class MultiModelSerpAPISystem(ContextEngineeringMixin):
     Enhanced orchestrator with strategic multi-model assignment and SerpAPI integration
     """
 
-    def __init__(self, 
+    def __init__(self,
                  serpapi_key: str = None,
                  context_window_size: int = 16384):
         # Initialize context engineering
         super().__init__()
         self.context_window = ContextWindow(max_tokens=context_window_size)
-        
+
         # Initialize model manager
         self.model_manager = ModelManager()
-        
+
         # Initialize SerpAPI
         self.serpapi_key = serpapi_key or os.environ.get("SERPAPI_API_KEY")
-        
-        self.workers: Dict[str, Union[CodeAgent, ToolCallingAgent]] = {}
-        self.worker_tools: Dict[str, AgentTool] = {}  # Store wrapped agents as tools
+
+        self.workers: dict[str, Union[CodeAgent, ToolCallingAgent]] = {}
+        self.worker_tools: dict[str, AgentTool] = {}  # Store wrapped agents as tools
         self.model_performance_tracker = {}
 
-    def create_serpapi_tools(self) -> List[Tool]:
+    def create_serpapi_tools(self) -> list[Tool]:
         """Create comprehensive SerpAPI tool suite"""
         if not self.serpapi_key:
-            print("Warning: No SerpAPI key provided. Search tools will be limited.")
+            logger.warning("No SerpAPI key provided. Search tools will be limited.")
             return []
-        
+
         return [
             GoogleSearchTool(self.serpapi_key, self),
             GoogleShoppingTool(self.serpapi_key, self),
@@ -914,7 +946,7 @@ class MultiModelSerpAPISystem(ContextEngineeringMixin):
             GoogleScholarTool(self.serpapi_key, self),
             MultiEngineSearchTool(self.serpapi_key, self)
         ]
-    
+
     def _check_model_tool_support(self, model) -> bool:
         """Check if a model supports tool calling"""
         # Models known not to support tool calling through OpenRouter
@@ -925,50 +957,50 @@ class MultiModelSerpAPISystem(ContextEngineeringMixin):
             'perplexity/sonar-reasoning',
             'perplexity/llama',  # Any Perplexity models
         ]
-        
+
         # Check if model has a model_id attribute and if it contains non-tool model names
         if hasattr(model, 'model_id'):
             model_id = str(model.model_id).lower()
             for non_tool_model in non_tool_models:
                 if non_tool_model in model_id:
                     return False
-        
+
         # By default, assume the model supports tools
         # Most models through LiteLLM/OpenRouter support tool calling
         return True
-    
+
     def _check_model_code_support(self, model) -> bool:
         """Check if a model supports code generation for CodeAgent"""
         # Models that are good at code generation
         code_capable_models = [
             'claude', 'gpt', 'deepseek', 'mistral', 'gemini', 'qwen'
         ]
-        
+
         if hasattr(model, 'model_id'):
             model_id = str(model.model_id).lower()
             for code_model in code_capable_models:
                 if code_model in model_id:
                     return True
-        
+
         # Models like Perplexity are optimized for search/QA, not code generation
         return False
 
-    def create_specialized_worker(self, name: str, description: str, 
-                                 tools: List[Tool], agent_type: str = "ToolCallingAgent",
+    def create_specialized_worker(self, name: str, description: str,
+                                 tools: list[Tool], agent_type: str = "ToolCallingAgent",
                                  model_override: str = None) -> None:
         """Create worker with optimal model selection and enhanced capabilities"""
-        
+
         # Get optimal model for this role
         model = self.model_manager.get_model_for_role(model_override or name)
-        
+
         if model is None:
-            print(f"Warning: No model available for {name}. Skipping worker creation.")
+            logger.warning("No model available for %s. Skipping worker creation.", name)
             return
-        
+
         model_info = self.model_manager.get_model_capabilities()
         model_name = model_override or name
         capabilities = model_info.get(model_name, {})
-        
+
         # Enhanced context with model-specific optimization
         model_context = f"""
 SPECIALIZED MODEL ASSIGNMENT:
@@ -976,7 +1008,7 @@ Model strengths: {', '.join(capabilities.get('strengths', ['general']))}
 
 SERPAPI MULTI-ENGINE CAPABILITIES:
 - Google Web Search: Comprehensive with location/language/date filters
-- Google Shopping: Product search with price/review filtering  
+- Google Shopping: Product search with price/review filtering
 - Google Maps/Local: Business search with ratings/reviews
 - Google Scholar: Academic papers and citation analysis
 - Multi-Engine Search: Cross-platform comparison and validation
@@ -988,7 +1020,7 @@ CONTEXT-AWARE OPTIMIZATION:
 4. Track and optimize search performance metrics
 5. Synthesize results with model-specific analytical strengths
 """
-        
+
         base_context = self.prepare_agent_context("initialization", name)
         enhanced_description = f"""
 {description}
@@ -1004,31 +1036,33 @@ MODEL-OPTIMIZED APPROACH:
 - Coordinate with other specialized agents for comprehensive results
 - Provide analysis depth appropriate to your model capabilities
 """
-        
+
         try:
             # Create prompt templates with the enhanced description as system prompt
             from smolagents.agents import (
-                PromptTemplates, PlanningPromptTemplate, 
-                ManagedAgentPromptTemplate, FinalAnswerPromptTemplate
+                FinalAnswerPromptTemplate,
+                ManagedAgentPromptTemplate,
+                PlanningPromptTemplate,
+                PromptTemplates,
             )
-            
+
             # Create empty sub-templates with required keys
             planning_template = PlanningPromptTemplate(
                 initial_plan=None,
                 update_plan_pre_messages=None,
                 update_plan_post_messages=None
             )
-            
+
             managed_template = ManagedAgentPromptTemplate(
                 task=None,
                 report=None
             )
-            
+
             final_template = FinalAnswerPromptTemplate(
                 pre_messages=None,
                 post_messages=None
             )
-            
+
             # Create full prompt templates
             prompt_templates = PromptTemplates(
                 system_prompt=enhanced_description,
@@ -1036,11 +1070,11 @@ MODEL-OPTIMIZED APPROACH:
                 managed_agent=managed_template,
                 final_answer=final_template
             )
-            
+
             # Check model capabilities
             model_supports_tools = self._check_model_tool_support(model)
             model_supports_code = self._check_model_code_support(model)
-            
+
             if agent_type == "CodeAgent" and model_supports_code:
                 # Use CodeAgent for models that support code generation
                 agent = CodeAgent(
@@ -1049,7 +1083,7 @@ MODEL-OPTIMIZED APPROACH:
                     prompt_templates=prompt_templates,
                     max_steps=20,
                     additional_authorized_imports=[
-                        "pandas", "numpy", "json", "csv", "re", "datetime", 
+                        "pandas", "numpy", "json", "csv", "re", "datetime",
                         "time", "requests", "urllib", "math", "statistics"
                     ]
                 )
@@ -1067,11 +1101,11 @@ MODEL-OPTIMIZED APPROACH:
                     tools=tools,
                     prompt_templates=prompt_templates
                 )
-                print(f"Note: Model for {name} doesn't support tools or code generation, using BasicAgent")
+                logger.info("Model for %s does not support tools or code generation, using BasicAgent", name)
 
             # Store both the raw agent and create an AgentTool wrapper
             self.workers[name] = agent
-            
+
             # Create AgentTool wrapper for orchestrator use
             agent_tool = AgentTool(
                 agent=agent,
@@ -1079,24 +1113,24 @@ MODEL-OPTIMIZED APPROACH:
                 agent_description=description
             )
             self.worker_tools[name] = agent_tool
-            
+
         except Exception as e:
-            print(f"Failed to create specialized worker {name}: {str(e)}")
+            logger.error("Failed to create specialized worker %s: %s", name, e)
 
     def setup_multi_model_workers(self, default_model: str = None):
         """Setup workers with strategic model assignments
-        
+
         Args:
             default_model: Model to use for all workers (if not specified, uses role-based assignment)
         """
-        
+
         # Create specialized tool sets
         serpapi_tools = self.create_serpapi_tools()
-        
+
         if not serpapi_tools:
-            print("Warning: No SerpAPI tools available. System will have limited functionality.")
+            logger.warning("No SerpAPI tools available. System will have limited functionality.")
             return
-        
+
         # 🧠 Strategic Research Orchestrator
         research_tools = [t for t in serpapi_tools if t.name in ['google_search', 'google_scholar', 'multi_engine_search']]
         if research_tools:
@@ -1141,10 +1175,10 @@ MODEL-OPTIMIZED APPROACH:
                 model_override=default_model  # Use the passed model if available
             )
 
-    async def execute_multi_model_workflow(self, task: str, timeout: Optional[float] = None,
+    async def execute_multi_model_workflow(self, task: str, timeout: float | None = None,
                                           orchestrator_model: str = "orchestrator") -> str:
         """Execute workflow with multi-model coordination and optimization"""
-        
+
         # Initialize enhanced task context
         task_id = f"multimodel_task_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         self.current_task_context = TaskContext(
@@ -1152,7 +1186,7 @@ MODEL-OPTIMIZED APPROACH:
             objective=task,
             total_steps=10
         )
-        
+
         if not self.workers:
             # Use the same model for all workers as the orchestrator for consistency
             self.setup_multi_model_workers(default_model=orchestrator_model)
@@ -1166,21 +1200,21 @@ MODEL-OPTIMIZED APPROACH:
         try:
             # Get optimal orchestrator model
             orchestrator_model_instance = self.model_manager.get_model_for_role(orchestrator_model)
-            
+
             if orchestrator_model_instance is None:
                 return json.dumps({
                     'error': 'No orchestrator model available. Please check API keys.',
                     'task': task
                 })
-            
+
             # Prepare multi-model orchestrator context
             orchestrator_context = self.prepare_agent_context(task, "orchestrator")
-            
+
             available_specialists = "\n".join([
                 f"- {name}: specialized agent"
-                for name in self.workers.keys()
+                for name in self.workers
             ])
-            
+
             # Enhanced orchestrator with multi-model awareness
             orchestrator_prompt = f"""
 You are a CODE-BASED ORCHESTRATOR managing a team of AI specialist agents through Python code.
@@ -1193,7 +1227,7 @@ AVAILABLE SPECIALIST AGENT TOOLS (call them as functions):
 HOW TO USE THE AGENTS:
 Each specialist agent is available as a tool that can be called like a function:
 - academic_researcher(task="research query") - for historical/academic research
-- search_researcher(task="search query") - for general web research  
+- search_researcher(task="search query") - for general web research
 - ecommerce_analyst(task="product/market query") - for commerce analysis
 - local_business_analyst(task="business query") - for local business research
 
@@ -1218,49 +1252,51 @@ CURRENT TASK CONTEXT:
 
 Write Python code to execute the task. Remember to STOP after providing the final answer.
 """
-            
+
             # Create multi-model orchestrator with both SerpAPI tools and wrapped agent tools
             orchestrator_tools = self.create_serpapi_tools()[:2] if self.serpapi_key else []
-            
+
             # Add the wrapped worker agents as tools for the orchestrator
             orchestrator_tools.extend(list(self.worker_tools.values()))
-            
+
             # Create prompt templates for orchestrator
             from smolagents.agents import (
-                PromptTemplates, PlanningPromptTemplate,
-                ManagedAgentPromptTemplate, FinalAnswerPromptTemplate
+                FinalAnswerPromptTemplate,
+                ManagedAgentPromptTemplate,
+                PlanningPromptTemplate,
+                PromptTemplates,
             )
-            
+
             # Create sub-templates for orchestrator
             orchestrator_planning = PlanningPromptTemplate(
                 initial_plan=None,
                 update_plan_pre_messages=None,
                 update_plan_post_messages=None
             )
-            
+
             orchestrator_managed = ManagedAgentPromptTemplate(
                 task=None,
                 report=None
             )
-            
+
             orchestrator_final = FinalAnswerPromptTemplate(
                 pre_messages=None,
                 post_messages=None
             )
-            
+
             orchestrator_templates = PromptTemplates(
                 system_prompt=orchestrator_prompt,
                 planning=orchestrator_planning,
                 managed_agent=orchestrator_managed,
                 final_answer=orchestrator_final
             )
-            
+
             orchestrator = CodeAgent(
                 tools=orchestrator_tools,
                 model=orchestrator_model_instance,
                 prompt_templates=orchestrator_templates,
                 additional_authorized_imports=[
-                    "pandas", "numpy", "json", "csv", "re", "datetime", 
+                    "pandas", "numpy", "json", "csv", "re", "datetime",
                     "time", "requests", "urllib", "math", "statistics"
                 ],
                 max_steps=10  # Reduced from 50 to prevent infinite loops
@@ -1281,17 +1317,17 @@ Write Python code to execute the task. Remember to STOP after providing the fina
                 'search_performance': self.analyze_search_performance(),
                 'cross_engine_analysis': self._analyze_cross_engine_results()
             }
-            
+
             # Update memory with results
             self.update_context_from_result("multi_model_orchestrator", task, result, True)
-            
+
             return json.dumps(final_result, indent=2, default=str)
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             error_msg = f"Multi-model workflow execution exceeded {timeout} seconds"
             self.update_context_from_result("multi_model_orchestrator", task, error_msg, False)
             return json.dumps({'error': error_msg, 'task': task})
         except Exception as e:
-            error_msg = f"Multi-model workflow execution failed: {str(e)}"
+            error_msg = f"Multi-model workflow execution failed: {e!s}"
             self.update_context_from_result("multi_model_orchestrator", task, error_msg, False)
             return json.dumps({'error': error_msg, 'task': task})

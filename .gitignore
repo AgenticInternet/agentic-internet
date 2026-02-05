@@ -11,3 +11,4 @@ wheels/
 .cursorindexingignore
 .env
 .specstory/**
+.beads/

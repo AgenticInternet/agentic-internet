@@ -1,19 +1,19 @@
 """Tools module for AgenticInternet."""
 
-from .web_search import WebSearchTool, WebScraperTool, NewsSearchTool
-from .code_execution import PythonExecutorTool, DataAnalysisTool
-from .browser_use import BrowserUseTool, AsyncBrowserUseTool, StructuredBrowserUseTool
+from .browser_use import AsyncBrowserUseTool, BrowserUseTool, StructuredBrowserUseTool
+from .code_execution import DataAnalysisTool, PythonExecutorTool
+from .web_search import NewsSearchTool, WebScraperTool, WebSearchTool
 
 # MCP integration (optional - only available if mcp package is installed)
 try:
     from .mcp_integration import (
-        MCPToolIntegration,
+        MCP_AVAILABLE,
         MCPServerConfig,
         MCPServerManager,
-        mcp_tools,
-        load_mcp_config_from_env,
+        MCPToolIntegration,
         is_mcp_available,
-        MCP_AVAILABLE,
+        load_mcp_config_from_env,
+        mcp_tools,
     )
 except ImportError:
     # MCP packages not installed
@@ -23,26 +23,27 @@ except ImportError:
     MCPServerManager = None
     mcp_tools = None
     load_mcp_config_from_env = None
-    is_mcp_available = lambda: False
+    def is_mcp_available() -> bool:
+        return False
 
 __all__ = [
-    # Web tools
-    "WebSearchTool",
-    "WebScraperTool",
+    "MCP_AVAILABLE",
+    "AsyncBrowserUseTool",
+    # Browser tools
+    "BrowserUseTool",
+    "DataAnalysisTool",
+    "MCPServerConfig",
+    "MCPServerManager",
+    # MCP tools
+    "MCPToolIntegration",
     "NewsSearchTool",
     # Code tools
     "PythonExecutorTool",
-    "DataAnalysisTool",
-    # Browser tools
-    "BrowserUseTool",
-    "AsyncBrowserUseTool",
     "StructuredBrowserUseTool",
-    # MCP tools
-    "MCPToolIntegration",
-    "MCPServerConfig",
-    "MCPServerManager",
-    "mcp_tools",
-    "load_mcp_config_from_env",
+    "WebScraperTool",
+    # Web tools
+    "WebSearchTool",
     "is_mcp_available",
-    "MCP_AVAILABLE",
+    "load_mcp_config_from_env",
+    "mcp_tools",
 ]

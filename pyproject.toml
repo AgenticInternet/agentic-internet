@@ -41,8 +41,60 @@ dev-dependencies = [
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.0",
     "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
     "mypy>=1.8.0",
     "ruff>=0.3.0",
     "black>=24.0.0",
     "ipython>=8.20.0",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "UP",   # pyupgrade
+    "S",    # flake8-bandit (security)
+    "SIM",  # flake8-simplify
+    "RUF",  # ruff-specific rules
+]
+ignore = [
+    "E501",   # line too long (handled by formatter)
+    "S101",   # use of assert (needed in tests)
+    "S603",   # subprocess call - check for untrusted input
+    "S607",   # start process with partial path
+    "B008",   # function call in default argument (typer pattern)
+    "UP007",  # use X | Y for union types (keep Optional for 3.11 compat)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101", "S106"]
+"agentic_internet/tools/code_execution.py" = ["S102", "RUF012"]  # exec usage intentional; smolagents Tool pattern
+"agentic_internet/agents/multi_model_serpapi.py" = ["RUF005", "RUF012", "RUF013", "RUF015", "B007"]  # smolagents Tool pattern + large orchestration file
+"agentic_internet/tools/browser_use.py" = ["RUF012"]  # smolagents Tool pattern
+"agentic_internet/tools/web_search.py" = ["RUF012"]  # smolagents Tool pattern
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+check_untyped_defs = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+markers = [
+    "integration: marks tests that require external services (deselect with '-m \"not integration\"')",
 ]
