@@ -145,7 +145,7 @@ class InternetAgent:
 
         return tools
 
-    def run(self, task: str, **kwargs) -> str:
+    def run(self, task: str, *, show_result: bool = True, **kwargs) -> str:
         """
         Run the agent on a specific task.
 
@@ -166,7 +166,7 @@ class InternetAgent:
             # Run the agent
             result = self.agent.run(task, **kwargs)
 
-            if self.verbose:
+            if self.verbose and show_result:
                 console.print(Panel.fit(
                     Markdown(str(result)),
                     title="[bold green]Result[/bold green]"
@@ -283,7 +283,7 @@ class ResearchAgent(InternetAgent):
         if self.verbose:
             console.print(f"[bold blue]Researching:[/bold blue] {topic} (Depth: {depth})")
 
-        result = self.run(prompt)
+        result = self.run(prompt, show_result=False)
 
         research_entry = {
             "topic": topic,
