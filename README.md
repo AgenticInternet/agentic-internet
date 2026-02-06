@@ -1,5 +1,7 @@
 # 🤖 Agentic Internet
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/AgenticInternet/agentic-internet)
+
 An advanced AI agent system powered by [smolagents](https://github.com/huggingface/smolagents) for autonomous internet interactions, research, and intelligent task execution.
 
 ## ✨ Features
