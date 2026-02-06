@@ -13,6 +13,7 @@ import os
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Union
+from urllib.parse import urlparse, urlunparse
 
 from ..exceptions import MCPNotAvailableError
 
@@ -34,6 +35,19 @@ def check_mcp_available() -> None:
     """Check if MCP packages are available and raise informative error if not."""
     if not MCP_AVAILABLE:
         raise MCPNotAvailableError()
+
+def _normalize_http_url(url: str) -> str:
+    parsed = urlparse(url)
+    if not parsed.scheme or not parsed.netloc:
+        return url
+
+    path = parsed.path or "/"
+    if path == "/":
+        logger.warning("HTTP MCP URL missing path; defaulting to /mcp/ endpoint")
+        path = "/mcp/"
+        return urlunparse(parsed._replace(path=path))
+
+    return url
 
 
 class MCPToolIntegration:
@@ -118,6 +132,8 @@ class MCPToolIntegration:
 
             if not url:
                 raise ValueError("URL required for http transport")
+
+            url = _normalize_http_url(url)
 
             # Return dict format for HTTP transport
             return {
