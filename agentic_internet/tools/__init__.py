@@ -2,6 +2,7 @@
 
 from .browser_use import AsyncBrowserUseTool, BrowserUseTool, StructuredBrowserUseTool
 from .code_execution import DataAnalysisTool, PythonExecutorTool
+from .exa_search import ExaFindSimilarTool, ExaSearchTool
 from .web_search import NewsSearchTool, WebScraperTool, WebSearchTool
 
 # MCP integration (optional - only available if mcp package is installed)
@@ -32,6 +33,9 @@ __all__ = [
     # Browser tools
     "BrowserUseTool",
     "DataAnalysisTool",
+    "ExaFindSimilarTool",
+    # Exa search tools
+    "ExaSearchTool",
     "MCPServerConfig",
     "MCPServerManager",
     # MCP tools

@@ -181,6 +181,10 @@ class Settings(BaseModel):
         default_factory=lambda: os.getenv("BROWSER_USE_API_KEY"),
         description="Browser Use Cloud API key"
     )
+    exa_api_key: str | None = Field(
+        default_factory=lambda: os.getenv("EXA_API_KEY"),
+        description="Exa AI search API key"
+    )
 
     # Model configuration
     model: ModelConfig = Field(default_factory=ModelConfig)
