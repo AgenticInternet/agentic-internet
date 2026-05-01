@@ -60,6 +60,9 @@ ANTHROPIC_API_KEY=your_anthropic_api_key
 # Optional: For SerpAPI advanced search
 SERPAPI_API_KEY=your_serpapi_key
 
+# Optional: For Exa AI-powered neural / semantic search
+EXA_API_KEY=your_exa_api_key
+
 # Optional: For multi-model orchestration via OpenRouter
 OPENROUTER_API_KEY=your_openrouter_key
 
@@ -254,6 +257,8 @@ data_analysis
 - **web_search**: Search the web using DuckDuckGo
 - **web_scraper**: Scrape and extract content from web pages
 - **news_search**: Search for recent news articles
+- **exa_search**: AI-powered neural / semantic web search via [Exa](https://exa.ai)
+- **exa_find_similar**: Find pages semantically similar to a given URL via Exa
 - **multi_model_serpapi**: Multi-model SerpAPI tools
 - **browser_use**: Browser Use Cloud SDK
 

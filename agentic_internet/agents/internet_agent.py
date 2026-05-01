@@ -18,6 +18,7 @@ from ..config.settings import settings
 from ..exceptions import ModelInitializationError
 from ..tools.browser_use import AsyncBrowserUseTool, BrowserUseTool, StructuredBrowserUseTool
 from ..tools.code_execution import DataAnalysisTool, PythonExecutorTool
+from ..tools.exa_search import ExaFindSimilarTool, ExaSearchTool
 from ..tools.web_search import NewsSearchTool, WebScraperTool, WebSearchTool
 from ..utils.model_utils import initialize_model
 
@@ -120,6 +121,13 @@ class InternetAgent:
                 WebScraperTool(),
                 NewsSearchTool()
             ])
+
+            # Add Exa neural search tools when an API key is available
+            if settings.exa_api_key:
+                tools.extend([
+                    ExaSearchTool(),
+                    ExaFindSimilarTool()
+                ])
 
         # Add Browser Use tools if API key is available
         if settings.tools.browser_enabled and settings.browser_use_api_key:
