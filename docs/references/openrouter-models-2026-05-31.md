@@ -39,9 +39,15 @@ The newest OpenRouter models are converging on:
 - Explicit reasoning controls through `reasoning` or `include_reasoning`.
 - Multimodal input for major frontier families.
 
-## Repository Gap
+## Repository Status
 
-`agentic_internet/config/settings.py` currently hardcodes a February 2026-style model catalog. It does not include the newest models above, including Claude Opus 4.8, Qwen3.7 Max, Grok Build 0.1, Gemini 3.5 Flash, Step 3.7 Flash, or GPT Chat Latest.
+`agentic_internet/config/settings.py` now includes the newest agent-relevant
+aliases from this snapshot, including Claude Opus 4.8, Qwen3.7 Max, Grok Build
+0.1, Gemini 3.5 Flash, Step 3.7 Flash, and GPT Chat Latest.
+
+`agentic_internet/utils/openrouter_models.py` adds a live fetch/normalization
+helper, and `agentic-internet models --live` can list recent OpenRouter models
+with tool, reasoning, and structured-output support.
 
 ## Implementation Guidance
 
@@ -49,18 +55,18 @@ The newest OpenRouter models are converging on:
 flowchart LR
     API["OpenRouter /api/v1/models"]
     Normalize["Normalize IDs for LiteLLM"]
-    Cache["Write/update local snapshot"]
+    Live["Live filter and summarize"]
     Settings["Settings fallback catalog"]
     CLI["agentic-internet models"]
 
     API --> Normalize
-    Normalize --> Cache
-    Cache --> CLI
+    Normalize --> Live
+    Live --> CLI
     Settings --> CLI
-    Cache -. "fallback when API unavailable" .-> Settings
+    Settings -. "fallback when API unavailable" .-> CLI
 ```
 
 - Store OpenRouter API IDs without the `openrouter/` prefix in snapshots.
 - Add `openrouter/` only at the LiteLLM boundary, matching current `model_utils.py` behavior.
 - Prefer dynamic list/search behavior over repeatedly editing a static catalog.
-- Keep a checked-in snapshot for offline behavior and tests.
+- Keep the checked-in fallback catalog current enough for offline behavior and tests.

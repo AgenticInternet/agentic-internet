@@ -7,7 +7,6 @@ Exec-plans capture non-trivial work before implementation and preserve handoff c
 | Plan | Area | Status |
 |------|------|--------|
 | [Initial Project Setup](exec-plans/active/2026-05-30-initial-setup.md) | Global project foundation | in_progress |
-| [Code Mode MCP Agent](plans/2026-02-23-feat-code-mode-mcp-agent-plan.md) | Code mode and MCP integration | legacy active |
 
 ## Status Maps
 
@@ -17,7 +16,9 @@ Exec-plans capture non-trivial work before implementation and preserve handoff c
 
 ## Completed Plans
 
-No completed plans have been migrated yet.
+| Plan | Area | Status |
+|------|------|--------|
+| [Code Mode MCP Agent](exec-plans/completed/2026-02-23-feat-code-mode-mcp-agent-plan.md) | Code mode and MCP integration | completed |
 
 ## Legacy Plan Location
 

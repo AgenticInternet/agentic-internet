@@ -51,12 +51,12 @@ flowchart TD
 
 | Work | Evidence | Status | Next Action |
 |------|----------|--------|-------------|
-| Code Mode MCP agent | Uncommitted files: `agentic_internet/agents/code_mode.py`, `agentic_internet/cli.py`, `agentic_internet/__init__.py`, `agentic_internet/agents/__init__.py`; plan: `docs/plans/2026-02-23-feat-code-mode-mcp-agent-plan.md` | Partially implemented, not committed | Add tests, verify against current SmolAgents APIs, then move plan into `docs/exec-plans/active/` |
-| Code Mode acceptance criteria | Plan has unchecked functional and non-functional criteria | Not verified | Create focused tests for `ToolFacade`, `SearchTool`, `ExecuteTool`, exports, and `mcp run --agent-type code` |
-| Model catalog freshness | `settings.py` says "updated Feb 2026"; OpenRouter has newer May 2026 models | Stale | Replace static-only catalog with refreshable OpenRouter snapshot or dynamic model listing |
-| Initial harness setup | `docs/exec-plans/active/2026-05-30-initial-setup.md` remains `in_progress` | Incomplete | Close once first real feature exec-plan exists and local gates are runnable |
-| Local quality gates | Current shell lacks `uv`, `pytest`, `ruff`, `mypy`, and `bd` on PATH | Blocked locally | Install/restore tooling path before final verification of code changes |
-| Legacy plan location | `docs/plans/` exists beside `docs/exec-plans/` | Needs migration | Move active plans to `docs/exec-plans/active/`, completed plans to `docs/exec-plans/completed/` |
+| Code Mode MCP agent | `agentic_internet/agents/code_mode.py`, `agentic_internet/cli.py`, exports, focused tests, and completed exec-plan | Implemented in current pass | Add live MCP integration smoke test when a local server fixture is available |
+| Code Mode acceptance criteria | `tests/test_code_mode.py` covers facade, meta-tools, factory, and E2B fallback | Covered by focused tests | Add CLI-level coverage for `mcp run --agent-type code` |
+| Model catalog freshness | `settings.py` refreshed and `agentic_internet/utils/openrouter_models.py` added | Dynamic live listing available via `models --live` | Add cached snapshot writing command if offline catalog automation is needed |
+| Initial harness setup | `docs/exec-plans/active/2026-05-30-initial-setup.md` remains `in_progress` | Partially complete | Close once `bd`, `uv`, and `mypy` are restored for complete release gates |
+| Local quality gates | `.venv` provides `pytest` and `ruff`; `uv`, `mypy`, and `bd` are still missing from PATH | Partially unblocked | Use `.venv/bin/pytest` and `.venv/bin/ruff`; restore `uv`, `mypy`, and `bd` for full gates |
+| Legacy plan location | Completed Code Mode plan migrated to `docs/exec-plans/completed/` | Resolved for current pass | Keep future plans in `docs/exec-plans/active/` or `docs/exec-plans/completed/` |
 
 ## External Findings
 
@@ -91,8 +91,7 @@ See [SmolAgents feature snapshot](references/smolagents-features-2026-05-31.md).
 
 ## Recommended Next Pass
 
-1. Stabilize and test the uncommitted Code Mode MCP work before touching model routing.
-2. Update model catalog behavior to query OpenRouter dynamically, with a cached fallback generated from `/api/v1/models`.
-3. Add a `models refresh` or `models sync-openrouter` command only after tests exist for provider ID normalization.
-4. Update `.env.example` and docs for `EXA_API_KEY` if Exa is intended to be user-facing.
-5. Restore local tooling availability (`uv`, `bd`, `ruff`, `mypy`, `pytest`) so code changes can be verified before push.
+1. Add cached snapshot writing for OpenRouter if offline catalog automation is needed.
+2. Add a local MCP server fixture for a real `mcp run --agent-type code --structured-output` smoke test.
+3. Restore local tooling availability (`uv`, `bd`, and `mypy`) so release gates can run completely.
+4. Clean up existing Ruff failures under `agentic_internet/examples/`.

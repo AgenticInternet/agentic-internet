@@ -2,6 +2,7 @@
 
 import logging
 
+from .agents.code_mode import ToolFacade, create_code_mode_agent
 from .agents.internet_agent import InternetAgent, ResearchAgent
 from .agents.search_orchestrator import SearchOrchestrator, create_search_orchestrator
 from .agents.specialized_agents import (
@@ -42,6 +43,7 @@ try:
         MultiEngineSearchTool,
         MultiModelSerpAPISystem,
     )
+
     MULTI_MODEL_AVAILABLE = True
 except ImportError:
     MULTI_MODEL_AVAILABLE = False
@@ -80,8 +82,10 @@ __all__ = [
     "SearchOrchestrator",
     "TechnicalSupportAgent",
     "ToolExecutionError",
+    "ToolFacade",
     "UnsafeCodeError",
     "__version__",
+    "create_code_mode_agent",
     "create_search_orchestrator",
     "settings",
 ]

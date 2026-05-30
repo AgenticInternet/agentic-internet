@@ -13,6 +13,7 @@ try:
     from exa_py import Exa
     HAS_EXA = True
 except ImportError:
+    Exa = None  # type: ignore[assignment]
     HAS_EXA = False
 
 INTEGRATION_NAME = "agentic-internet"

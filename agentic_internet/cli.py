@@ -16,13 +16,12 @@ from rich.table import Table
 from .agents.internet_agent import InternetAgent, ResearchAgent
 from .agents.multi_model_serpapi import MultiModelSerpAPISystem
 from .config.settings import settings
+from .utils.openrouter_models import fetch_openrouter_models, recent_agentic_models, summarize_openrouter_model
 
 logger = logging.getLogger(__name__)
 
 app = typer.Typer(
-    name="agentic-internet",
-    help="Advanced AI agent for intelligent internet interactions",
-    add_completion=False
+    name="agentic-internet", help="Advanced AI agent for intelligent internet interactions", add_completion=False
 )
 console = Console()
 
@@ -31,27 +30,16 @@ console = Console()
 def chat(
     model: str | None = typer.Option(
         None,
-        "--model", "-m",
-        help="Model to use (e.g., claude-opus-4.5, gpt-5.2, gemini-3-flash, grok-4.1-fast, deepseek-v3.2, qwen3-coder, devstral-2, sonar-pro)"
+        "--model",
+        "-m",
+        help="Model to use (e.g., claude-opus-4.5, gpt-5.2, gemini-3-flash, grok-4.1-fast, deepseek-v3.2, qwen3-coder, devstral-2, sonar-pro)",
     ),
-    verbose: bool = typer.Option(
-        True,
-        "--verbose/--quiet", "-v/-q",
-        help="Enable verbose output"
-    ),
-    max_iterations: int = typer.Option(
-        10,
-        "--max-iterations", "-i",
-        help="Maximum iterations for the agent"
-    )
+    verbose: bool = typer.Option(True, "--verbose/--quiet", "-v/-q", help="Enable verbose output"),
+    max_iterations: int = typer.Option(10, "--max-iterations", "-i", help="Maximum iterations for the agent"),
 ):
     """Start an interactive chat session with the agent."""
     try:
-        agent = InternetAgent(
-            model_id=model,
-            verbose=verbose,
-            max_iterations=max_iterations
-        )
+        agent = InternetAgent(model_id=model, verbose=verbose, max_iterations=max_iterations)
         agent.chat()
     except Exception as e:
         console.print(f"[bold red]Error:[/bold red] {e!s}")
@@ -63,32 +51,17 @@ def run(
     task: str = typer.Argument(..., help="The task to execute"),
     model: str | None = typer.Option(
         None,
-        "--model", "-m",
-        help="Model to use (e.g., claude-opus-4.5, gpt-5.2, gemini-3-flash, grok-4.1-fast, deepseek-v3.2, qwen3-coder, devstral-2, sonar-pro)"
+        "--model",
+        "-m",
+        help="Model to use (e.g., claude-opus-4.5, gpt-5.2, gemini-3-flash, grok-4.1-fast, deepseek-v3.2, qwen3-coder, devstral-2, sonar-pro)",
     ),
-    verbose: bool = typer.Option(
-        True,
-        "--verbose/--quiet", "-v/-q",
-        help="Enable verbose output"
-    ),
-    max_iterations: int = typer.Option(
-        10,
-        "--max-iterations", "-i",
-        help="Maximum iterations for the agent"
-    ),
-    output: Path | None = typer.Option(
-        None,
-        "--output", "-o",
-        help="Save output to file"
-    )
+    verbose: bool = typer.Option(True, "--verbose/--quiet", "-v/-q", help="Enable verbose output"),
+    max_iterations: int = typer.Option(10, "--max-iterations", "-i", help="Maximum iterations for the agent"),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Save output to file"),
 ):
     """Run a single task with the agent."""
     try:
-        agent = InternetAgent(
-            model_id=model,
-            verbose=verbose,
-            max_iterations=max_iterations
-        )
+        agent = InternetAgent(model_id=model, verbose=verbose, max_iterations=max_iterations)
 
         result = agent.run(task)
 
@@ -104,26 +77,15 @@ def run(
 @app.command()
 def research(
     topic: str = typer.Argument(..., help="The topic to research"),
-    depth: str = typer.Option(
-        "moderate",
-        "--depth", "-d",
-        help="Research depth: quick, moderate, or deep"
-    ),
+    depth: str = typer.Option("moderate", "--depth", "-d", help="Research depth: quick, moderate, or deep"),
     model: str | None = typer.Option(
         None,
-        "--model", "-m",
-        help="Model to use (e.g., claude-opus-4.5, gpt-5.2, gemini-3-flash, grok-4.1-fast, deepseek-v3.2, qwen3-coder, devstral-2, sonar-pro)"
+        "--model",
+        "-m",
+        help="Model to use (e.g., claude-opus-4.5, gpt-5.2, gemini-3-flash, grok-4.1-fast, deepseek-v3.2, qwen3-coder, devstral-2, sonar-pro)",
     ),
-    output: Path | None = typer.Option(
-        None,
-        "--output", "-o",
-        help="Save research results to file"
-    ),
-    format: str = typer.Option(
-        "markdown",
-        "--format", "-f",
-        help="Output format: markdown or json"
-    )
+    output: Path | None = typer.Option(None, "--output", "-o", help="Save research results to file"),
+    format: str = typer.Option("markdown", "--format", "-f", help="Output format: markdown or json"),
 ):
     """Conduct research on a specific topic."""
     if depth not in ["quick", "moderate", "deep"]:
@@ -147,10 +109,7 @@ def research(
 
             console.print(f"[green]Research saved to {output}[/green]")
         else:
-            console.print(Panel(
-                Markdown(result['findings']),
-                title=f"Research: {topic}"
-            ))
+            console.print(Panel(Markdown(result["findings"]), title=f"Research: {topic}"))
 
     except Exception as e:
         console.print(f"[bold red]Error:[/bold red] {e!s}")
@@ -159,28 +118,17 @@ def research(
 
 @app.command()
 def config(
-    show: bool = typer.Option(
-        False,
-        "--show", "-s",
-        help="Show current configuration"
-    ),
-    set_key: str | None = typer.Option(
-        None,
-        "--set", "-k",
-        help="Set a configuration value (format: key=value)"
-    )
+    show: bool = typer.Option(False, "--show", "-s", help="Show current configuration"),
+    set_key: str | None = typer.Option(None, "--set", "-k", help="Set a configuration value (format: key=value)"),
 ):
     """Manage configuration settings."""
     if show:
         # Display current configuration
         config_dict = settings.model_dump()
         # Convert Path objects to strings for JSON serialization
-        if 'cache_dir' in config_dict and hasattr(config_dict['cache_dir'], '__fspath__'):
-            config_dict['cache_dir'] = str(config_dict['cache_dir'])
-        console.print(Panel(
-            json.dumps(config_dict, indent=2, default=str),
-            title="Current Configuration"
-        ))
+        if "cache_dir" in config_dict and hasattr(config_dict["cache_dir"], "__fspath__"):
+            config_dict["cache_dir"] = str(config_dict["cache_dir"])
+        console.print(Panel(json.dumps(config_dict, indent=2, default=str), title="Current Configuration"))
 
     elif set_key:
         console.print(
@@ -196,39 +144,17 @@ def config(
 @app.command()
 def multi(
     task: str = typer.Argument(..., help="The task to execute with multi-model system"),
-    models: list[str] | None = typer.Option(
-        None,
-        "--models", "-m",
-        help="Models to use (can specify multiple)"
-    ),
-    verbose: bool = typer.Option(
-        True,
-        "--verbose/--quiet", "-v/-q",
-        help="Enable verbose output"
-    ),
-    output: Path | None = typer.Option(
-        None,
-        "--output", "-o",
-        help="Save output to file"
-    ),
-    use_news: bool = typer.Option(
-        False,
-        "--news", "-n",
-        help="Include news research models"
-    ),
-    max_workers: int = typer.Option(
-        3,
-        "--workers", "-w",
-        help="Maximum number of concurrent workers"
-    )
+    models: list[str] | None = typer.Option(None, "--models", "-m", help="Models to use (can specify multiple)"),
+    verbose: bool = typer.Option(True, "--verbose/--quiet", "-v/-q", help="Enable verbose output"),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Save output to file"),
+    use_news: bool = typer.Option(False, "--news", "-n", help="Include news research models"),
+    max_workers: int = typer.Option(3, "--workers", "-w", help="Maximum number of concurrent workers"),
 ):
     """Run a task using the multi-model orchestration system."""
     try:
         # Initialize the multi-model system
         with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            console=console
+            SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console
         ) as progress:
             progress.add_task("Initializing multi-model system...", total=None)
 
@@ -236,10 +162,7 @@ def multi(
             if not os.getenv("SERPAPI_API_KEY"):
                 console.print("[yellow]Warning: SERPAPI_API_KEY not set. SerpAPI tools may not work.[/yellow]")
 
-            system = MultiModelSerpAPISystem(
-                serpapi_key=os.getenv("SERPAPI_API_KEY"),
-                context_window_size=16384
-            )
+            system = MultiModelSerpAPISystem(serpapi_key=os.getenv("SERPAPI_API_KEY"), context_window_size=16384)
             # Setup workers with the specified model if provided
             default_model = models[0] if models else None
             system.setup_multi_model_workers(default_model=default_model)
@@ -250,9 +173,7 @@ def multi(
             console.print(f"[bold green]Using model:[/bold green] {models[0]}")
 
         with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            console=console
+            SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console
         ) as progress:
             progress.add_task("Processing with multiple models...", total=None)
 
@@ -267,21 +188,13 @@ def multi(
 
         if isinstance(result, dict):
             for model, response in result.items():
-                console.print(Panel(
-                    str(response),
-                    title=f"Model: {model}",
-                    border_style="cyan"
-                ))
+                console.print(Panel(str(response), title=f"Model: {model}", border_style="cyan"))
         else:
             console.print(result)
 
         # Save output if requested
         if output:
-            output_data = {
-                "task": task,
-                "models": models,
-                "results": result
-            }
+            output_data = {"task": task, "models": models, "results": result}
             output.write_text(json.dumps(output_data, indent=2, default=str))
             console.print(f"\n[green]Output saved to {output}[/green]")
 
@@ -293,66 +206,40 @@ def multi(
 @app.command()
 def orchestrate(
     task: str = typer.Argument(..., help="Complex task requiring orchestration"),
-    coordinator: str = typer.Option(
-        "claude-opus-4.5",
-        "--coordinator", "-c",
-        help="Model to use as coordinator"
-    ),
-    workers: list[str] | None = typer.Option(
-        None,
-        "--workers", "-w",
-        help="Worker models (can specify multiple)"
-    ),
-    verbose: bool = typer.Option(
-        True,
-        "--verbose/--quiet", "-v/-q",
-        help="Enable verbose output"
-    ),
-    output: Path | None = typer.Option(
-        None,
-        "--output", "-o",
-        help="Save output to file"
-    )
+    coordinator: str = typer.Option("claude-opus-4.5", "--coordinator", "-c", help="Model to use as coordinator"),
+    workers: list[str] | None = typer.Option(None, "--workers", "-w", help="Worker models (can specify multiple)"),
+    verbose: bool = typer.Option(True, "--verbose/--quiet", "-v/-q", help="Enable verbose output"),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Save output to file"),
 ):
     """Execute complex tasks using model orchestration."""
     try:
-        console.print(Panel(
-            f"[bold cyan]Task:[/bold cyan] {task}\n"
-            f"[bold cyan]Coordinator:[/bold cyan] {coordinator}\n"
-            f"[bold cyan]Workers:[/bold cyan] {', '.join(workers) if workers else 'Default'}",
-            title="Orchestration Setup"
-        ))
+        console.print(
+            Panel(
+                f"[bold cyan]Task:[/bold cyan] {task}\n"
+                f"[bold cyan]Coordinator:[/bold cyan] {coordinator}\n"
+                f"[bold cyan]Workers:[/bold cyan] {', '.join(workers) if workers else 'Default'}",
+                title="Orchestration Setup",
+            )
+        )
 
         # Initialize the multi-model system
-        system = MultiModelSerpAPISystem(
-            serpapi_key=os.getenv("SERPAPI_API_KEY"),
-            context_window_size=16384
-        )
+        system = MultiModelSerpAPISystem(serpapi_key=os.getenv("SERPAPI_API_KEY"), context_window_size=16384)
         system.setup_multi_model_workers()
 
         # Execute orchestrated task
         with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            console=console
+            SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console
         ) as progress:
             progress.add_task("Orchestrating task execution...", total=None)
 
-            result = asyncio.run(
-                system.execute_multi_model_workflow(task, timeout=600, orchestrator_model=coordinator)
-            )
+            result = asyncio.run(system.execute_multi_model_workflow(task, timeout=600, orchestrator_model=coordinator))
 
         # Display orchestrated results
         console.print("\n[bold green]Orchestration Results:[/bold green]")
         console.print(result)
 
         if output:
-            output_data = {
-                "task": task,
-                "coordinator": coordinator,
-                "workers": workers,
-                "result": result
-            }
+            output_data = {"task": task, "coordinator": coordinator, "workers": workers, "result": result}
             output.write_text(json.dumps(output_data, indent=2, default=str))
             console.print(f"\n[green]Results saved to {output}[/green]")
 
@@ -363,33 +250,21 @@ def orchestrate(
 
 @app.command()
 def tools(
-    list_tools: bool = typer.Option(
-        True,
-        "--list", "-l",
-        help="List available tools"
-    ),
-    multi_model: bool = typer.Option(
-        False,
-        "--multi", "-m",
-        help="Show multi-model tools"
-    )
+    list_tools: bool = typer.Option(True, "--list", "-l", help="List available tools"),
+    multi_model: bool = typer.Option(False, "--multi", "-m", help="Show multi-model tools"),
 ):
     """Manage and display available tools."""
     if list_tools:
         if multi_model:
             # Show multi-model tools
-            console.print(Panel.fit(
-                "[bold cyan]Multi-Model SerpAPI Tools[/bold cyan]",
-                title="Tools"
-            ))
-
+            console.print(Panel.fit("[bold cyan]Multi-Model SerpAPI Tools[/bold cyan]", title="Tools"))
 
             tools_info = [
                 ("GoogleSearchTool", "Search the web using Google"),
                 ("GoogleShoppingTool", "Search for products and prices"),
                 ("GoogleMapsLocalTool", "Find local businesses and places"),
                 ("GoogleScholarTool", "Search academic papers and citations"),
-                ("MultiEngineSearchTool", "Search across multiple search engines")
+                ("MultiEngineSearchTool", "Search across multiple search engines"),
             ]
 
             for name, desc in tools_info:
@@ -398,10 +273,7 @@ def tools(
         else:
             # Show regular tools
             agent = InternetAgent(verbose=False)
-            console.print(Panel.fit(
-                "[bold cyan]Available Tools[/bold cyan]",
-                title="Tools"
-            ))
+            console.print(Panel.fit("[bold cyan]Available Tools[/bold cyan]", title="Tools"))
             for tool in agent.tools:
                 console.print(f"\n[bold]{tool.name}[/bold]")
                 console.print(f"  {tool.description}")
@@ -410,31 +282,11 @@ def tools(
 @app.command()
 def news(
     query: str = typer.Argument(..., help="News topic or query to search"),
-    sources: list[str] | None = typer.Option(
-        None,
-        "--sources", "-s",
-        help="Specific news sources to search"
-    ),
-    timeframe: str = typer.Option(
-        "24h",
-        "--time", "-t",
-        help="Time frame: 1h, 24h, 7d, 30d"
-    ),
-    limit: int = typer.Option(
-        10,
-        "--limit", "-l",
-        help="Maximum number of results"
-    ),
-    output: Path | None = typer.Option(
-        None,
-        "--output", "-o",
-        help="Save results to file"
-    ),
-    format: str = typer.Option(
-        "markdown",
-        "--format", "-f",
-        help="Output format: markdown, json, or text"
-    )
+    sources: list[str] | None = typer.Option(None, "--sources", "-s", help="Specific news sources to search"),
+    timeframe: str = typer.Option("24h", "--time", "-t", help="Time frame: 1h, 24h, 7d, 30d"),
+    limit: int = typer.Option(10, "--limit", "-l", help="Maximum number of results"),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Save results to file"),
+    format: str = typer.Option("markdown", "--format", "-f", help="Output format: markdown, json, or text"),
 ):
     """Search and analyze news articles."""
     try:
@@ -442,16 +294,11 @@ def news(
 
         # Initialize multi-model system for news
         with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            console=console
+            SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console
         ) as progress:
             progress.add_task("Searching news sources...", total=None)
 
-            system = MultiModelSerpAPISystem(
-                serpapi_key=os.getenv("SERPAPI_API_KEY"),
-                context_window_size=16384
-            )
+            system = MultiModelSerpAPISystem(serpapi_key=os.getenv("SERPAPI_API_KEY"), context_window_size=16384)
             system.setup_multi_model_workers()
 
             # Construct news search query
@@ -463,9 +310,7 @@ def news(
             news_query += f" (limit to {limit} results)"
 
             # Execute search
-            result = asyncio.run(
-                system.execute_multi_model_workflow(news_query, timeout=300)
-            )
+            result = asyncio.run(system.execute_multi_model_workflow(news_query, timeout=300))
 
         # Format and display results
         console.print("\n[bold green]News Results:[/bold green]\n")
@@ -502,68 +347,104 @@ def news(
 
 @app.command()
 def models(
-    list_all: bool = typer.Option(
-        True,
-        "--list", "-l",
-        help="List all available models"
-    ),
+    list_all: bool = typer.Option(True, "--list", "-l", help="List all available models"),
     category: str | None = typer.Option(
-        None,
-        "--category", "-c",
-        help="Filter by category: general, news, research, code"
+        None, "--category", "-c", help="Filter by category: general, news, research, code"
     ),
-    details: bool = typer.Option(
-        False,
-        "--details", "-d",
-        help="Show detailed information about models"
-    )
+    details: bool = typer.Option(False, "--details", "-d", help="Show detailed information about models"),
+    live: bool = typer.Option(False, "--live", help="Fetch the latest OpenRouter inventory before listing"),
+    limit: int = typer.Option(20, "--limit", help="Maximum live OpenRouter models to display"),
 ):
     """List and manage available AI models."""
+    if live:
+        models_data = recent_agentic_models(fetch_openrouter_models(), limit=limit)
+        if not models_data:
+            console.print("[yellow]Could not fetch live OpenRouter models; showing static catalog instead.[/yellow]")
+        else:
+            table = Table(title="Live OpenRouter Agentic Models", show_header=True, header_style="bold cyan")
+            table.add_column("Created", style="green")
+            table.add_column("Model", style="cyan")
+            table.add_column("Context", style="magenta")
+            table.add_column("Tools", style="yellow")
+            table.add_column("Reasoning", style="yellow")
+            table.add_column("Structured", style="yellow")
+            if details:
+                table.add_column("Name", style="white")
+                table.add_column("Modality", style="white")
 
-    # Define model categories with default configuration (updated Feb 2026)
+            for model in models_data:
+                summary = summarize_openrouter_model(model)
+                row = [
+                    str(summary["created"]),
+                    str(summary["litellm_id"]),
+                    str(summary["context_length"]),
+                    "yes" if summary["tools"] else "no",
+                    "yes" if summary["reasoning"] else "no",
+                    "yes" if summary["structured_outputs"] else "no",
+                ]
+                if details:
+                    row.extend([str(summary["name"]), str(summary["modality"])])
+                table.add_row(*row)
+
+            console.print(table)
+            console.print("[dim]Source: https://openrouter.ai/api/v1/models[/dim]")
+            return
+
+    # Define model categories with default configuration (refreshed May 2026)
     model_catalog = {
         "general": [
-            {"name": "claude-opus-4.5", "provider": "openrouter", "desc": "Anthropic Claude Opus 4.5 - top reasoning & planning", "default": True},
-            {"name": "gpt-5.2", "provider": "openrouter", "desc": "OpenAI GPT-5.2 - latest flagship model"},
-            {"name": "gemini-3-pro", "provider": "openrouter", "desc": "Google Gemini 3 Pro - multimodal flagship"},
-            {"name": "gemini-3-flash", "provider": "openrouter", "desc": "Google Gemini 3 Flash - fast multimodal"},
+            {
+                "name": "claude-opus-4.8",
+                "provider": "openrouter",
+                "desc": "Anthropic Claude Opus 4.8 - top reasoning & planning",
+                "default": True,
+            },
+            {"name": "gemini-3.5-flash", "provider": "openrouter", "desc": "Google Gemini 3.5 Flash - fast multimodal"},
+            {"name": "qwen3.7-max", "provider": "openrouter", "desc": "Qwen3.7 Max - long-context agent workloads"},
+            {"name": "gpt-chat-latest", "provider": "openrouter", "desc": "OpenAI GPT Chat Latest - stable latest chat alias"},
             {"name": "deepseek-v3.2", "provider": "openrouter", "desc": "DeepSeek V3.2 - strong open-weight model"},
-            {"name": "grok-4.1-fast", "provider": "openrouter", "desc": "xAI Grok 4.1 Fast - creative & innovative"},
-            {"name": "llama-4-maverick", "provider": "openrouter", "desc": "Meta Llama 4 Maverick - open source flagship"},
+            {"name": "grok-4.3", "provider": "openrouter", "desc": "xAI Grok 4.3 - reasoning and instruction following"},
+            {"name": "step-3.7-flash", "provider": "openrouter", "desc": "StepFun Step 3.7 Flash - multimodal MoE"},
             {"name": "kimi-k2.5", "provider": "openrouter", "desc": "Moonshot Kimi K2.5 - long context specialist"},
-            {"name": "minimax-m2.1", "provider": "openrouter", "desc": "MiniMax M2.1 - balanced reasoning"},
             {"name": "sonar-pro", "provider": "openrouter", "desc": "Perplexity Sonar Pro - search-optimized"},
         ],
         "code": [
+            {"name": "grok-build-0.1", "provider": "openrouter", "desc": "xAI Grok Build 0.1 - coding agents"},
+            {"name": "qwen3.7-max", "provider": "openrouter", "desc": "Qwen3.7 Max - agent-centric coding"},
             {"name": "qwen3-coder", "provider": "openrouter", "desc": "Qwen3 Coder - top coding model"},
             {"name": "qwen3-coder-plus", "provider": "openrouter", "desc": "Qwen3 Coder Plus - enhanced coding"},
             {"name": "devstral-2", "provider": "openrouter", "desc": "Mistral Devstral 2 - agentic coding"},
             {"name": "gpt-5.2-codex", "provider": "openrouter", "desc": "OpenAI GPT-5.2 Codex - code generation"},
             {"name": "deepseek-v3.2-speciale", "provider": "openrouter", "desc": "DeepSeek V3.2 Speciale - specialized tasks"},
             {"name": "grok-code-fast", "provider": "openrouter", "desc": "xAI Grok Code Fast - rapid code generation"},
-            {"name": "mimo-v2-flash", "provider": "openrouter", "desc": "Xiaomi MiMo V2 Flash - cost-effective coding"},
+            {"name": "granite-4.1-8b", "provider": "openrouter", "desc": "IBM Granite 4.1 8B - efficient enterprise coding"},
         ],
         "research": [
-            {"name": "deepseek-r1", "provider": "openrouter", "desc": "DeepSeek R1 - advanced reasoning chain-of-thought"},
+            {"name": "claude-opus-4.8", "provider": "openrouter", "desc": "Anthropic Claude Opus 4.8 - high-end reasoning"},
+            {"name": "gemini-3.5-flash", "provider": "openrouter", "desc": "Google Gemini 3.5 Flash - multimodal analysis"},
+            {"name": "perceptron-mk1", "provider": "openrouter", "desc": "Perceptron Mk1 - vision/video reasoning"},
+            {"name": "ring-2.6-1t", "provider": "openrouter", "desc": "inclusionAI Ring 2.6 1T - thinking model"},
+            {
+                "name": "deepseek-r1",
+                "provider": "openrouter",
+                "desc": "DeepSeek R1 - advanced reasoning chain-of-thought",
+            },
             {"name": "sonar-deep-research", "provider": "openrouter", "desc": "Perplexity Sonar Deep Research"},
             {"name": "sonar-reasoning-pro", "provider": "openrouter", "desc": "Perplexity Sonar Reasoning Pro"},
-            {"name": "o4-mini", "provider": "openrouter", "desc": "OpenAI O4 Mini - efficient reasoning"},
-            {"name": "o3", "provider": "openrouter", "desc": "OpenAI O3 - deep reasoning"},
-            {"name": "gemini-3-pro", "provider": "openrouter", "desc": "Google Gemini 3 Pro - multimodal analysis"},
-            {"name": "tongyi-deepsearch", "provider": "openrouter", "desc": "Alibaba Tongyi DeepSearch"},
         ],
         "news": [
             {"name": "sonar-pro", "provider": "openrouter", "desc": "Perplexity Sonar Pro - real-time web search"},
             {"name": "sonar", "provider": "openrouter", "desc": "Perplexity Sonar - fast web search"},
-            {"name": "gemini-3-flash", "provider": "openrouter", "desc": "Google Gemini 3 Flash - fast multimodal"},
+            {"name": "gemini-3.5-flash", "provider": "openrouter", "desc": "Google Gemini 3.5 Flash - fast multimodal"},
             {"name": "llama-4-scout", "provider": "openrouter", "desc": "Meta Llama 4 Scout - open source"},
             {"name": "mistral-small", "provider": "openrouter", "desc": "Mistral Small 3.2 - efficient & fast"},
-            {"name": "mistral-large", "provider": "openrouter", "desc": "Mistral Large 2512 - business analysis"},
+            {"name": "mistral-medium-3.5", "provider": "openrouter", "desc": "Mistral Medium 3.5 - business analysis"},
         ],
         "science": [
             {"name": "deepseek-r1", "provider": "openrouter", "desc": "DeepSeek R1 - advanced reasoning"},
-            {"name": "o4-mini", "provider": "openrouter", "desc": "OpenAI O4 Mini - scientific reasoning"},
-            {"name": "gemini-3-pro", "provider": "openrouter", "desc": "Google Gemini 3 Pro - multimodal analysis"},
+            {"name": "claude-opus-4.8", "provider": "openrouter", "desc": "Anthropic Claude Opus 4.8 - advanced reasoning"},
+            {"name": "gemini-3.5-flash", "provider": "openrouter", "desc": "Google Gemini 3.5 Flash - multimodal analysis"},
+            {"name": "perceptron-mk1", "provider": "openrouter", "desc": "Perceptron Mk1 - video and embodied reasoning"},
             {"name": "qwen3-235b", "provider": "openrouter", "desc": "Qwen3 235B - massive context synthesis"},
             {"name": "magistral-medium", "provider": "openrouter", "desc": "Mistral Magistral Medium - specialized"},
         ],
@@ -587,26 +468,15 @@ def models(
                 for model in model_catalog[cat]:
                     default_marker = "✓" if model.get("default", False) else ""
                     if details:
-                        table.add_row(
-                            model["name"],
-                            model["provider"],
-                            cat,
-                            default_marker,
-                            model["desc"]
-                        )
+                        table.add_row(model["name"], model["provider"], cat, default_marker, model["desc"])
                     else:
-                        table.add_row(
-                            model["name"],
-                            model["provider"],
-                            cat,
-                            default_marker
-                        )
+                        table.add_row(model["name"], model["provider"], cat, default_marker)
 
         console.print(table)
 
         # Show default model info
         console.print("\n[bold green]Default Model Configuration:[/bold green]")
-        console.print("• [cyan]claude-opus-4.5[/cyan] - Used as default across all categories")
+        console.print("• [cyan]claude-opus-4.8[/cyan] - Used as default across all categories")
         console.print("• Provides excellent balance of capability, speed, and reliability")
         console.print("• Strong performance in reasoning, coding, and analysis tasks")
 
@@ -616,11 +486,7 @@ def models(
 
 
 # MCP subcommand group
-mcp_app = typer.Typer(
-    name="mcp",
-    help="Manage MCP (Model Context Protocol) servers",
-    add_completion=False
-)
+mcp_app = typer.Typer(name="mcp", help="Manage MCP (Model Context Protocol) servers", add_completion=False)
 app.add_typer(mcp_app, name="mcp")
 
 
@@ -659,12 +525,7 @@ def mcp_list():
 
         for config in configs:
             trust_marker = "✓" if config.trust_remote_code else "✗"
-            table.add_row(
-                config.name,
-                config.transport_type,
-                str(config.server_config)[:50],
-                trust_marker
-            )
+            table.add_row(config.name, config.transport_type, str(config.server_config)[:50], trust_marker)
 
         console.print(table)
 
@@ -679,10 +540,7 @@ def mcp_info():
     try:
         from .tools.mcp_integration import is_mcp_available
 
-        console.print(Panel.fit(
-            "[bold cyan]MCP Integration Status[/bold cyan]",
-            title="MCP Info"
-        ))
+        console.print(Panel.fit("[bold cyan]MCP Integration Status[/bold cyan]", title="MCP Info"))
 
         if is_mcp_available():
             console.print("[green]✓ MCP packages installed[/green]")
@@ -719,34 +577,29 @@ def mcp_info():
 def mcp_run(
     task: str = typer.Argument(..., help="The task to execute with MCP tools"),
     server_path: str | None = typer.Option(
-        None,
-        "--server", "-s",
-        help="Path to MCP server script (for stdio transport)"
+        None, "--server", "-s", help="Path to MCP server script (for stdio transport)"
     ),
-    server_url: str | None = typer.Option(
-        None,
-        "--url", "-u",
-        help="URL of MCP server (for http transport)"
-    ),
+    server_url: str | None = typer.Option(None, "--url", "-u", help="URL of MCP server (for http transport)"),
     trust: bool = typer.Option(
+        False, "--trust/--no-trust", "-t/-T", help="Trust remote code execution (required for MCP tools)"
+    ),
+    model: str | None = typer.Option(None, "--model", "-m", help="Model to use for the agent"),
+    agent_type: str = typer.Option(
+        "tool_calling",
+        "--agent-type",
+        "-a",
+        help=(
+            "Agent mode: 'tool_calling' (default) uses ToolCallingAgent with MCP tools "
+            "as individual tools; 'code' wraps all tools in a ToolFacade and uses "
+            "CodeAgent for multi-step Python execution."
+        ),
+    ),
+    verbose: bool = typer.Option(True, "--verbose/--quiet", "-v/-q", help="Enable verbose output"),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Save output to file"),
+    structured_output: bool = typer.Option(
         False,
-        "--trust/--no-trust", "-t/-T",
-        help="Trust remote code execution (required for MCP tools)"
-    ),
-    model: str | None = typer.Option(
-        None,
-        "--model", "-m",
-        help="Model to use for the agent"
-    ),
-    verbose: bool = typer.Option(
-        True,
-        "--verbose/--quiet", "-v/-q",
-        help="Enable verbose output"
-    ),
-    output: Path | None = typer.Option(
-        None,
-        "--output", "-o",
-        help="Save output to file"
+        "--structured-output/--no-structured-output",
+        help="Enable SmolAgents MCP structured output and output schema support",
     ),
 ):
     """Run a task using MCP tools from a server."""
@@ -767,17 +620,23 @@ def mcp_run(
             console.print("Add [cyan]--trust[/cyan] or [cyan]-t[/cyan] to enable tool execution.")
             raise typer.Exit(1)
 
-        console.print(Panel.fit(
-            f"[bold cyan]Task:[/bold cyan] {task}\n"
-            f"[bold cyan]Server:[/bold cyan] {server_path or server_url}\n"
-            f"[bold cyan]Trust:[/bold cyan] {'Enabled' if trust else 'Disabled'}",
-            title="MCP Run"
-        ))
+        if agent_type not in ("tool_calling", "code"):
+            console.print(f"[red]Error: --agent-type must be 'tool_calling' or 'code', got '{agent_type}'[/red]")
+            raise typer.Exit(1)
+
+        console.print(
+            Panel.fit(
+                f"[bold cyan]Task:[/bold cyan] {task}\n"
+                f"[bold cyan]Server:[/bold cyan] {server_path or server_url}\n"
+                f"[bold cyan]Agent Type:[/bold cyan] {agent_type}\n"
+                f"[bold cyan]Structured Output:[/bold cyan] {'Enabled' if structured_output else 'Disabled'}\n"
+                f"[bold cyan]Trust:[/bold cyan] {'Enabled' if trust else 'Disabled'}",
+                title="MCP Run",
+            )
+        )
 
         with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            console=console
+            SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console
         ) as progress:
             progress.add_task("Connecting to MCP server...", total=None)
 
@@ -786,18 +645,29 @@ def mcp_run(
                 server_path=server_path,
                 server_url=server_url,
                 trust_remote_code=trust,
+                structured_output=structured_output,
             ) as tools:
                 progress.add_task(f"Loaded {len(tools)} MCP tools", total=None)
 
-                # Create agent with MCP tools
-                agent = InternetAgent(
-                    model_id=model,
-                    tools=list(tools),
-                    verbose=verbose,
-                )
+                if agent_type == "code":
+                    from .agents.code_mode import create_code_mode_agent
 
-                progress.add_task("Executing task...", total=None)
-                result = agent.run(task)
+                    agent = create_code_mode_agent(
+                        tools=list(tools),
+                        model_id=model,
+                        verbosity_level=2 if verbose else 0,
+                    )
+                    progress.add_task("Executing task (code mode)...", total=None)
+                    result = agent.run(task)
+                else:
+                    # Default: ToolCallingAgent via InternetAgent
+                    agent = InternetAgent(
+                        model_id=model,
+                        tools=list(tools),
+                        verbose=verbose,
+                    )
+                    progress.add_task("Executing task...", total=None)
+                    result = agent.run(task)
 
         if output:
             output.write_text(str(result))
@@ -813,16 +683,8 @@ def mcp_run(
 
 @mcp_app.command("test")
 def mcp_test(
-    server_path: str | None = typer.Option(
-        None,
-        "--server", "-s",
-        help="Path to MCP server script to test"
-    ),
-    server_url: str | None = typer.Option(
-        None,
-        "--url", "-u",
-        help="URL of MCP server to test"
-    ),
+    server_path: str | None = typer.Option(None, "--server", "-s", help="Path to MCP server script to test"),
+    server_url: str | None = typer.Option(None, "--url", "-u", help="URL of MCP server to test"),
 ):
     """Test connection to an MCP server and list available tools."""
     try:
@@ -841,9 +703,7 @@ def mcp_test(
         console.print(f"[cyan]Testing connection to:[/cyan] {server_display}")
 
         with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            console=console
+            SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console
         ) as progress:
             progress.add_task("Connecting to MCP server...", total=None)
 
@@ -857,16 +717,12 @@ def mcp_test(
                     console.print(f"[green]✓ Found {len(tools)} tools[/green]\n")
 
                     if tools:
-                        table = Table(
-                            title="Available MCP Tools",
-                            show_header=True,
-                            header_style="bold cyan"
-                        )
+                        table = Table(title="Available MCP Tools", show_header=True, header_style="bold cyan")
                         table.add_column("Tool Name", style="cyan")
                         table.add_column("Description", style="white")
 
                         for tool in tools:
-                            desc = getattr(tool, 'description', 'No description')[:80]
+                            desc = getattr(tool, "description", "No description")[:80]
                             table.add_row(tool.name, desc)
 
                         console.print(table)
@@ -886,6 +742,7 @@ def mcp_test(
 def version():
     """Display version information."""
     from . import __version__
+
     console.print(f"[bold cyan]Agentic Internet[/bold cyan] version {__version__}")
 
 

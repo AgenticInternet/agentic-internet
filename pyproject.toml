@@ -5,7 +5,7 @@ description = "An intelligent agent system powered by smolagents for autonomous 
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "smolagents>=0.1.0",
+    "smolagents[mcp]>=0.1.0",
     "transformers>=4.40.0",
     "huggingface-hub>=0.23.0",
     "torch>=2.0.0",

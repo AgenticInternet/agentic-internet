@@ -78,12 +78,14 @@ class TestMCPServerConfig:
             server_config="./server.py",
             transport_type="stdio",
             trust_remote_code=True,
+            structured_output=True,
         )
 
         assert config.name == "test_server"
         assert config.server_config == "./server.py"
         assert config.transport_type == "stdio"
         assert config.trust_remote_code is True
+        assert config.structured_output is True
 
     def test_server_config_to_dict(self, skip_if_no_mcp):
         """Test MCPServerConfig.to_dict()."""
@@ -109,12 +111,14 @@ class TestMCPServerConfig:
             "server_config": "./test.py",
             "transport_type": "stdio",
             "trust_remote_code": True,
+            "structured_output": True,
         }
 
         config = MCPServerConfig.from_dict(data)
         assert config.name == "test"
         assert config.server_config == "./test.py"
         assert config.trust_remote_code is True
+        assert config.structured_output is True
 
 
 class TestMCPServerManager:
@@ -287,6 +291,7 @@ class TestEnvironmentConfig:
         os.environ["MCP_SERVER_1_PATH"] = "/test/server.py"
         os.environ["MCP_SERVER_1_NAME"] = "test-server"
         os.environ["MCP_SERVER_1_TRUST"] = "true"
+        os.environ["MCP_SERVER_1_STRUCTURED_OUTPUT"] = "true"
 
         try:
             configs = load_mcp_config_from_env()
@@ -297,10 +302,16 @@ class TestEnvironmentConfig:
             assert config.server_config == "/test/server.py"
             assert config.transport_type == "stdio"
             assert config.trust_remote_code is True
+            assert config.structured_output is True
         finally:
             # Clean up
-            for key in ["MCP_SERVER_1_TYPE", "MCP_SERVER_1_PATH",
-                       "MCP_SERVER_1_NAME", "MCP_SERVER_1_TRUST"]:
+            for key in [
+                "MCP_SERVER_1_TYPE",
+                "MCP_SERVER_1_PATH",
+                "MCP_SERVER_1_NAME",
+                "MCP_SERVER_1_TRUST",
+                "MCP_SERVER_1_STRUCTURED_OUTPUT",
+            ]:
                 os.environ.pop(key, None)
 
 

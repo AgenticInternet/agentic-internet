@@ -57,17 +57,20 @@ flowchart TD
 
 ## Code Mode Implications
 
-The in-progress `agentic_internet/agents/code_mode.py` should be validated against current SmolAgents before commit:
+The implemented `agentic_internet/agents/code_mode.py` has been validated
+against the installed SmolAgents API in this repository:
 
-- Confirm imports use public APIs. The file imports `PythonExecutor` but executes through `LocalPythonExecutor`.
-- Add tests for `SearchTool.to_dict()` and `ExecuteTool.to_dict()` because recent releases changed executor serialization and security behavior.
-- Add explicit handling for `structured_output=True` in MCP flows where available.
-- Keep `ToolCallingAgent` as the default MCP path and make Code Mode an explicit opt-in.
-- Treat local execution as trusted-user-only. For untrusted code, prefer sandbox executor configuration and clear CLI warnings.
+- `ExecuteTool` executes through `LocalPythonExecutor`.
+- `SearchTool.to_dict()` and `ExecuteTool.to_dict()` have regression coverage
+  because recent SmolAgents releases changed serialization and executor behavior.
+- MCP flows accept `structured_output=True` where SmolAgents supports it.
+- `ToolCallingAgent` remains the default MCP path; Code Mode is explicit opt-in
+  through `mcp run --agent-type code`.
+- Local execution remains trusted-user-only. For untrusted code, prefer sandbox
+  executor configuration and clear CLI warnings.
 
 ## Recommended Upgrade Direction
 
-1. Finish the Code Mode tests before updating public docs or defaults.
-2. Add a compatibility matrix for SmolAgents executor types used by this project.
-3. Decide whether repo-specific Exa tooling should wrap upstream `WebSearchTool` Exa support or remain separate.
-4. Add a small integration example for MCP streamable HTTP with structured output.
+1. Add a compatibility matrix for SmolAgents executor types used by this project.
+2. Decide whether repo-specific Exa tooling should wrap upstream `WebSearchTool` Exa support or remain separate.
+3. Add a small integration example for MCP streamable HTTP with structured output.

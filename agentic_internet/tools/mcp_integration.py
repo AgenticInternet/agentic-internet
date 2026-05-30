@@ -223,12 +223,14 @@ class MCPServerConfig:
         transport_type: str = "stdio",
         env: dict[str, str] | None = None,
         trust_remote_code: bool = False,
+        structured_output: bool | None = None,
     ):
         self.name = name
         self.server_config = server_config
         self.transport_type = transport_type
         self.env = env or {}
         self.trust_remote_code = trust_remote_code
+        self.structured_output = structured_output
 
     def to_dict(self) -> dict[str, Any]:
         """Convert config to dictionary."""
@@ -238,6 +240,7 @@ class MCPServerConfig:
             "transport_type": self.transport_type,
             "env": self.env,
             "trust_remote_code": self.trust_remote_code,
+            "structured_output": self.structured_output,
         }
 
     @classmethod
@@ -249,6 +252,7 @@ class MCPServerConfig:
             transport_type=data.get("transport_type", "stdio"),
             env=data.get("env", {}),
             trust_remote_code=data.get("trust_remote_code", False),
+            structured_output=data.get("structured_output"),
         )
 
 
@@ -278,6 +282,7 @@ class MCPServerManager:
         transport_type: str = "stdio",
         env: dict[str, str] | None = None,
         trust_remote_code: bool = False,
+        structured_output: bool | None = None,
     ) -> None:
         """
         Add an MCP server configuration.
@@ -295,6 +300,7 @@ class MCPServerManager:
             transport_type=transport_type,
             env=env,
             trust_remote_code=trust_remote_code,
+            structured_output=structured_output,
         )
         self.servers[name] = config
 
@@ -333,6 +339,7 @@ class MCPServerManager:
             transport_type=config.transport_type,
             env=config.env,
             trust_remote_code=config.trust_remote_code,
+            structured_output=config.structured_output,
         ) as tools:
             yield tools
 
@@ -372,6 +379,7 @@ class MCPServerManager:
             transport_type=server_list[0].transport_type,
             env=server_list[0].env,
             trust_remote_code=server_list[0].trust_remote_code,
+            structured_output=server_list[0].structured_output,
         ) as tools:
             all_tools.extend(tools)
 
@@ -385,6 +393,7 @@ class MCPServerManager:
                         transport_type=server_list[1].transport_type,
                         env=server_list[1].env,
                         trust_remote_code=server_list[1].trust_remote_code,
+                        structured_output=server_list[1].structured_output,
                     ) as tools2:
                         all_tools.extend(tools2)
                         yield all_tools
@@ -463,6 +472,7 @@ def load_mcp_config_from_env() -> list[MCPServerConfig]:
         MCP_SERVER_2_TYPE=http
         MCP_SERVER_2_URL=https://api.example.com/mcp
         MCP_SERVER_2_TRUST=true
+        MCP_SERVER_2_STRUCTURED_OUTPUT=true
 
     Returns:
         List of MCPServerConfig objects
@@ -479,6 +489,12 @@ def load_mcp_config_from_env() -> list[MCPServerConfig]:
 
         name = os.getenv(f"{prefix}NAME", f"server_{i}")
         trust_remote_code = os.getenv(f"{prefix}TRUST", "false").lower() in ("true", "1", "yes")
+        structured_output_env = os.getenv(f"{prefix}STRUCTURED_OUTPUT")
+        structured_output = (
+            None
+            if structured_output_env is None
+            else structured_output_env.lower() in ("true", "1", "yes")
+        )
 
         if server_type == "stdio":
             server_path = os.getenv(f"{prefix}PATH")
@@ -500,6 +516,7 @@ def load_mcp_config_from_env() -> list[MCPServerConfig]:
                 transport_type="stdio",
                 env=env,
                 trust_remote_code=trust_remote_code,
+                structured_output=structured_output,
             )
 
         elif server_type in ("http", "streamable-http"):
@@ -515,6 +532,7 @@ def load_mcp_config_from_env() -> list[MCPServerConfig]:
                 transport_type="streamable-http",
                 env={},
                 trust_remote_code=trust_remote_code,
+                structured_output=structured_output,
             )
         else:
             logger.warning(f"MCP_SERVER_{i}: Unknown type '{server_type}'")

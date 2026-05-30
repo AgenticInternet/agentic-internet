@@ -14,22 +14,26 @@ logger = logging.getLogger(__name__)
 
 class ModelConfig(BaseModel):
     """Configuration for LLM models."""
-    name: str = Field(default="openrouter/anthropic/claude-opus-4.5", description="Default model name")
+    name: str = Field(default="openrouter/anthropic/claude-opus-4.8", description="Default model name")
     provider: str = Field(default="auto", description="Model provider (auto, openrouter, openai, anthropic, huggingface)")
     api_key: str | None = Field(default=None, description="API key for the model provider")
     temperature: float = Field(default=0.7, description="Temperature for generation")
     max_tokens: int = Field(default=2048, description="Maximum tokens for generation")
     top_p: float = Field(default=0.95, description="Top-p sampling parameter")
 
-    # Model provider configurations (updated Feb 2026)
+    # Model provider configurations (refreshed from OpenRouter snapshot on 2026-05-31)
     openrouter_models: dict[str, str] = Field(
         default={
             # Anthropic
+            "claude-opus-4.8": "openrouter/anthropic/claude-opus-4.8",
+            "claude-opus-4.8-fast": "openrouter/anthropic/claude-opus-4.8-fast",
+            "claude-opus-4.7-fast": "openrouter/anthropic/claude-opus-4.7-fast",
             "claude-opus-4.5": "openrouter/anthropic/claude-opus-4.5",
             "claude-sonnet-4.5": "openrouter/anthropic/claude-sonnet-4.5",
             "claude-opus-4.1": "openrouter/anthropic/claude-opus-4.1",
             "claude-haiku-4.5": "openrouter/anthropic/claude-haiku-4.5",
             # OpenAI
+            "gpt-chat-latest": "openrouter/openai/gpt-chat-latest",
             "gpt-5.2": "openrouter/openai/gpt-5.2",
             "gpt-5.2-chat": "openrouter/openai/gpt-5.2-chat",
             "gpt-5.2-codex": "openrouter/openai/gpt-5.2-codex",
@@ -41,6 +45,8 @@ class ModelConfig(BaseModel):
             "o3": "openrouter/openai/o3",
             "o3-mini": "openrouter/openai/o3-mini",
             # Google
+            "gemini-3.5-flash": "openrouter/google/gemini-3.5-flash",
+            "gemini-3.1-flash-lite": "openrouter/google/gemini-3.1-flash-lite",
             "gemini-3-flash": "openrouter/google/gemini-3-flash-preview",
             "gemini-3-pro": "openrouter/google/gemini-3-pro-preview",
             "gemini-2.5-pro": "openrouter/google/gemini-2.5-pro",
@@ -50,11 +56,14 @@ class ModelConfig(BaseModel):
             "deepseek-v3.2-speciale": "openrouter/deepseek/deepseek-v3.2-speciale",
             "deepseek-r1": "openrouter/deepseek/deepseek-r1-0528",
             # xAI
+            "grok-4.3": "openrouter/x-ai/grok-4.3",
+            "grok-build-0.1": "openrouter/x-ai/grok-build-0.1",
             "grok-4.1-fast": "openrouter/x-ai/grok-4.1-fast",
             "grok-4": "openrouter/x-ai/grok-4",
             "grok-4-fast": "openrouter/x-ai/grok-4-fast",
             "grok-code-fast": "openrouter/x-ai/grok-code-fast-1",
             # Mistral
+            "mistral-medium-3.5": "openrouter/mistralai/mistral-medium-3-5",
             "devstral-2": "openrouter/mistralai/devstral-2512",
             "mistral-large": "openrouter/mistralai/mistral-large-2512",
             "mistral-medium-3.1": "openrouter/mistralai/mistral-medium-3.1",
@@ -67,6 +76,7 @@ class ModelConfig(BaseModel):
             "qwen3-coder-next": "openrouter/qwen/qwen3-coder-next",
             "qwen3-235b": "openrouter/qwen/qwen3-235b-a22b",
             "qwen3-max": "openrouter/qwen/qwen3-max",
+            "qwen3.7-max": "openrouter/qwen/qwen3.7-max",
             # Meta
             "llama-4-maverick": "openrouter/meta-llama/llama-4-maverick",
             "llama-4-scout": "openrouter/meta-llama/llama-4-scout",
@@ -84,6 +94,12 @@ class ModelConfig(BaseModel):
             "mimo-v2-flash": "openrouter/xiaomi/mimo-v2-flash",
             # Alibaba
             "tongyi-deepsearch": "openrouter/alibaba/tongyi-deepresearch-30b-a3b",
+            # Recent agentic / multimodal models
+            "step-3.7-flash": "openrouter/stepfun/step-3.7-flash",
+            "ring-2.6-1t": "openrouter/inclusionai/ring-2.6-1t",
+            "perceptron-mk1": "openrouter/perceptron/perceptron-mk1",
+            "granite-4.1-8b": "openrouter/ibm-granite/granite-4.1-8b",
+            "owl-alpha": "openrouter/openrouter/owl-alpha",
         },
         description="Available OpenRouter models"
     )
@@ -105,6 +121,7 @@ class ModelConfig(BaseModel):
 
     anthropic_models: dict[str, str] = Field(
         default={
+            "claude-opus-4.8": "claude-opus-4.8",
             "claude-opus-4.5": "claude-opus-4.5",
             "claude-sonnet-4.5": "claude-sonnet-4.5",
             "claude-opus-4.1": "claude-opus-4.1",
@@ -125,9 +142,9 @@ class ModelConfig(BaseModel):
     # Fallback model preferences by provider
     fallback_models: dict[str, str] = Field(
         default={
-            "openrouter": "openrouter/deepseek/deepseek-v3.2",
+            "openrouter": "openrouter/anthropic/claude-opus-4.8",
             "openai": "gpt-5.2",
-            "anthropic": "claude-sonnet-4.5",
+            "anthropic": "claude-opus-4.8",
             "huggingface": "meta-llama/llama-4-scout",
         },
         description="Fallback models for each provider"

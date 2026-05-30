@@ -42,7 +42,7 @@ class TestToolConfig:
 class TestSettings:
     def test_get_model_provider_openrouter(self):
         s = Settings()
-        provider = s.get_model_provider("openrouter/anthropic/claude-sonnet-4.5")
+        provider = s.get_model_provider("openrouter/anthropic/claude-opus-4.8")
         assert provider == "openrouter"
 
     def test_get_model_provider_openai_pattern(self):
@@ -63,7 +63,7 @@ class TestSettings:
     def test_get_default_model_for_provider(self):
         s = Settings()
         default = s.get_default_model_for_provider("openrouter")
-        assert default is not None
+        assert default == "openrouter/anthropic/claude-opus-4.8"
 
     def test_list_available_models_no_keys(self):
         s = Settings(
