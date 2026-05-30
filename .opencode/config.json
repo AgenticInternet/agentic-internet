@@ -1,0 +1,10 @@
+{
+  "instructions": [
+    "AGENTS.md",
+    "docs/ARCHITECTURE.md",
+    "docs/PRODUCT_SENSE.md",
+    "docs/SECURITY.md",
+    "docs/DESIGN.md",
+    "docs/PLANS.md"
+  ]
+}

@@ -4,6 +4,19 @@
 
 An advanced AI agent system powered by [smolagents](https://github.com/huggingface/smolagents) for autonomous internet interactions, research, and intelligent task execution.
 
+## Agent-First Repository Map
+
+Start with [`AGENTS.md`](AGENTS.md). It links the durable architecture, design, security, reliability, quality, and planning documents used by coding agents and humans.
+
+Core project docs:
+
+| Doc | Purpose |
+|-----|---------|
+| [Architecture](docs/ARCHITECTURE.md) | System layers, dependency direction, golden principles |
+| [Design](docs/DESIGN.md) | Python conventions, API patterns, logging |
+| [Security](docs/SECURITY.md) | Secret handling, input validation, data classes |
+| [Plans](docs/PLANS.md) | Active and completed exec-plans |
+
 ## ✨ Features
 
 - **🔍 Web Search & Scraping**: Search the web, scrape content, and gather information
@@ -488,7 +501,7 @@ All models are accessed via [OpenRouter](https://openrouter.ai/) for unified API
 ### Running Tests
 ```bash
 # Run all tests (102 tests)
-uv run pytest tests/
+uv run pytest
 
 # Run with verbose output
 uv run pytest tests/ -v
@@ -510,6 +523,9 @@ uv run black agentic_internet/
 
 # Type checking
 uv run mypy agentic_internet/
+
+# Full local gate
+make check
 ```
 
 ## 📝 License

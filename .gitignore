@@ -5,10 +5,29 @@ build/
 dist/
 wheels/
 *.egg-info
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+coverage/
+htmlcov/
 
 # Virtual environments
 .venv
-.cursorindexingignore
+.venv/
+venv/
+
+# Local environment and secrets
 .env
+.env.local
+.env.*.local
+
+# OS/editor/runtime noise
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+.cursorindexingignore
 .specstory/**
 .beads/
+.opencode/cache/

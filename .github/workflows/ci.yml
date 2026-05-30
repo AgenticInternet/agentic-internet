@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  preflight:
+    name: Python preflight
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: uv sync --all-extras --dev
+
+      - name: Format check
+        run: uv run ruff format --check agentic_internet tests
+
+      - name: Lint
+        run: uv run ruff check agentic_internet tests
+
+      - name: Type check
+        run: uv run mypy agentic_internet
+
+      - name: Unit tests
+        run: uv run pytest
+
+      - name: Harness checks
+        run: python3 .opencode/tools/golden_principles.py
+
+      - name: Secret scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
