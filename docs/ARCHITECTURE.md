@@ -2,11 +2,25 @@
 
 Agentic Internet is a Python package and CLI for autonomous internet research, browser automation, code execution, and multi-model orchestration.
 
-## Layer Model
+## Diagram Standard
 
-```text
-Configuration -> Tools -> Agents -> Orchestration -> CLI/Examples
+Architecture, flow, lifecycle, and dependency diagrams must be written in Mermaid.
+
+```mermaid
+flowchart LR
+    Configuration["Configuration"]
+    Tools["Tools"]
+    Agents["Agents"]
+    Orchestration["Orchestration"]
+    Runtime["CLI and Examples"]
+
+    Configuration --> Tools
+    Tools --> Agents
+    Agents --> Orchestration
+    Orchestration --> Runtime
 ```
+
+## Layer Model
 
 | Layer | Paths | Responsibility |
 |-------|-------|----------------|

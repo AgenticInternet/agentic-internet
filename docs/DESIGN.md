@@ -9,6 +9,12 @@
 - Use `pathlib.Path` for filesystem paths in new code.
 - Prefer typed function signatures at public boundaries.
 
+## Documentation Diagrams
+
+- Use Mermaid for architecture, request lifecycle, workflow, state, and dependency diagrams.
+- Keep diagrams close to the implementation docs they explain.
+- Prefer `flowchart`, `sequenceDiagram`, and `stateDiagram-v2` before plain ASCII diagrams.
+
 ## Agent Patterns
 
 - Agents should compose tools and configuration instead of constructing provider clients deep in execution paths.

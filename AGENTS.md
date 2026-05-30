@@ -36,8 +36,9 @@ AGENTS.md                          <- you are here
 2. Plans before broad code changes. Complex work needs an exec-plan first.
 3. Keep source changes scoped. Do not rewrite unrelated Python modules or lockfiles.
 4. Preserve user work. Never revert uncommitted changes unless explicitly asked.
-5. Golden principles are mechanical. Run `make golden` or `python3 .opencode/tools/golden_principles.py`.
-6. Update docs with architecture changes; stale docs are treated as defects.
+5. Use Mermaid for architecture, flow, lifecycle, and system diagrams.
+6. Golden principles are mechanical. Run `make golden` or `python3 .opencode/tools/golden_principles.py`.
+7. Update docs with architecture changes; stale docs are treated as defects.
 
 ## 4. Issue Workflow
 
