@@ -70,7 +70,7 @@ def initialize_model(
     Returns:
         Initialized model instance or None if initialization fails.
     """
-    model_id = model_id or settings.model.name
+    model_id = settings.resolve_model_id(model_id)
     provider = settings.get_model_provider(model_id)
 
     if not provider:

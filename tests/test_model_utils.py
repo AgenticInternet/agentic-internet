@@ -57,12 +57,32 @@ class TestInitializeModel:
     @patch("agentic_internet.utils.model_utils._create_model_for_provider")
     def test_uses_settings_defaults(self, mock_create, mock_settings):
         mock_settings.model.name = "test-model"
+        mock_settings.resolve_model_id.return_value = "test-model"
         mock_settings.get_model_provider.return_value = "openai"
         mock_settings.get_api_key_for_provider.return_value = "key"
         mock_create.return_value = MagicMock()
 
         result = initialize_model()
         assert result is not None
+
+    @patch("agentic_internet.utils.model_utils.settings")
+    @patch("agentic_internet.utils.model_utils._create_model_for_provider")
+    def test_resolves_short_alias_before_creating_model(self, mock_create, mock_settings):
+        mock_settings.resolve_model_id.return_value = "openrouter/google/gemini-3.5-flash"
+        mock_settings.get_model_provider.return_value = "openrouter"
+        mock_settings.get_api_key_for_provider.return_value = "key"
+        mock_create.return_value = MagicMock()
+
+        result = initialize_model("gemini-3.5-flash")
+
+        assert result is not None
+        mock_settings.resolve_model_id.assert_called_once_with("gemini-3.5-flash")
+        mock_create.assert_called_once()
+        assert mock_create.call_args.args[:3] == (
+            "openrouter",
+            "openrouter/google/gemini-3.5-flash",
+            "key",
+        )
 
     @patch("agentic_internet.utils.model_utils.settings")
     @patch("agentic_internet.utils.model_utils.get_any_available_model")

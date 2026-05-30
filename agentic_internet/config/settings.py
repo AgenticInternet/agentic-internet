@@ -226,9 +226,26 @@ class Settings(BaseModel):
         """Ensure cache directory exists."""
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
+    def resolve_model_id(self, model_id: str | None = None) -> str:
+        """Resolve configured short aliases to provider-ready model IDs."""
+        model_id = model_id or self.model.name
+
+        provider_model_maps = [
+            self.model.openrouter_models,
+            self.model.openai_models,
+            self.model.anthropic_models,
+            self.model.huggingface_models,
+        ]
+
+        for model_map in provider_model_maps:
+            if model_id in model_map:
+                return model_map[model_id]
+
+        return model_id
+
     def get_model_provider(self, model_id: str | None = None) -> str | None:
         """Determine the provider for a given model ID."""
-        model_id = model_id or self.model.name
+        model_id = self.resolve_model_id(model_id)
 
         # First check if the model exists in our configured model lists
         # This gives us explicit control over provider mapping

@@ -40,6 +40,15 @@ class TestToolConfig:
 
 
 class TestSettings:
+    def test_resolve_model_id_openrouter_alias(self):
+        s = Settings()
+        assert s.resolve_model_id("gemini-3.5-flash") == "openrouter/google/gemini-3.5-flash"
+
+    def test_get_model_provider_openrouter_alias(self):
+        s = Settings()
+        provider = s.get_model_provider("gemini-3.5-flash")
+        assert provider == "openrouter"
+
     def test_get_model_provider_openrouter(self):
         s = Settings()
         provider = s.get_model_provider("openrouter/anthropic/claude-opus-4.8")
