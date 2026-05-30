@@ -321,6 +321,7 @@ identically to before.
 | `agentic_internet/agents/__init__.py` | Add import + `__all__` entry | +2 lines |
 | `agentic_internet/__init__.py` | Add import + `__all__` entry | +2 lines |
 | `agentic_internet/cli.py` | Add `--agent-type` option + branch | ~+25 lines |
+| `tests/test_cli_mcp.py` | CLI smoke coverage for Code Mode MCP routing with structured output | +79 lines |
 
 **Total diff:** Core implementation plus CLI, model catalog, MCP structured-output, docs, and tests.
 

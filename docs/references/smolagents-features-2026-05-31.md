@@ -66,6 +66,9 @@ against the installed SmolAgents API in this repository:
 - MCP flows accept `structured_output=True` where SmolAgents supports it.
 - `ToolCallingAgent` remains the default MCP path; Code Mode is explicit opt-in
   through `mcp run --agent-type code`.
+- `tests/test_cli_mcp.py` covers the CLI routing path for
+  `mcp run --agent-type code --structured-output` without requiring a live MCP
+  server or model API key.
 - Local execution remains trusted-user-only. For untrusted code, prefer sandbox
   executor configuration and clear CLI warnings.
 

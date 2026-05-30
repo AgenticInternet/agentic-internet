@@ -51,8 +51,8 @@ flowchart TD
 
 | Work | Evidence | Status | Next Action |
 |------|----------|--------|-------------|
-| Code Mode MCP agent | `agentic_internet/agents/code_mode.py`, `agentic_internet/cli.py`, exports, focused tests, and completed exec-plan | Implemented in current pass | Add live MCP integration smoke test when a local server fixture is available |
-| Code Mode acceptance criteria | `tests/test_code_mode.py` covers facade, meta-tools, factory, and E2B fallback | Covered by focused tests | Add CLI-level coverage for `mcp run --agent-type code` |
+| Code Mode MCP agent | `agentic_internet/agents/code_mode.py`, `agentic_internet/cli.py`, exports, focused tests, CLI smoke test, and completed exec-plan | Implemented in current pass | Add live MCP integration smoke test when a local server fixture is available |
+| Code Mode acceptance criteria | `tests/test_code_mode.py` covers facade, meta-tools, factory, and E2B fallback; `tests/test_cli_mcp.py` covers `mcp run --agent-type code --structured-output` routing | Covered by focused tests | Add a real local MCP server fixture for process-level smoke coverage |
 | Model catalog freshness | `settings.py` refreshed and `agentic_internet/utils/openrouter_models.py` added | Dynamic live listing available via `models --live` | Add cached snapshot writing command if offline catalog automation is needed |
 | Initial harness setup | `docs/exec-plans/active/2026-05-30-initial-setup.md` remains `in_progress` | Partially complete | Close once `bd`, `uv`, and `mypy` are restored for complete release gates |
 | Local quality gates | `.venv` provides `pytest` and `ruff`; `uv`, `mypy`, and `bd` are still missing from PATH | Partially unblocked | Use `.venv/bin/pytest` and `.venv/bin/ruff`; restore `uv`, `mypy`, and `bd` for full gates |
@@ -92,6 +92,6 @@ See [SmolAgents feature snapshot](references/smolagents-features-2026-05-31.md).
 ## Recommended Next Pass
 
 1. Add cached snapshot writing for OpenRouter if offline catalog automation is needed.
-2. Add a local MCP server fixture for a real `mcp run --agent-type code --structured-output` smoke test.
+2. Add a local MCP server fixture for a real process-level `mcp run --agent-type code --structured-output` smoke test.
 3. Restore local tooling availability (`uv`, `bd`, and `mypy`) so release gates can run completely.
 4. Clean up existing Ruff failures under `agentic_internet/examples/`.
