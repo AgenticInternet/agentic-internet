@@ -6,7 +6,7 @@ supporting both stdio and HTTP transports.
 
 Usage:
     python -m agentic_internet.examples.example_mcp_usage
-    
+
 Requirements:
     pip install smolagents mcp fastmcp
 """
@@ -17,9 +17,9 @@ from pathlib import Path
 
 def example_stdio_usage():
     """Example: Using MCP tools via stdio transport (local server)."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Example 1: STDIO Transport (Local MCP Server)")
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
 
     try:
         from agentic_internet.tools.mcp_integration import is_mcp_available, mcp_tools
@@ -44,7 +44,7 @@ def example_stdio_usage():
         ) as tools:
             print(f"\nLoaded {len(tools)} tools from MCP server:")
             for tool in tools:
-                desc = getattr(tool, 'description', 'No description')[:60]
+                desc = getattr(tool, "description", "No description")[:60]
                 print(f"  - {tool.name}: {desc}...")
 
         print("\n[Connection closed automatically]")
@@ -52,14 +52,14 @@ def example_stdio_usage():
     except Exception as e:
         print(f"Error: {e}")
 
-    print("\n" + "-"*60 + "\n")
+    print("\n" + "-" * 60 + "\n")
 
 
 def example_http_usage():
     """Example: Using MCP tools via HTTP transport (remote server)."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Example 2: HTTP Transport (Remote MCP Server)")
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
 
     try:
         from agentic_internet.tools.mcp_integration import is_mcp_available, mcp_tools
@@ -90,14 +90,14 @@ def example_http_usage():
         print("Start one with: fastmcp run example_mcp_server.py --transport http --port 8000")
         print(f"Error: {e}")
 
-    print("\n" + "-"*60 + "\n")
+    print("\n" + "-" * 60 + "\n")
 
 
 def example_with_agent():
     """Example: Using MCP tools with an InternetAgent."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Example 3: Integration with InternetAgent")
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
 
     try:
         from agentic_internet.agents.internet_agent import InternetAgent
@@ -146,14 +146,14 @@ def example_with_agent():
     except Exception as e:
         print(f"Error: {e}")
 
-    print("\n" + "-"*60 + "\n")
+    print("\n" + "-" * 60 + "\n")
 
 
 def example_server_manager():
     """Example: Using MCPServerManager to manage multiple servers."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Example 4: Managing Multiple MCP Servers")
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
 
     try:
         from agentic_internet.tools.mcp_integration import MCPServerManager, is_mcp_available
@@ -193,14 +193,14 @@ def example_server_manager():
     except Exception as e:
         print(f"Error: {e}")
 
-    print("\n" + "-"*60 + "\n")
+    print("\n" + "-" * 60 + "\n")
 
 
 def example_env_config():
     """Example: Loading MCP configuration from environment variables."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Example 5: Environment-Based Configuration")
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
 
     try:
         from agentic_internet.tools.mcp_integration import is_mcp_available, load_mcp_config_from_env
@@ -238,14 +238,14 @@ def example_env_config():
     except Exception as e:
         print(f"Error: {e}")
 
-    print("\n" + "-"*60 + "\n")
+    print("\n" + "-" * 60 + "\n")
 
 
 def example_cli_usage():
     """Show CLI usage examples."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Example 6: CLI Usage")
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
 
     print("MCP CLI commands:")
     print()
@@ -265,18 +265,19 @@ def example_cli_usage():
     print("      --trust")
     print()
 
-    print("-"*60 + "\n")
+    print("-" * 60 + "\n")
 
 
 def main():
     """Run all examples."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("AgenticInternet MCP Integration Examples")
-    print("="*60)
+    print("=" * 60)
 
     # Check MCP availability first
     try:
         from agentic_internet.tools.mcp_integration import is_mcp_available
+
         if not is_mcp_available():
             print("\n[WARNING] MCP packages not installed.")
             print("Install with: pip install smolagents mcp")
@@ -294,9 +295,9 @@ def main():
     example_env_config()
     example_cli_usage()
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Examples completed!")
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
 
 
 if __name__ == "__main__":

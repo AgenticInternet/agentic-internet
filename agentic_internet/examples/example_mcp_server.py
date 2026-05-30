@@ -6,10 +6,8 @@ This server provides simple tools that can be accessed via MCP protocol.
 
 try:
     from fastmcp import FastMCP
-except ImportError:
-    raise ImportError(
-        "FastMCP is required for this example. Install it with: pip install fastmcp"
-    )
+except ImportError as exc:
+    raise ImportError("FastMCP is required for this example. Install it with: pip install fastmcp") from exc
 
 
 # Create the MCP server
@@ -20,11 +18,11 @@ mcp = FastMCP(name="Example MCP Server")
 def calculate_sum(a: int, b: int) -> int:
     """
     Add two numbers together.
-    
+
     Args:
         a: First number
         b: Second number
-        
+
     Returns:
         The sum of a and b
     """
@@ -35,11 +33,11 @@ def calculate_sum(a: int, b: int) -> int:
 def calculate_product(a: float, b: float) -> float:
     """
     Multiply two numbers together.
-    
+
     Args:
         a: First number
         b: Second number
-        
+
     Returns:
         The product of a and b
     """
@@ -50,10 +48,10 @@ def calculate_product(a: float, b: float) -> float:
 def get_weather(city: str) -> dict[str, str]:
     """
     Get mock weather information for a city.
-    
+
     Args:
         city: Name of the city
-        
+
     Returns:
         Dictionary with weather information
     """
@@ -63,7 +61,7 @@ def get_weather(city: str) -> dict[str, str]:
         "temperature": "72°F",
         "condition": "Sunny",
         "humidity": "45%",
-        "wind_speed": "10 mph"
+        "wind_speed": "10 mph",
     }
     return weather_data
 
@@ -72,10 +70,10 @@ def get_weather(city: str) -> dict[str, str]:
 def analyze_sentiment(text: str) -> dict[str, str]:
     """
     Perform basic sentiment analysis on text.
-    
+
     Args:
         text: Text to analyze
-        
+
     Returns:
         Dictionary with sentiment analysis results
     """
@@ -98,7 +96,7 @@ def analyze_sentiment(text: str) -> dict[str, str]:
         "text": text,
         "sentiment": sentiment,
         "positive_count": str(positive_count),
-        "negative_count": str(negative_count)
+        "negative_count": str(negative_count),
     }
 
 
@@ -106,20 +104,20 @@ def analyze_sentiment(text: str) -> dict[str, str]:
 def search_items(query: str, limit: int = 5) -> list[dict[str, str]]:
     """
     Search for items based on a query (mock data).
-    
+
     Args:
         query: Search query
         limit: Maximum number of results to return
-        
+
     Returns:
         List of search results
     """
     # Mock search results
     results = [
         {
-            "title": f"Result {i+1} for '{query}'",
-            "description": f"This is a mock description for search result {i+1}",
-            "url": f"https://example.com/results/{i+1}"
+            "title": f"Result {i + 1} for '{query}'",
+            "description": f"This is a mock description for search result {i + 1}",
+            "url": f"https://example.com/results/{i + 1}",
         }
         for i in range(min(limit, 10))
     ]
@@ -130,7 +128,7 @@ def search_items(query: str, limit: int = 5) -> list[dict[str, str]]:
 def get_server_config() -> dict[str, str]:
     """
     Provide server configuration information.
-    
+
     Returns:
         Server configuration dictionary
     """
@@ -138,7 +136,7 @@ def get_server_config() -> dict[str, str]:
         "version": "1.0.0",
         "name": "Example MCP Server",
         "author": "AgenticInternet",
-        "description": "Example MCP server for testing integration"
+        "description": "Example MCP server for testing integration",
     }
 
 
@@ -146,29 +144,21 @@ def get_server_config() -> dict[str, str]:
 def get_dataset(dataset_name: str) -> dict[str, any]:
     """
     Provide mock dataset information.
-    
+
     Args:
         dataset_name: Name of the dataset
-        
+
     Returns:
         Dataset information
     """
     datasets = {
-        "users": {
-            "name": "users",
-            "records": 1000,
-            "columns": ["id", "name", "email", "created_at"]
-        },
-        "products": {
-            "name": "products",
-            "records": 500,
-            "columns": ["id", "name", "price", "category"]
-        },
+        "users": {"name": "users", "records": 1000, "columns": ["id", "name", "email", "created_at"]},
+        "products": {"name": "products", "records": 500, "columns": ["id", "name", "price", "category"]},
         "orders": {
             "name": "orders",
             "records": 2500,
-            "columns": ["id", "user_id", "product_id", "quantity", "order_date"]
-        }
+            "columns": ["id", "user_id", "product_id", "quantity", "order_date"],
+        },
     }
 
     return datasets.get(dataset_name, {"error": f"Dataset '{dataset_name}' not found"})

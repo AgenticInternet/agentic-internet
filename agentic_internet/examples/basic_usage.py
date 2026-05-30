@@ -34,9 +34,7 @@ def example_web_scraping():
     agent = InternetAgent(verbose=True)
 
     # Scrape content from a website
-    result = agent.run(
-        "Scrape the main content from https://www.python.org and summarize what Python is about"
-    )
+    result = agent.run("Scrape the main content from https://www.python.org and summarize what Python is about")
 
     return result
 
@@ -70,18 +68,12 @@ def example_research():
     researcher = ResearchAgent(verbose=True)
 
     # Conduct quick research
-    quick_result = researcher.research(
-        topic="Artificial General Intelligence",
-        depth="quick"
-    )
+    quick_result = researcher.research(topic="Artificial General Intelligence", depth="quick")
 
     console.print(f"\nQuick research completed: {quick_result['topic']}")
 
     # Conduct deep research
-    deep_result = researcher.research(
-        topic="Impact of AI on job market",
-        depth="deep"
-    )
+    deep_result = researcher.research(topic="Impact of AI on job market", depth="deep")
 
     console.print(f"\nDeep research completed: {deep_result['topic']}")
 
@@ -96,11 +88,7 @@ def example_multi_tool_task():
     """Example of a task using multiple tools."""
     console.print("\n[bold cyan]Example 5: Multi-Tool Task[/bold cyan]")
 
-    agent = InternetAgent(
-        model_id="openrouter/anthropic/claude-sonnet-4.5",
-        verbose=True,
-        max_iterations=15
-    )
+    agent = InternetAgent(model_id="openrouter/anthropic/claude-sonnet-4.5", verbose=True, max_iterations=15)
 
     # Complex task requiring multiple tools
     result = agent.run("""
@@ -155,16 +143,16 @@ def main():
         # ("Multi-Tool Task", example_multi_tool_task),
         ("Research", example_research),
         ("Code Execution", example_code_execution),
-        ("News Analysis", example_news_analysis)
+        ("News Analysis", example_news_analysis),
     ]
 
     results = {}
 
     for name, example_func in examples:
         try:
-            console.print(f"\n{'='*60}")
+            console.print(f"\n{'=' * 60}")
             console.print(f"[bold]Running: {name}[/bold]")
-            console.print(f"{'='*60}")
+            console.print(f"{'=' * 60}")
 
             result = example_func()
             results[name] = {"status": "success", "result": result}
@@ -174,7 +162,7 @@ def main():
             results[name] = {"status": "error", "error": str(e)}
 
     # Summary
-    console.print("\n" + "="*60)
+    console.print("\n" + "=" * 60)
     console.print("[bold green]Examples Completed![/bold green]")
     console.print(f"Successful: {sum(1 for r in results.values() if r['status'] == 'success')}")
     console.print(f"Failed: {sum(1 for r in results.values() if r['status'] == 'error')}")

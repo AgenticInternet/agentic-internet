@@ -3,6 +3,7 @@ Example demonstrating orchestrated search with multiple agents.
 """
 
 import asyncio
+import importlib.util
 import json
 import os
 
@@ -11,31 +12,27 @@ from rich.console import Console
 from rich.markdown import Markdown
 from rich.panel import Panel
 
-# Load environment variables
-load_dotenv()
-
-# Import our components
 from agentic_internet.agents.internet_agent import InternetAgent
 from agentic_internet.agents.search_orchestrator import SearchOrchestrator, create_search_orchestrator
 from agentic_internet.tools.web_search import NewsSearchTool, WebScraperTool, WebSearchTool
+
+# Load environment variables
+load_dotenv()
 
 console = Console()
 
 
 def demo_basic_orchestrator():
     """Demonstrate basic orchestrator functionality."""
-    console.print(Panel.fit(
-        "[bold cyan]Basic Orchestrator Demo[/bold cyan]\n"
-        "Setting up a search orchestrator with multiple agents",
-        title="Demo 1"
-    ))
+    console.print(
+        Panel.fit(
+            "[bold cyan]Basic Orchestrator Demo[/bold cyan]\nSetting up a search orchestrator with multiple agents",
+            title="Demo 1",
+        )
+    )
 
     # Create tools for the agents
-    tools = [
-        WebSearchTool(),
-        WebScraperTool(),
-        NewsSearchTool()
-    ]
+    tools = [WebSearchTool(), WebScraperTool(), NewsSearchTool()]
 
     # Create the orchestrator
     orchestrator = create_search_orchestrator(tools, verbose=True)
@@ -50,15 +47,12 @@ def demo_basic_orchestrator():
     console.print("\n[bold green]Search Results:[/bold green]")
 
     if results.get("synthesis"):
-        console.print(Panel(
-            Markdown(results["synthesis"]),
-            title="Synthesized Results"
-        ))
+        console.print(Panel(Markdown(results["synthesis"]), title="Synthesized Results"))
 
     if "agent_results" in results:
         for agent_name, agent_data in results["agent_results"].items():
             console.print(f"\n[bold]{agent_name}[/bold] ({agent_data.get('specialization', 'general')}):")
-            console.print(agent_data.get('result', 'No results')[:500] + "...")
+            console.print(agent_data.get("result", "No results")[:500] + "...")
 
     # Show performance report
     perf_report = orchestrator.get_performance_report()
@@ -68,27 +62,22 @@ def demo_basic_orchestrator():
 
 def demo_integrated_orchestrator():
     """Demonstrate orchestrator integrated with InternetAgent."""
-    console.print(Panel.fit(
-        "[bold cyan]Integrated Orchestrator Demo[/bold cyan]\n"
-        "Using orchestrated search within an InternetAgent",
-        title="Demo 2"
-    ))
+    console.print(
+        Panel.fit(
+            "[bold cyan]Integrated Orchestrator Demo[/bold cyan]\nUsing orchestrated search within an InternetAgent",
+            title="Demo 2",
+        )
+    )
 
     # Create the orchestrator
     search_tools = [WebScraperTool(), NewsSearchTool()]
     orchestrator = create_search_orchestrator(search_tools, verbose=False)
 
     # Create an orchestrated web search tool
-    orchestrated_search_tool = WebSearchTool(
-        use_orchestrator=True,
-        orchestrator=orchestrator
-    )
+    orchestrated_search_tool = WebSearchTool(use_orchestrator=True, orchestrator=orchestrator)
 
     # Create an InternetAgent with the orchestrated search tool
-    agent = InternetAgent(
-        tools=[orchestrated_search_tool, WebScraperTool()],
-        verbose=True
-    )
+    agent = InternetAgent(tools=[orchestrated_search_tool, WebScraperTool()], verbose=True)
 
     # Run a task that will use orchestrated search
     task = "Search for information about the latest breakthroughs in quantum computing and summarize the key findings"
@@ -96,24 +85,22 @@ def demo_integrated_orchestrator():
 
     result = agent.run(task)
 
-    console.print(Panel(
-        Markdown(str(result)),
-        title="Agent Result with Orchestrated Search"
-    ))
+    console.print(Panel(Markdown(str(result)), title="Agent Result with Orchestrated Search"))
 
 
 def demo_custom_orchestrator():
     """Demonstrate custom orchestrator configuration."""
-    console.print(Panel.fit(
-        "[bold cyan]Custom Orchestrator Demo[/bold cyan]\n"
-        "Creating a custom orchestrator with specialized agents",
-        title="Demo 3"
-    ))
+    console.print(
+        Panel.fit(
+            "[bold cyan]Custom Orchestrator Demo[/bold cyan]\nCreating a custom orchestrator with specialized agents",
+            title="Demo 3",
+        )
+    )
 
     # Create orchestrator with custom configuration
     orchestrator = SearchOrchestrator(
         max_workers=2,  # Limit parallel execution
-        verbose=True
+        verbose=True,
     )
 
     # Manually add specialized agents if model is available
@@ -123,10 +110,7 @@ def demo_custom_orchestrator():
         # Try to get a model
         model = None
         if os.getenv("OPENAI_API_KEY"):
-            model = LiteLLMModel(
-                model_id="gpt-3.5-turbo",
-                api_key=os.getenv("OPENAI_API_KEY")
-            )
+            model = LiteLLMModel(model_id="gpt-3.5-turbo", api_key=os.getenv("OPENAI_API_KEY"))
 
         if model:
             # Create tools
@@ -135,33 +119,21 @@ def demo_custom_orchestrator():
             # Add custom specialized agents
             academic_agent = ToolCallingAgent(tools=tools, model=model)
             orchestrator.add_agent(
-                "academic_researcher",
-                academic_agent,
-                "Focuses on academic and research sources",
-                "academic"
+                "academic_researcher", academic_agent, "Focuses on academic and research sources", "academic"
             )
 
             market_agent = ToolCallingAgent(tools=tools, model=model)
-            orchestrator.add_agent(
-                "market_analyst",
-                market_agent,
-                "Analyzes market trends and business data",
-                "market"
-            )
+            orchestrator.add_agent("market_analyst", market_agent, "Analyzes market trends and business data", "market")
 
             # Run specialized search
             query = "Impact of large language models on software development industry"
-            results = orchestrator.search(
-                query,
-                agents_to_use=["academic_researcher", "market_analyst"],
-                parallel=True
-            )
+            results = orchestrator.search(query, agents_to_use=["academic_researcher", "market_analyst"], parallel=True)
 
             console.print("\n[bold green]Specialized Search Results:[/bold green]")
             if "agent_results" in results:
                 for agent_name, agent_data in results["agent_results"].items():
                     console.print(f"\n[bold]{agent_name}[/bold]:")
-                    console.print(agent_data.get('result', 'No results')[:500] + "...")
+                    console.print(agent_data.get("result", "No results")[:500] + "...")
         else:
             console.print("[yellow]No model available for custom agents. Skipping...[/yellow]")
 
@@ -171,11 +143,12 @@ def demo_custom_orchestrator():
 
 async def demo_async_orchestrator():
     """Demonstrate async orchestrator functionality."""
-    console.print(Panel.fit(
-        "[bold cyan]Async Orchestrator Demo[/bold cyan]\n"
-        "Using async methods for concurrent execution",
-        title="Demo 4"
-    ))
+    console.print(
+        Panel.fit(
+            "[bold cyan]Async Orchestrator Demo[/bold cyan]\nUsing async methods for concurrent execution",
+            title="Demo 4",
+        )
+    )
 
     # Create tools
     tools = [WebSearchTool(), NewsSearchTool()]
@@ -188,7 +161,7 @@ async def demo_async_orchestrator():
     queries = [
         "Future of artificial intelligence",
         "Climate change solutions 2024",
-        "Space exploration recent discoveries"
+        "Space exploration recent discoveries",
     ]
 
     console.print("[bold blue]Running concurrent searches:[/bold blue]")
@@ -210,17 +183,17 @@ async def demo_async_orchestrator():
 
 def main():
     """Run all demonstrations."""
-    console.print(Panel.fit(
-        "[bold magenta]Search Orchestrator Demonstrations[/bold magenta]\n"
-        "Showing different ways to use orchestrated search with multiple agents",
-        title="Orchestrated Search Examples"
-    ))
+    console.print(
+        Panel.fit(
+            "[bold magenta]Search Orchestrator Demonstrations[/bold magenta]\n"
+            "Showing different ways to use orchestrated search with multiple agents",
+            title="Orchestrated Search Examples",
+        )
+    )
 
     # Check for required dependencies
     has_deps = True
-    try:
-        from duckduckgo_search import DDGS
-    except ImportError:
+    if importlib.util.find_spec("duckduckgo_search") is None:
         console.print("[yellow]Warning: duckduckgo-search not installed[/yellow]")
         has_deps = False
 
@@ -232,19 +205,19 @@ def main():
     # Run demonstrations
     try:
         # Demo 1: Basic orchestrator
-        console.print("\n" + "="*60)
+        console.print("\n" + "=" * 60)
         demo_basic_orchestrator()
 
         # Demo 2: Integrated with InternetAgent
-        console.print("\n" + "="*60)
+        console.print("\n" + "=" * 60)
         demo_integrated_orchestrator()
 
         # Demo 3: Custom configuration
-        console.print("\n" + "="*60)
+        console.print("\n" + "=" * 60)
         demo_custom_orchestrator()
 
         # Demo 4: Async execution
-        console.print("\n" + "="*60)
+        console.print("\n" + "=" * 60)
         asyncio.run(demo_async_orchestrator())
 
     except KeyboardInterrupt:
@@ -252,6 +225,7 @@ def main():
     except Exception as e:
         console.print(f"\n[red]Error during demonstrations: {e}[/red]")
         import traceback
+
         traceback.print_exc()
 
     console.print("\n[bold green]✅ All demonstrations complete![/bold green]")

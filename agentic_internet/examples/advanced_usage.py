@@ -26,11 +26,7 @@ def example_agent_types():
 
     # ToolCallingAgent - Best for tool-heavy tasks
     console.print("\n[yellow]1. ToolCallingAgent (default)[/yellow]")
-    agent1 = InternetAgent(
-        model_id="openrouter/openai/gpt-5",
-        agent_type="tool_calling",
-        verbose=True
-    )
+    agent1 = InternetAgent(model_id="openrouter/openai/gpt-5", agent_type="tool_calling", verbose=True)
     result1 = agent1.run("""
         - Search for the latest Agentic Internet articles and summarize the top 5 articles
         - Use others tools and Agents to perfom this task
@@ -49,7 +45,7 @@ def example_agent_types():
     # """)
 
     # MultiStepAgent - Best for complex reasoning
-    #console.print("\n[yellow]3. MultiStepAgent[/yellow]")
+    # console.print("\n[yellow]3. MultiStepAgent[/yellow]")
     # agent3 = InternetAgent(
     #     model_id="openrouter/anthropic/claude-sonnet-4.5",
     #     agent_type="multi_step",
@@ -66,7 +62,7 @@ def example_agent_types():
     return {
         "tool_calling": result1,
         # "code": result2,
-        #"multi_step": result3
+        # "multi_step": result3
     }
 
 
@@ -80,28 +76,13 @@ def example_browser_automation():
         console.print("Get your API key at: https://cloud.browser-use.com/billing")
         return None
 
-    agent = BrowserAutomationAgent(
-        model_id="openrouter/anthropic/claude-sonnet-4.5",
-        verbose=True
-    )
+    agent = BrowserAutomationAgent(model_id="openrouter/anthropic/claude-sonnet-4.5", verbose=True)
 
     # Example 1: Scrape structured data
     console.print("\n[green]Scraping Hacker News top posts...[/green]")
-    schema = {
-        "posts": [
-            {
-                "title": "string",
-                "url": "string",
-                "points": "number",
-                "comments": "number"
-            }
-        ]
-    }
+    schema = {"posts": [{"title": "string", "url": "string", "points": "number", "comments": "number"}]}
 
-    result = agent.scrape_structured_data(
-        url="https://news.ycombinator.com",
-        data_schema=schema
-    )
+    result = agent.scrape_structured_data(url="https://news.ycombinator.com", data_schema=schema)
 
     return result
 
@@ -110,10 +91,7 @@ def example_data_analysis():
     """Demonstrate data analysis capabilities."""
     console.print("\n[bold cyan]Example: Data Analysis Agent[/bold cyan]")
 
-    agent = DataAnalysisAgent(
-        model_id="openrouter/anthropic/claude-sonnet-4.5",
-        verbose=True
-    )
+    agent = DataAnalysisAgent(model_id="openrouter/anthropic/claude-sonnet-4.5", verbose=True)
 
     # Sample sales data
     sales_data = [
@@ -122,13 +100,10 @@ def example_data_analysis():
         {"month": "Mar", "sales": 48000, "costs": 33000, "region": "North"},
         {"month": "Jan", "sales": 38000, "costs": 28000, "region": "South"},
         {"month": "Feb", "sales": 41000, "costs": 29000, "region": "South"},
-        {"month": "Mar", "sales": 44000, "costs": 30000, "region": "South"}
+        {"month": "Mar", "sales": 44000, "costs": 30000, "region": "South"},
     ]
 
-    result = agent.analyze_dataset(
-        data=sales_data,
-        analysis_type="comprehensive"
-    )
+    result = agent.analyze_dataset(data=sales_data, analysis_type="comprehensive")
 
     return result
 
@@ -137,45 +112,27 @@ def example_content_creation():
     """Demonstrate content creation capabilities."""
     console.print("\n[bold cyan]Example: Content Creation Agent[/bold cyan]")
 
-    agent = ContentCreationAgent(
-        model_id="openrouter/anthropic/claude-sonnet-4.5",
-        verbose=True
-    )
+    agent = ContentCreationAgent(model_id="openrouter/anthropic/claude-sonnet-4.5", verbose=True)
 
     # Write an article
     article = agent.write_article(
-        topic="The Future of AI Agents in Business",
-        style="informative",
-        word_count=300,
-        sources_required=True
+        topic="The Future of AI Agents in Business", style="informative", word_count=300, sources_required=True
     )
 
     # Summarize content
-    summary = agent.summarize_content(
-        content=article["content"],
-        summary_type="bullet_points"
-    )
+    summary = agent.summarize_content(content=article["content"], summary_type="bullet_points")
 
-    return {
-        "article": article,
-        "summary": summary
-    }
+    return {"article": article, "summary": summary}
 
 
 def example_market_research():
     """Demonstrate market research capabilities."""
     console.print("\n[bold cyan]Example: Market Research Agent[/bold cyan]")
 
-    agent = MarketResearchAgent(
-        model_id="openrouter/anthropic/claude-sonnet-4.5",
-        verbose=True
-    )
+    agent = MarketResearchAgent(model_id="openrouter/anthropic/claude-sonnet-4.5", verbose=True)
 
     # Analyze market trends
-    trends = agent.market_trends(
-        industry="AI and Machine Learning",
-        timeframe="2024"
-    )
+    trends = agent.market_trends(industry="AI and Machine Learning", timeframe="2024")
 
     return trends
 
@@ -184,10 +141,7 @@ def example_technical_support():
     """Demonstrate technical support capabilities."""
     console.print("\n[bold cyan]Example: Technical Support Agent[/bold cyan]")
 
-    agent = TechnicalSupportAgent(
-        model_id="openrouter/anthropic/claude-sonnet-4.5",
-        verbose=True
-    )
+    agent = TechnicalSupportAgent(model_id="openrouter/anthropic/claude-sonnet-4.5", verbose=True)
 
     # Code review example
     code = """
@@ -200,9 +154,7 @@ def calculate_average(numbers):
 """
 
     review = agent.code_review(
-        code=code,
-        language="python",
-        focus_areas=["performance", "error_handling", "best_practices"]
+        code=code, language="python", focus_areas=["performance", "error_handling", "best_practices"]
     )
 
     return review
@@ -216,21 +168,9 @@ def display_capabilities_table():
     table.add_column("Best For", style="green")
     table.add_column("Key Features", style="yellow")
 
-    table.add_row(
-        "ToolCallingAgent",
-        "Tool-heavy tasks, web searches",
-        "Efficient tool use, structured responses"
-    )
-    table.add_row(
-        "CodeAgent",
-        "Data analysis, code generation",
-        "Can execute Python code, data manipulation"
-    )
-    table.add_row(
-        "MultiStepAgent",
-        "Complex reasoning, planning",
-        "Step-by-step reasoning, detailed analysis"
-    )
+    table.add_row("ToolCallingAgent", "Tool-heavy tasks, web searches", "Efficient tool use, structured responses")
+    table.add_row("CodeAgent", "Data analysis, code generation", "Can execute Python code, data manipulation")
+    table.add_row("MultiStepAgent", "Complex reasoning, planning", "Step-by-step reasoning, detailed analysis")
 
     console.print(table)
 
@@ -242,51 +182,35 @@ def display_capabilities_table():
     table2.add_column("Key Methods", style="yellow")
 
     table2.add_row(
-        "BrowserAutomationAgent",
-        "Web automation & scraping",
-        "scrape_structured_data, fill_form, monitor_website"
+        "BrowserAutomationAgent", "Web automation & scraping", "scrape_structured_data, fill_form, monitor_website"
     )
-    table2.add_row(
-        "DataAnalysisAgent",
-        "Data analysis & visualization",
-        "analyze_dataset, compare_datasets"
-    )
-    table2.add_row(
-        "ContentCreationAgent",
-        "Writing & content generation",
-        "write_article, summarize_content"
-    )
-    table2.add_row(
-        "MarketResearchAgent",
-        "Market & competitive analysis",
-        "analyze_competitor, market_trends"
-    )
-    table2.add_row(
-        "TechnicalSupportAgent",
-        "Tech support & troubleshooting",
-        "troubleshoot, code_review"
-    )
+    table2.add_row("DataAnalysisAgent", "Data analysis & visualization", "analyze_dataset, compare_datasets")
+    table2.add_row("ContentCreationAgent", "Writing & content generation", "write_article, summarize_content")
+    table2.add_row("MarketResearchAgent", "Market & competitive analysis", "analyze_competitor, market_trends")
+    table2.add_row("TechnicalSupportAgent", "Tech support & troubleshooting", "troubleshoot, code_review")
 
     console.print(table2)
 
 
 def main():
     """Run advanced examples."""
-    console.print(Panel.fit(
-        "[bold green]Agentic Internet - Advanced Usage Examples[/bold green]\n"
-        "Demonstrating different agent types and specialized capabilities",
-        title="Welcome"
-    ))
+    console.print(
+        Panel.fit(
+            "[bold green]Agentic Internet - Advanced Usage Examples[/bold green]\n"
+            "Demonstrating different agent types and specialized capabilities",
+            title="Welcome",
+        )
+    )
 
     # Display capabilities
     display_capabilities_table()
 
     examples_to_run = [
         ("Agent Types Demo", example_agent_types),
-        #("Browser Automation", example_browser_automation),
-        #("Data Analysis", example_data_analysis),
+        # ("Browser Automation", example_browser_automation),
+        # ("Data Analysis", example_data_analysis),
         # ("Content Creation", example_content_creation),
-        #("Market Research", example_market_research),
+        # ("Market Research", example_market_research),
         # ("Technical Support", example_technical_support)
     ]
 
@@ -294,9 +218,9 @@ def main():
 
     for name, example_func in examples_to_run:
         try:
-            console.print(f"\n{'='*60}")
+            console.print(f"\n{'=' * 60}")
             console.print(f"[bold]Running: {name}[/bold]")
-            console.print(f"{'='*60}")
+            console.print(f"{'=' * 60}")
 
             result = example_func()
             results[name] = {"status": "success", "result": result}
@@ -306,7 +230,7 @@ def main():
             results[name] = {"status": "error", "error": str(e)}
 
     # Summary
-    console.print("\n" + "="*60)
+    console.print("\n" + "=" * 60)
     console.print("[bold green]Examples Completed![/bold green]")
 
     successful = sum(1 for r in results.values() if r["status"] == "success")
