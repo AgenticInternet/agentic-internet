@@ -12,10 +12,14 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
+
 class ModelConfig(BaseModel):
     """Configuration for LLM models."""
+
     name: str = Field(default="openrouter/anthropic/claude-opus-4.8", description="Default model name")
-    provider: str = Field(default="auto", description="Model provider (auto, openrouter, openai, anthropic, huggingface)")
+    provider: str = Field(
+        default="auto", description="Model provider (auto, openrouter, openai, anthropic, huggingface)"
+    )
     api_key: str | None = Field(default=None, description="API key for the model provider")
     temperature: float = Field(default=0.7, description="Temperature for generation")
     max_tokens: int = Field(default=2048, description="Maximum tokens for generation")
@@ -101,7 +105,7 @@ class ModelConfig(BaseModel):
             "granite-4.1-8b": "openrouter/ibm-granite/granite-4.1-8b",
             "owl-alpha": "openrouter/openrouter/owl-alpha",
         },
-        description="Available OpenRouter models"
+        description="Available OpenRouter models",
     )
 
     openai_models: dict[str, str] = Field(
@@ -116,7 +120,7 @@ class ModelConfig(BaseModel):
             "o3": "o3",
             "o3-mini": "o3-mini",
         },
-        description="Available OpenAI models"
+        description="Available OpenAI models",
     )
 
     anthropic_models: dict[str, str] = Field(
@@ -127,7 +131,7 @@ class ModelConfig(BaseModel):
             "claude-opus-4.1": "claude-opus-4.1",
             "claude-haiku-4.5": "claude-haiku-4.5",
         },
-        description="Available Anthropic models"
+        description="Available Anthropic models",
     )
 
     huggingface_models: dict[str, str] = Field(
@@ -136,7 +140,7 @@ class ModelConfig(BaseModel):
             "llama-4-maverick": "meta-llama/llama-4-maverick",
             "qwen3-235b": "qwen/qwen3-235b-a22b",
         },
-        description="Available HuggingFace models"
+        description="Available HuggingFace models",
     )
 
     # Fallback model preferences by provider
@@ -147,14 +151,16 @@ class ModelConfig(BaseModel):
             "anthropic": "claude-opus-4.8",
             "huggingface": "meta-llama/llama-4-scout",
         },
-        description="Fallback models for each provider"
+        description="Fallback models for each provider",
     )
 
     class Config:
         protected_namespaces = ()
 
+
 class AgentConfig(BaseModel):
     """Configuration for agent behavior."""
+
     verbose: bool = Field(default=True, description="Enable verbose output")
     max_iterations: int = Field(default=10, description="Maximum iterations for agent")
     memory_enabled: bool = Field(default=True, description="Enable agent memory")
@@ -164,8 +170,10 @@ class AgentConfig(BaseModel):
     class Config:
         protected_namespaces = ()
 
+
 class ToolConfig(BaseModel):
     """Configuration for tools."""
+
     web_search_enabled: bool = Field(default=True, description="Enable web search tool")
     code_execution_enabled: bool = Field(default=True, description="Enable code execution")
     browser_enabled: bool = Field(default=True, description="Enable browser automation")
@@ -175,32 +183,28 @@ class ToolConfig(BaseModel):
     class Config:
         protected_namespaces = ()
 
+
 class Settings(BaseModel):
     """Main settings for the application."""
+
     # API Keys from environment
     huggingface_token: str | None = Field(
-        default_factory=lambda: os.getenv("HUGGINGFACE_TOKEN"),
-        description="HuggingFace API token"
+        default_factory=lambda: os.getenv("HUGGINGFACE_TOKEN"), description="HuggingFace API token"
     )
     openai_api_key: str | None = Field(
-        default_factory=lambda: os.getenv("OPENAI_API_KEY"),
-        description="OpenAI API key"
+        default_factory=lambda: os.getenv("OPENAI_API_KEY"), description="OpenAI API key"
     )
     anthropic_api_key: str | None = Field(
-        default_factory=lambda: os.getenv("ANTHROPIC_API_KEY"),
-        description="Anthropic API key"
+        default_factory=lambda: os.getenv("ANTHROPIC_API_KEY"), description="Anthropic API key"
     )
     openrouter_api_key: str | None = Field(
-        default_factory=lambda: os.getenv("OPENROUTER_API_KEY"),
-        description="OpenRouter API key"
+        default_factory=lambda: os.getenv("OPENROUTER_API_KEY"), description="OpenRouter API key"
     )
     browser_use_api_key: str | None = Field(
-        default_factory=lambda: os.getenv("BROWSER_USE_API_KEY"),
-        description="Browser Use Cloud API key"
+        default_factory=lambda: os.getenv("BROWSER_USE_API_KEY"), description="Browser Use Cloud API key"
     )
     exa_api_key: str | None = Field(
-        default_factory=lambda: os.getenv("EXA_API_KEY"),
-        description="Exa AI search API key"
+        default_factory=lambda: os.getenv("EXA_API_KEY"), description="Exa AI search API key"
     )
 
     # Model configuration
@@ -215,7 +219,7 @@ class Settings(BaseModel):
     # Application settings
     cache_dir: Path = Field(
         default_factory=lambda: Path.home() / ".cache" / "agentic_internet",
-        description="Cache directory for models and data"
+        description="Cache directory for models and data",
     )
     log_level: str = Field(default="INFO", description="Logging level")
 
@@ -276,10 +280,21 @@ class Settings(BaseModel):
         elif "claude" in model_id.lower():
             return "anthropic"
         # Check for common model providers that typically use OpenRouter
-        elif any(provider in model_id.lower() for provider in [
-            "deepseek/", "perplexity/", "x-ai/", "alibaba/", "mistral/",
-            "qwen/", "moonshotai/", "minimax/", "xiaomi/", "google/",
-        ]):
+        elif any(
+            provider in model_id.lower()
+            for provider in [
+                "deepseek/",
+                "perplexity/",
+                "x-ai/",
+                "alibaba/",
+                "mistral/",
+                "qwen/",
+                "moonshotai/",
+                "minimax/",
+                "xiaomi/",
+                "google/",
+            ]
+        ):
             if self.openrouter_api_key:
                 return "openrouter"
         # Check if it matches HuggingFace patterns
@@ -306,7 +321,7 @@ class Settings(BaseModel):
             "openrouter": self.openrouter_api_key,
             "openai": self.openai_api_key,
             "anthropic": self.anthropic_api_key,
-            "huggingface": self.huggingface_token
+            "huggingface": self.huggingface_token,
         }
         return provider_keys.get(provider)
 

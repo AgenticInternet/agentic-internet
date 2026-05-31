@@ -55,8 +55,8 @@ Response:"""
                 response = self.model(full_prompt)
 
             # Extract the actual response text
-            if hasattr(response, 'content'):
-                return response.content
+            if hasattr(response, "content"):
+                return str(response.content)
             elif isinstance(response, str):
                 return response
             else:

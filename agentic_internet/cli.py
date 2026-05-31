@@ -5,6 +5,7 @@ import json
 import logging
 import os
 from pathlib import Path
+from typing import Any
 
 import typer
 from rich.console import Console
@@ -391,7 +392,7 @@ def models(
             return
 
     # Define model categories with default configuration (refreshed May 2026)
-    model_catalog = {
+    model_catalog: dict[str, list[dict[str, Any]]] = {
         "general": [
             {
                 "name": "claude-opus-4.8",
@@ -401,9 +402,17 @@ def models(
             },
             {"name": "gemini-3.5-flash", "provider": "openrouter", "desc": "Google Gemini 3.5 Flash - fast multimodal"},
             {"name": "qwen3.7-max", "provider": "openrouter", "desc": "Qwen3.7 Max - long-context agent workloads"},
-            {"name": "gpt-chat-latest", "provider": "openrouter", "desc": "OpenAI GPT Chat Latest - stable latest chat alias"},
+            {
+                "name": "gpt-chat-latest",
+                "provider": "openrouter",
+                "desc": "OpenAI GPT Chat Latest - stable latest chat alias",
+            },
             {"name": "deepseek-v3.2", "provider": "openrouter", "desc": "DeepSeek V3.2 - strong open-weight model"},
-            {"name": "grok-4.3", "provider": "openrouter", "desc": "xAI Grok 4.3 - reasoning and instruction following"},
+            {
+                "name": "grok-4.3",
+                "provider": "openrouter",
+                "desc": "xAI Grok 4.3 - reasoning and instruction following",
+            },
             {"name": "step-3.7-flash", "provider": "openrouter", "desc": "StepFun Step 3.7 Flash - multimodal MoE"},
             {"name": "kimi-k2.5", "provider": "openrouter", "desc": "Moonshot Kimi K2.5 - long context specialist"},
             {"name": "sonar-pro", "provider": "openrouter", "desc": "Perplexity Sonar Pro - search-optimized"},
@@ -415,13 +424,29 @@ def models(
             {"name": "qwen3-coder-plus", "provider": "openrouter", "desc": "Qwen3 Coder Plus - enhanced coding"},
             {"name": "devstral-2", "provider": "openrouter", "desc": "Mistral Devstral 2 - agentic coding"},
             {"name": "gpt-5.2-codex", "provider": "openrouter", "desc": "OpenAI GPT-5.2 Codex - code generation"},
-            {"name": "deepseek-v3.2-speciale", "provider": "openrouter", "desc": "DeepSeek V3.2 Speciale - specialized tasks"},
+            {
+                "name": "deepseek-v3.2-speciale",
+                "provider": "openrouter",
+                "desc": "DeepSeek V3.2 Speciale - specialized tasks",
+            },
             {"name": "grok-code-fast", "provider": "openrouter", "desc": "xAI Grok Code Fast - rapid code generation"},
-            {"name": "granite-4.1-8b", "provider": "openrouter", "desc": "IBM Granite 4.1 8B - efficient enterprise coding"},
+            {
+                "name": "granite-4.1-8b",
+                "provider": "openrouter",
+                "desc": "IBM Granite 4.1 8B - efficient enterprise coding",
+            },
         ],
         "research": [
-            {"name": "claude-opus-4.8", "provider": "openrouter", "desc": "Anthropic Claude Opus 4.8 - high-end reasoning"},
-            {"name": "gemini-3.5-flash", "provider": "openrouter", "desc": "Google Gemini 3.5 Flash - multimodal analysis"},
+            {
+                "name": "claude-opus-4.8",
+                "provider": "openrouter",
+                "desc": "Anthropic Claude Opus 4.8 - high-end reasoning",
+            },
+            {
+                "name": "gemini-3.5-flash",
+                "provider": "openrouter",
+                "desc": "Google Gemini 3.5 Flash - multimodal analysis",
+            },
             {"name": "perceptron-mk1", "provider": "openrouter", "desc": "Perceptron Mk1 - vision/video reasoning"},
             {"name": "ring-2.6-1t", "provider": "openrouter", "desc": "inclusionAI Ring 2.6 1T - thinking model"},
             {
@@ -442,9 +467,21 @@ def models(
         ],
         "science": [
             {"name": "deepseek-r1", "provider": "openrouter", "desc": "DeepSeek R1 - advanced reasoning"},
-            {"name": "claude-opus-4.8", "provider": "openrouter", "desc": "Anthropic Claude Opus 4.8 - advanced reasoning"},
-            {"name": "gemini-3.5-flash", "provider": "openrouter", "desc": "Google Gemini 3.5 Flash - multimodal analysis"},
-            {"name": "perceptron-mk1", "provider": "openrouter", "desc": "Perceptron Mk1 - video and embodied reasoning"},
+            {
+                "name": "claude-opus-4.8",
+                "provider": "openrouter",
+                "desc": "Anthropic Claude Opus 4.8 - advanced reasoning",
+            },
+            {
+                "name": "gemini-3.5-flash",
+                "provider": "openrouter",
+                "desc": "Google Gemini 3.5 Flash - multimodal analysis",
+            },
+            {
+                "name": "perceptron-mk1",
+                "provider": "openrouter",
+                "desc": "Perceptron Mk1 - video and embodied reasoning",
+            },
             {"name": "qwen3-235b", "provider": "openrouter", "desc": "Qwen3 235B - massive context synthesis"},
             {"name": "magistral-medium", "provider": "openrouter", "desc": "Mistral Magistral Medium - specialized"},
         ],

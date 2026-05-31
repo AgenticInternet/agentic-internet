@@ -66,6 +66,7 @@ class TestMCPServerConfig:
     def skip_if_no_mcp(self):
         """Skip test if MCP is not available."""
         from agentic_internet.tools.mcp_integration import is_mcp_available
+
         if not is_mcp_available():
             pytest.skip("MCP packages not installed")
 
@@ -128,6 +129,7 @@ class TestMCPServerManager:
     def skip_if_no_mcp(self):
         """Skip test if MCP is not available."""
         from agentic_internet.tools.mcp_integration import is_mcp_available
+
         if not is_mcp_available():
             pytest.skip("MCP packages not installed")
 
@@ -191,6 +193,7 @@ class TestMCPToolIntegration:
     def skip_if_no_mcp(self):
         """Skip test if MCP is not available."""
         from agentic_internet.tools.mcp_integration import is_mcp_available
+
         if not is_mcp_available():
             pytest.skip("MCP packages not installed")
 
@@ -235,8 +238,8 @@ class TestMCPToolIntegration:
 
         params = integration.get_server_parameters()
         # Should be StdioServerParameters
-        assert hasattr(params, 'command')
-        assert hasattr(params, 'args')
+        assert hasattr(params, "command")
+        assert hasattr(params, "args")
 
     def test_integration_get_server_parameters_http(self, skip_if_no_mcp):
         """Test getting server parameters for HTTP transport."""
@@ -279,6 +282,7 @@ class TestEnvironmentConfig:
     def skip_if_no_mcp(self):
         """Skip test if MCP is not available."""
         from agentic_internet.tools.mcp_integration import is_mcp_available
+
         if not is_mcp_available():
             pytest.skip("MCP packages not installed")
 

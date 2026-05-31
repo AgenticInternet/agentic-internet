@@ -9,7 +9,9 @@ from agentic_internet import InternetAgent, ResearchAgent
 
 load_dotenv()
 
-os.environ["OPENROUTER_API_KEY"] = os.getenv("OPENROUTER_API_KEY")
+_openrouter_key = os.getenv("OPENROUTER_API_KEY")
+if _openrouter_key:
+    os.environ["OPENROUTER_API_KEY"] = _openrouter_key
 
 console = Console()
 

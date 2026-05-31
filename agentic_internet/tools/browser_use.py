@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 try:
     from browser_use_sdk import AsyncBrowserUse, BrowserUse
+
     HAS_BROWSER_USE = True
 except ImportError:
     HAS_BROWSER_USE = False
@@ -30,15 +31,12 @@ class BrowserUseTool(Tool):
     dynamic websites or perform complex web automation tasks."""
 
     inputs = {
-        "task": {
-            "type": "string",
-            "description": "Description of the task to perform in the browser"
-        },
+        "task": {"type": "string", "description": "Description of the task to perform in the browser"},
         "structured_output": {
             "type": "boolean",
             "description": "Whether to return structured output (optional)",
-            "nullable": True
-        }
+            "nullable": True,
+        },
     }
     output_type = "string"
 
@@ -81,15 +79,8 @@ class AsyncBrowserUseTool(Tool):
     Use this for complex scraping tasks that require parallel execution or streaming updates."""
 
     inputs = {
-        "task": {
-            "type": "string",
-            "description": "Description of the task to perform in the browser"
-        },
-        "stream": {
-            "type": "boolean",
-            "description": "Whether to stream updates (optional)",
-            "nullable": True
-        }
+        "task": {"type": "string", "description": "Description of the task to perform in the browser"},
+        "stream": {"type": "boolean", "description": "Whether to stream updates (optional)", "nullable": True},
     }
     output_type = "string"
 
@@ -121,6 +112,7 @@ class AsyncBrowserUseTool(Tool):
 
     async def _run_simple(self, task: str) -> str:
         """Run a simple async task."""
+        assert self.client is not None  # guaranteed by forward()
         result = await self.client.tasks.run(task=task)
         if result.done_output:
             return result.done_output
@@ -128,6 +120,7 @@ class AsyncBrowserUseTool(Tool):
 
     async def _run_with_stream(self, task: str) -> str:
         """Run a task with streaming updates."""
+        assert self.client is not None  # guaranteed by forward()
         # Create the task
         created_task = await self.client.tasks.create(task=task)
 
@@ -136,7 +129,9 @@ class AsyncBrowserUseTool(Tool):
         async for update in self.client.tasks.stream(created_task.id):
             if len(update.steps) > 0:
                 last_step = update.steps[-1]
-                updates.append(f"Step: {last_step.url if hasattr(last_step, 'url') else 'processing'} - {last_step.next_goal if hasattr(last_step, 'next_goal') else 'working'}")
+                updates.append(
+                    f"Step: {last_step.url if hasattr(last_step, 'url') else 'processing'} - {last_step.next_goal if hasattr(last_step, 'next_goal') else 'working'}"
+                )
 
             if update.status == "finished":
                 if update.done_output:
@@ -157,15 +152,12 @@ class StructuredBrowserUseTool(Tool):
     Use this when you need to extract specific structured information from websites."""
 
     inputs = {
-        "task": {
-            "type": "string",
-            "description": "Description of the data extraction task"
-        },
+        "task": {"type": "string", "description": "Description of the data extraction task"},
         "schema": {
             "type": "string",
             "description": "JSON schema describing the expected output structure",
-            "nullable": True
-        }
+            "nullable": True,
+        },
     }
     output_type = "string"
 
@@ -196,6 +188,7 @@ class StructuredBrowserUseTool(Tool):
 
     async def _extract_structured_data(self, task: str, schema: str | None = None) -> str:
         """Extract structured data from web pages."""
+        assert self.client is not None  # guaranteed by forward()
         # For now, we'll use the standard run method
         # In a real implementation, you'd parse the schema and use it
         result = await self.client.tasks.run(task=task)
@@ -209,6 +202,7 @@ class StructuredBrowserUseTool(Tool):
 # Example Pydantic models for common extraction tasks
 class WebArticle(BaseModel):
     """Model for web article extraction."""
+
     title: str
     author: str | None = None
     date: str | None = None
@@ -218,6 +212,7 @@ class WebArticle(BaseModel):
 
 class ProductInfo(BaseModel):
     """Model for e-commerce product extraction."""
+
     name: str
     price: str
     availability: str | None = None
@@ -229,6 +224,7 @@ class ProductInfo(BaseModel):
 
 class ContactInfo(BaseModel):
     """Model for contact information extraction."""
+
     name: str | None = None
     email: str | None = None
     phone: str | None = None
@@ -238,6 +234,7 @@ class ContactInfo(BaseModel):
 
 class SearchResults(BaseModel):
     """Model for search results extraction."""
+
     results: list[dict[str, str]]
     total_results: int | None = None
     next_page_url: str | None = None

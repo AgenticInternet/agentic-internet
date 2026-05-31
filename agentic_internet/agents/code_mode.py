@@ -180,7 +180,7 @@ class SearchTool(Tool):
         """Temporarily hide the non-serialisable facade during E2B serialisation."""
         facade_backup = self.__dict__.pop("facade", None)
         try:
-            return super().to_dict()
+            return super().to_dict()  # type: ignore[no-any-return]
         finally:
             if facade_backup is not None:
                 self.facade = facade_backup
@@ -276,7 +276,7 @@ class ExecuteTool(Tool):
         """Temporarily hide the non-serialisable facade during E2B serialisation."""
         facade_backup = self.__dict__.pop("facade", None)
         try:
-            return super().to_dict()
+            return super().to_dict()  # type: ignore[no-any-return]
         finally:
             if facade_backup is not None:
                 self.facade = facade_backup

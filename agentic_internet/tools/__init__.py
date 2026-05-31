@@ -19,13 +19,15 @@ try:
 except ImportError:
     # MCP packages not installed
     MCP_AVAILABLE = False
-    MCPToolIntegration = None
-    MCPServerConfig = None
-    MCPServerManager = None
-    mcp_tools = None
-    load_mcp_config_from_env = None
-    def is_mcp_available() -> bool:
+    MCPToolIntegration = None  # type: ignore[assignment,misc]
+    MCPServerConfig = None  # type: ignore[assignment,misc]
+    MCPServerManager = None  # type: ignore[assignment,misc]
+    mcp_tools = None  # type: ignore[assignment]
+    load_mcp_config_from_env = None  # type: ignore[assignment]
+
+    def is_mcp_available() -> bool:  # type: ignore[misc]
         return False
+
 
 __all__ = [
     "MCP_AVAILABLE",

@@ -4,6 +4,8 @@ Example MCP Server for testing AgenticInternet MCP integration.
 This server provides simple tools that can be accessed via MCP protocol.
 """
 
+from typing import Any
+
 try:
     from fastmcp import FastMCP
 except ImportError as exc:
@@ -141,7 +143,7 @@ def get_server_config() -> dict[str, str]:
 
 
 @mcp.resource("data://{dataset_name}")
-def get_dataset(dataset_name: str) -> dict[str, any]:
+def get_dataset(dataset_name: str) -> dict[str, Any]:
     """
     Provide mock dataset information.
 

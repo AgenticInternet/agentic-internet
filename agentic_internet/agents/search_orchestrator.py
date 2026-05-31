@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class SearchTask:
     """Represents a search task to be executed by an agent."""
+
     query: str
     task_id: str
     agent_name: str
@@ -37,6 +38,7 @@ class SearchTask:
 @dataclass
 class SearchResult:
     """Represents the result from a search agent."""
+
     task_id: str
     agent_name: str
     result: Any
@@ -48,8 +50,13 @@ class SearchResult:
 class SearchAgentWrapper:
     """Wrapper for individual search agents."""
 
-    def __init__(self, name: str, agent: Union[ToolCallingAgent, CodeAgent],
-                 description: str = "", specialization: str = "general"):
+    def __init__(
+        self,
+        name: str,
+        agent: Union[ToolCallingAgent, CodeAgent],
+        description: str = "",
+        specialization: str = "general",
+    ):
         self.name = name
         self.agent = agent
         self.description = description
@@ -71,11 +78,7 @@ class SearchAgentWrapper:
             self.success_count += 1
 
             return SearchResult(
-                task_id=task.task_id,
-                agent_name=self.name,
-                result=result,
-                success=True,
-                execution_time=execution_time
+                task_id=task.task_id, agent_name=self.name, result=result, success=True, execution_time=execution_time
             )
         except Exception as e:
             execution_time = (datetime.now() - start_time).total_seconds()
@@ -85,7 +88,7 @@ class SearchAgentWrapper:
                 result=None,
                 success=False,
                 execution_time=execution_time,
-                error=str(e)
+                error=str(e),
             )
 
     def _create_specialized_prompt(self, task: SearchTask) -> str:
@@ -112,7 +115,7 @@ class SearchAgentWrapper:
             "specialization": self.specialization,
             "executions": self.execution_count,
             "successes": self.success_count,
-            "success_rate": self.success_count / self.execution_count if self.execution_count > 0 else 0
+            "success_rate": self.success_count / self.execution_count if self.execution_count > 0 else 0,
         }
 
 
@@ -121,10 +124,7 @@ class SearchOrchestrator:
     Orchestrates multiple search agents to perform comprehensive searches.
     """
 
-    def __init__(self,
-                 max_workers: int = 3,
-                 verbose: bool = True,
-                 use_async: bool = False):
+    def __init__(self, max_workers: int = 3, verbose: bool = True, use_async: bool = False):
         """
         Initialize the Search Orchestrator.
 
@@ -140,8 +140,13 @@ class SearchOrchestrator:
         self.orchestrator_agent: ToolCallingAgent | None = None
         self.execution_history: list[dict[str, Any]] = []
 
-    def add_agent(self, name: str, agent: Union[ToolCallingAgent, CodeAgent],
-                  description: str = "", specialization: str = "general"):
+    def add_agent(
+        self,
+        name: str,
+        agent: Union[ToolCallingAgent, CodeAgent],
+        description: str = "",
+        specialization: str = "general",
+    ):
         """Add a search agent to the orchestrator."""
         wrapper = SearchAgentWrapper(name, agent, description, specialization)
         self.agents[name] = wrapper
@@ -169,11 +174,7 @@ class SearchOrchestrator:
 
         for name, spec, desc in specializations:
             try:
-                agent = ToolCallingAgent(
-                    tools=tools,
-                    model=model,
-                    max_steps=10
-                )
+                agent = ToolCallingAgent(tools=tools, model=model, max_steps=10)
                 self.add_agent(name, agent, desc, spec)
             except Exception as e:
                 if self.verbose:
@@ -182,10 +183,7 @@ class SearchOrchestrator:
         # Create the orchestrator agent that coordinates the workers
         try:
             self.orchestrator_agent = CodeAgent(
-                tools=tools,
-                model=model,
-                max_steps=20,
-                additional_authorized_imports=["json", "re", "datetime"]
+                tools=tools, model=model, max_steps=20, additional_authorized_imports=["json", "re", "datetime"]
             )
             if self.verbose:
                 console.print("[green]✓[/green] Orchestrator agent created")
@@ -197,8 +195,7 @@ class SearchOrchestrator:
         """Get a default model using the centralized model initialization."""
         return initialize_model(model_id, verbose=self.verbose)
 
-    def search(self, query: str, agents_to_use: list[str] | None = None,
-               parallel: bool = True) -> dict[str, Any]:
+    def search(self, query: str, agents_to_use: list[str] | None = None, parallel: bool = True) -> dict[str, Any]:
         """
         Execute a search using multiple agents.
 
@@ -211,27 +208,23 @@ class SearchOrchestrator:
             Dictionary containing aggregated results
         """
         if not self.agents:
-            return {
-                "error": "No agents available. Please add agents first.",
-                "query": query
-            }
+            return {"error": "No agents available. Please add agents first.", "query": query}
 
         # Select agents to use
         selected_agents = agents_to_use or list(self.agents.keys())
         selected_agents = [a for a in selected_agents if a in self.agents]
 
         if not selected_agents:
-            return {
-                "error": "No valid agents selected",
-                "query": query
-            }
+            return {"error": "No valid agents selected", "query": query}
 
         if self.verbose:
-            console.print(Panel.fit(
-                f"[bold blue]Orchestrating search:[/bold blue] {query}\n"
-                f"Using {len(selected_agents)} agents: {', '.join(selected_agents)}",
-                title="Search Orchestration"
-            ))
+            console.print(
+                Panel.fit(
+                    f"[bold blue]Orchestrating search:[/bold blue] {query}\n"
+                    f"Using {len(selected_agents)} agents: {', '.join(selected_agents)}",
+                    title="Search Orchestration",
+                )
+            )
 
         # Create tasks
         tasks = []
@@ -240,7 +233,7 @@ class SearchOrchestrator:
                 query=query,
                 task_id=f"{agent_name}_{datetime.now().timestamp()}",
                 agent_name=agent_name,
-                metadata={"original_query": query}
+                metadata={"original_query": query},
             )
             tasks.append(task)
 
@@ -251,12 +244,14 @@ class SearchOrchestrator:
         aggregated = self._aggregate_results(query, results)
 
         # Store in history
-        self.execution_history.append({
-            "timestamp": datetime.now().isoformat(),
-            "query": query,
-            "agents_used": selected_agents,
-            "results": aggregated
-        })
+        self.execution_history.append(
+            {
+                "timestamp": datetime.now().isoformat(),
+                "query": query,
+                "agents_used": selected_agents,
+                "results": aggregated,
+            }
+        )
 
         return aggregated
 
@@ -265,22 +260,12 @@ class SearchOrchestrator:
         results = []
 
         with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            console=console,
-            transient=True
+            SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console, transient=True
         ) as progress:
-
-            task_id = progress.add_task(
-                f"Running {len(tasks)} agents in parallel...",
-                total=len(tasks)
-            )
+            task_id = progress.add_task(f"Running {len(tasks)} agents in parallel...", total=len(tasks))
 
             with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
-                future_to_task = {
-                    executor.submit(self.agents[task.agent_name].execute, task): task
-                    for task in tasks
-                }
+                future_to_task = {executor.submit(self.agents[task.agent_name].execute, task): task for task in tasks}
 
                 for future in as_completed(future_to_task):
                     result = future.result()
@@ -317,7 +302,7 @@ class SearchOrchestrator:
         successful_results = [r for r in results if r.success]
         failed_results = [r for r in results if not r.success]
 
-        aggregated = {
+        aggregated: dict[str, Any] = {
             "query": query,
             "timestamp": datetime.now().isoformat(),
             "total_agents": len(results),
@@ -325,7 +310,7 @@ class SearchOrchestrator:
             "failed_agents": len(failed_results),
             "execution_times": {r.agent_name: r.execution_time for r in results},
             "agent_results": {},
-            "failures": {}
+            "failures": {},
         }
 
         # Add successful results
@@ -333,7 +318,7 @@ class SearchOrchestrator:
             agent = self.agents[result.agent_name]
             aggregated["agent_results"][result.agent_name] = {
                 "specialization": agent.specialization,
-                "result": str(result.result)[:1000] if result.result else None  # Truncate for readability
+                "result": str(result.result)[:1000] if result.result else None,  # Truncate for readability
             }
 
         # Add failure information
@@ -346,16 +331,19 @@ class SearchOrchestrator:
 
         return aggregated
 
-    def _synthesize_results(self, query: str, results: list[SearchResult]) -> str:
+    def _synthesize_results(self, query: str, results: list[SearchResult]) -> str | None:
         """Use the orchestrator agent to synthesize results from multiple agents."""
         if not self.orchestrator_agent:
             return None
 
         # Prepare the synthesis prompt
-        results_text = "\n\n".join([
-            f"Results from {r.agent_name} ({self.agents[r.agent_name].specialization}):\n{str(r.result)[:500]}"
-            for r in results if r.success
-        ])
+        results_text = "\n\n".join(
+            [
+                f"Results from {r.agent_name} ({self.agents[r.agent_name].specialization}):\n{str(r.result)[:500]}"
+                for r in results
+                if r.success
+            ]
+        )
 
         synthesis_prompt = f"""
         Synthesize the following search results for the query: "{query}"
@@ -382,10 +370,7 @@ class SearchOrchestrator:
 
     def get_performance_report(self) -> dict[str, Any]:
         """Get a performance report for all agents."""
-        report = {
-            "total_executions": len(self.execution_history),
-            "agents": {}
-        }
+        report: dict[str, Any] = {"total_executions": len(self.execution_history), "agents": {}}
 
         for name, agent in self.agents.items():
             report["agents"][name] = agent.get_performance_stats()
@@ -404,8 +389,7 @@ class SearchOrchestrator:
         return await asyncio.to_thread(self.search, query, agents_to_use, parallel=True)
 
 
-def create_search_orchestrator(tools: list[Tool], model: Any | None = None,
-                              verbose: bool = True) -> SearchOrchestrator:
+def create_search_orchestrator(tools: list[Tool], model: Any | None = None, verbose: bool = True) -> SearchOrchestrator:
     """
     Convenience function to create and set up a search orchestrator.
 

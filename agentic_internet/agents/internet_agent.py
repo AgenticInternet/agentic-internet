@@ -39,7 +39,7 @@ class InternetAgent:
         max_iterations: int = 10,
         planning_enabled: bool = True,
         agent_type: Literal["tool_calling", "code"] = "tool_calling",
-        additional_authorized_imports: list[str] | None = None
+        additional_authorized_imports: list[str] | None = None,
     ):
         """
         Initialize the Internet Agent.
@@ -69,14 +69,16 @@ class InternetAgent:
         self.agent = self._create_agent()
 
         if self.verbose:
-            console.print(Panel.fit(
-                f"[bold green]Internet Agent Initialized[/bold green]\n"
-                f"Model: {model_id or settings.model.name}\n"
-                f"Agent Type: {self.agent_type}\n"
-                f"Tools: {[tool.name for tool in self.tools]}\n"
-                f"Max Iterations: {self.max_iterations}",
-                title="Agent Ready"
-            ))
+            console.print(
+                Panel.fit(
+                    f"[bold green]Internet Agent Initialized[/bold green]\n"
+                    f"Model: {model_id or settings.model.name}\n"
+                    f"Agent Type: {self.agent_type}\n"
+                    f"Tools: {[tool.name for tool in self.tools]}\n"
+                    f"Max Iterations: {self.max_iterations}",
+                    title="Agent Ready",
+                )
+            )
 
     def _initialize_model(self, model_id: str | None = None) -> Any:
         """Initialize the LLM model using centralized model initialization."""
@@ -93,22 +95,28 @@ class InternetAgent:
         if self.agent_type == "code":
             # CodeAgent can execute Python code and use tools
             default_imports = [
-                "pandas", "numpy", "json", "csv", "re",
-                "datetime", "time", "requests", "urllib",
-                "math", "statistics", "collections"
+                "pandas",
+                "numpy",
+                "json",
+                "csv",
+                "re",
+                "datetime",
+                "time",
+                "requests",
+                "urllib",
+                "math",
+                "statistics",
+                "collections",
             ]
             return CodeAgent(
                 tools=self.tools,
                 model=self.model,
                 max_steps=self.max_iterations,
-                additional_authorized_imports=default_imports + self.additional_authorized_imports
+                additional_authorized_imports=default_imports + self.additional_authorized_imports,
             )
         else:
             # Default to ToolCallingAgent
-            return ToolCallingAgent(
-                tools=self.tools,
-                model=self.model
-            )
+            return ToolCallingAgent(tools=self.tools, model=self.model)
 
     def _get_default_tools(self) -> list[Tool]:
         """Get the default set of tools for the agent."""
@@ -116,33 +124,25 @@ class InternetAgent:
 
         # Add web search tools
         if settings.tools.web_search_enabled:
-            tools.extend([
-                WebSearchTool(),
-                WebScraperTool(),
-                NewsSearchTool()
-            ])
+            tools.extend([WebSearchTool(), WebScraperTool(), NewsSearchTool()])
 
             # Add Exa neural search tools when an API key is available
             if settings.exa_api_key:
-                tools.extend([
-                    ExaSearchTool(),
-                    ExaFindSimilarTool()
-                ])
+                tools.extend([ExaSearchTool(), ExaFindSimilarTool()])
 
         # Add Browser Use tools if API key is available
         if settings.tools.browser_enabled and settings.browser_use_api_key:
-            tools.extend([
-                BrowserUseTool(api_key=settings.browser_use_api_key),
-                AsyncBrowserUseTool(api_key=settings.browser_use_api_key),
-                StructuredBrowserUseTool(api_key=settings.browser_use_api_key)
-            ])
+            tools.extend(
+                [
+                    BrowserUseTool(api_key=settings.browser_use_api_key),
+                    AsyncBrowserUseTool(api_key=settings.browser_use_api_key),
+                    StructuredBrowserUseTool(api_key=settings.browser_use_api_key),
+                ]
+            )
 
         # Add code execution tools
         if settings.tools.code_execution_enabled:
-            tools.extend([
-                PythonExecutorTool(),
-                DataAnalysisTool()
-            ])
+            tools.extend([PythonExecutorTool(), DataAnalysisTool()])
 
         # Try to load built-in smolagents tools
         try:
@@ -165,22 +165,16 @@ class InternetAgent:
             The agent's response
         """
         if self.verbose:
-            console.print(Panel.fit(
-                f"[bold blue]Task:[/bold blue] {task}",
-                title="Executing"
-            ))
+            console.print(Panel.fit(f"[bold blue]Task:[/bold blue] {task}", title="Executing"))
 
         try:
             # Run the agent
             result = self.agent.run(task, **kwargs)
 
             if self.verbose and show_result:
-                console.print(Panel.fit(
-                    Markdown(str(result)),
-                    title="[bold green]Result[/bold green]"
-                ))
+                console.print(Panel.fit(Markdown(str(result)), title="[bold green]Result[/bold green]"))
 
-            return result
+            return str(result)
 
         except Exception as e:
             logger.error("Error executing task: %s", e, exc_info=True)
@@ -193,12 +187,14 @@ class InternetAgent:
         """
         Start an interactive chat session with the agent.
         """
-        console.print(Panel.fit(
-            "[bold cyan]Interactive Chat Mode[/bold cyan]\n"
-            "Type 'exit' or 'quit' to end the session.\n"
-            "Type 'help' for available commands.",
-            title="Chat Started"
-        ))
+        console.print(
+            Panel.fit(
+                "[bold cyan]Interactive Chat Mode[/bold cyan]\n"
+                "Type 'exit' or 'quit' to end the session.\n"
+                "Type 'help' for available commands.",
+                title="Chat Started",
+            )
+        )
 
         chat_history = []
 
@@ -208,17 +204,17 @@ class InternetAgent:
                 user_input = console.input("\n[bold yellow]You:[/bold yellow] ")
 
                 # Check for exit commands
-                if user_input.lower() in ['exit', 'quit', 'bye']:
+                if user_input.lower() in ["exit", "quit", "bye"]:
                     console.print("[bold cyan]Goodbye![/bold cyan]")
                     break
 
                 # Check for help command
-                if user_input.lower() == 'help':
+                if user_input.lower() == "help":
                     self._show_help()
                     continue
 
                 # Check for tool list command
-                if user_input.lower() == 'tools':
+                if user_input.lower() == "tools":
                     self._show_tools()
                     continue
 
@@ -283,7 +279,7 @@ class ResearchAgent(InternetAgent):
         depth_prompts = {
             "quick": f"Quickly search for basic information about {topic}. Provide a brief summary.",
             "moderate": f"Research {topic}. Search for information, find recent news, and provide a comprehensive summary with sources.",
-            "deep": f"Conduct deep research on {topic}. Search multiple sources, analyze different perspectives, check recent developments, and provide a detailed analysis with citations."
+            "deep": f"Conduct deep research on {topic}. Search multiple sources, analyze different perspectives, check recent developments, and provide a detailed analysis with citations.",
         }
 
         prompt = depth_prompts.get(depth, depth_prompts["moderate"])
@@ -297,7 +293,7 @@ class ResearchAgent(InternetAgent):
             "topic": topic,
             "depth": depth,
             "findings": result,
-            "timestamp": pd.Timestamp.now().isoformat()
+            "timestamp": pd.Timestamp.now().isoformat(),
         }
 
         self.research_history.append(research_entry)

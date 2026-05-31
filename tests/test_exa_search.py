@@ -122,33 +122,23 @@ class TestFormatResults:
 
 class TestBuildContentsKwargs:
     def test_all_disabled(self):
-        kwargs = _build_contents_kwargs(
-            text=False, text_max_chars=None, highlights=False, summary=False
-        )
+        kwargs = _build_contents_kwargs(text=False, text_max_chars=None, highlights=False, summary=False)
         assert kwargs == {}
 
     def test_text_with_max_chars(self):
-        kwargs = _build_contents_kwargs(
-            text=True, text_max_chars=500, highlights=False, summary=False
-        )
+        kwargs = _build_contents_kwargs(text=True, text_max_chars=500, highlights=False, summary=False)
         assert kwargs == {"text": {"max_characters": 500}}
 
     def test_text_without_max_chars(self):
-        kwargs = _build_contents_kwargs(
-            text=True, text_max_chars=None, highlights=False, summary=False
-        )
+        kwargs = _build_contents_kwargs(text=True, text_max_chars=None, highlights=False, summary=False)
         assert kwargs == {"text": True}
 
     def test_highlights_enabled(self):
-        kwargs = _build_contents_kwargs(
-            text=False, text_max_chars=None, highlights=True, summary=False
-        )
+        kwargs = _build_contents_kwargs(text=False, text_max_chars=None, highlights=True, summary=False)
         assert kwargs == {"highlights": True}
 
     def test_summary_without_query(self):
-        kwargs = _build_contents_kwargs(
-            text=False, text_max_chars=None, highlights=False, summary=True
-        )
+        kwargs = _build_contents_kwargs(text=False, text_max_chars=None, highlights=False, summary=True)
         assert kwargs == {"summary": True}
 
     def test_summary_with_query(self):
@@ -162,9 +152,7 @@ class TestBuildContentsKwargs:
         assert kwargs == {"summary": {"query": "What is X?"}}
 
     def test_all_enabled_simultaneously(self):
-        kwargs = _build_contents_kwargs(
-            text=True, text_max_chars=200, highlights=True, summary=True
-        )
+        kwargs = _build_contents_kwargs(text=True, text_max_chars=200, highlights=True, summary=True)
         assert kwargs == {
             "text": {"max_characters": 200},
             "highlights": True,
@@ -381,6 +369,7 @@ class TestDefaultToolsRegistration:
 
     def test_not_registered_when_api_key_missing(self, monkeypatch):
         from agentic_internet.config.settings import settings
+
         monkeypatch.setattr(settings, "exa_api_key", None)
 
         from agentic_internet.agents.internet_agent import InternetAgent
@@ -395,6 +384,7 @@ class TestDefaultToolsRegistration:
 
     def test_registered_when_api_key_set(self, monkeypatch):
         from agentic_internet.config.settings import settings
+
         monkeypatch.setattr(settings, "exa_api_key", "fake-key")
         # Avoid pulling in the browser tool which requires a separate key
         monkeypatch.setattr(settings.tools, "browser_enabled", False)

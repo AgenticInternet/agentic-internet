@@ -11,9 +11,10 @@ logger = logging.getLogger(__name__)
 
 try:
     from exa_py import Exa
+
     HAS_EXA = True
 except ImportError:
-    Exa = None  # type: ignore[assignment]
+    Exa = None  # type: ignore[assignment,misc]
     HAS_EXA = False
 
 INTEGRATION_NAME = "agentic-internet"
@@ -221,9 +222,7 @@ class ExaSearchTool(Tool):
         self.text_max_chars = text_max_chars or self.DEFAULT_TEXT_MAX_CHARS
 
         if not HAS_EXA:
-            logger.warning(
-                "exa-py is not installed. Install with: pip install exa-py"
-            )
+            logger.warning("exa-py is not installed. Install with: pip install exa-py")
 
     def is_available(self) -> bool:
         """Check whether the tool can run (SDK installed and API key set)."""
@@ -330,9 +329,7 @@ class ExaFindSimilarTool(Tool):
         self.text_max_chars = text_max_chars or self.DEFAULT_TEXT_MAX_CHARS
 
         if not HAS_EXA:
-            logger.warning(
-                "exa-py is not installed. Install with: pip install exa-py"
-            )
+            logger.warning("exa-py is not installed. Install with: pip install exa-py")
 
     def is_available(self) -> bool:
         return HAS_EXA and bool(self.api_key)

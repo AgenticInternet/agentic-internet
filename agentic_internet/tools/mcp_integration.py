@@ -24,10 +24,11 @@ MCP_AVAILABLE = False
 try:
     from mcp import StdioServerParameters
     from smolagents import ToolCollection
+
     MCP_AVAILABLE = True
 except ImportError:
-    ToolCollection = None
-    StdioServerParameters = None
+    ToolCollection = None  # type: ignore[assignment,misc]
+    StdioServerParameters = None  # type: ignore[assignment,misc]
     logger.debug("MCP packages not installed. Install with: pip install smolagents mcp")
 
 
@@ -35,6 +36,7 @@ def check_mcp_available() -> None:
     """Check if MCP packages are available and raise informative error if not."""
     if not MCP_AVAILABLE:
         raise MCPNotAvailableError()
+
 
 def _normalize_http_url(url: str) -> str:
     parsed = urlparse(url)
@@ -96,7 +98,7 @@ class MCPToolIntegration:
         self._context_manager = None
         self._tools: list[Any] = []
 
-    def _create_server_parameters(self) -> Union['StdioServerParameters', dict[str, Any]]:
+    def _create_server_parameters(self) -> Union["StdioServerParameters", dict[str, Any]]:
         """
         Create server parameters based on transport type.
 
@@ -136,18 +138,12 @@ class MCPToolIntegration:
             url = _normalize_http_url(url)
 
             # Return dict format for HTTP transport
-            return {
-                "url": url,
-                "transport": "streamable-http"
-            }
+            return {"url": url, "transport": "streamable-http"}
 
         else:
-            raise ValueError(
-                f"Unsupported transport type: {self.transport_type}. "
-                "Use 'stdio' or 'streamable-http'"
-            )
+            raise ValueError(f"Unsupported transport type: {self.transport_type}. Use 'stdio' or 'streamable-http'")
 
-    def get_server_parameters(self) -> Union['StdioServerParameters', dict[str, Any]]:
+    def get_server_parameters(self) -> Union["StdioServerParameters", dict[str, Any]]:
         """Get the server parameters for this integration."""
         return self._create_server_parameters()
 
@@ -244,11 +240,14 @@ class MCPServerConfig:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> 'MCPServerConfig':
+    def from_dict(cls, data: dict[str, Any]) -> "MCPServerConfig":
         """Create config from dictionary."""
+        server_config = data.get("server_config", data.get("path") or data.get("url"))
+        if server_config is None:
+            raise ValueError("MCPServerConfig requires one of: 'server_config', 'path', or 'url'")
         return cls(
             name=data.get("name", "unnamed"),
-            server_config=data.get("server_config", data.get("path") or data.get("url")),
+            server_config=server_config,
             transport_type=data.get("transport_type", "stdio"),
             env=data.get("env", {}),
             trust_remote_code=data.get("trust_remote_code", False),
@@ -491,9 +490,7 @@ def load_mcp_config_from_env() -> list[MCPServerConfig]:
         trust_remote_code = os.getenv(f"{prefix}TRUST", "false").lower() in ("true", "1", "yes")
         structured_output_env = os.getenv(f"{prefix}STRUCTURED_OUTPUT")
         structured_output = (
-            None
-            if structured_output_env is None
-            else structured_output_env.lower() in ("true", "1", "yes")
+            None if structured_output_env is None else structured_output_env.lower() in ("true", "1", "yes")
         )
 
         if server_type == "stdio":
