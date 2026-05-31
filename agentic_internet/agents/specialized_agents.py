@@ -19,8 +19,8 @@ class BrowserAutomationAgent(InternetAgent):
     def __init__(self, **kwargs):
         """Initialize browser automation agent with browser-specific configuration."""
         # Default to code agent for better browser interaction capabilities
-        kwargs.setdefault('agent_type', 'code')
-        kwargs.setdefault('max_iterations', 20)
+        kwargs.setdefault("agent_type", "code")
+        kwargs.setdefault("max_iterations", 20)
         super().__init__(**kwargs)
 
     def scrape_structured_data(self, url: str, data_schema: dict[str, Any]) -> dict[str, Any]:
@@ -45,7 +45,8 @@ class BrowserAutomationAgent(InternetAgent):
 
         # Try to parse as JSON
         try:
-            return json.loads(result)
+            parsed = json.loads(result)
+            return parsed if isinstance(parsed, dict) else {"raw_result": result}
         except (json.JSONDecodeError, ValueError, TypeError):
             return {"raw_result": result}
 
@@ -93,7 +94,7 @@ class BrowserAutomationAgent(InternetAgent):
             "url": url,
             "check_for": check_for,
             "findings": result,
-            "suggested_interval": f"{interval_minutes} minutes"
+            "suggested_interval": f"{interval_minutes} minutes",
         }
 
 
@@ -106,10 +107,10 @@ class DataAnalysisAgent(InternetAgent):
     def __init__(self, **kwargs):
         """Initialize data analysis agent with analysis-specific configuration."""
         # Use code agent for better data manipulation capabilities
-        kwargs.setdefault('agent_type', 'code')
+        kwargs.setdefault("agent_type", "code")
         # Only add imports that are actually installed
         # You can install matplotlib, seaborn, plotly with: uv add matplotlib seaborn plotly
-        kwargs.setdefault('additional_authorized_imports', [])
+        kwargs.setdefault("additional_authorized_imports", [])
         super().__init__(**kwargs)
 
     def analyze_dataset(self, data: Any, analysis_type: str = "comprehensive") -> dict[str, Any]:
@@ -137,10 +138,7 @@ class DataAnalysisAgent(InternetAgent):
 
         result = self.run(task)
 
-        return {
-            "analysis_type": analysis_type,
-            "insights": result
-        }
+        return {"analysis_type": analysis_type, "insights": result}
 
     def compare_datasets(self, dataset1: Any, dataset2: Any, comparison_criteria: list[str] | None = None) -> str:
         """
@@ -178,11 +176,12 @@ class ContentCreationAgent(InternetAgent):
 
     def __init__(self, **kwargs):
         """Initialize content creation agent."""
-        kwargs.setdefault('agent_type', 'tool_calling')
+        kwargs.setdefault("agent_type", "tool_calling")
         super().__init__(**kwargs)
 
-    def write_article(self, topic: str, style: str = "informative",
-                     word_count: int = 500, sources_required: bool = True) -> dict[str, str]:
+    def write_article(
+        self, topic: str, style: str = "informative", word_count: int = 500, sources_required: bool = True
+    ) -> dict[str, Any]:
         """
         Write an article on a given topic.
 
@@ -211,12 +210,7 @@ class ContentCreationAgent(InternetAgent):
 
         result = self.run(task)
 
-        return {
-            "topic": topic,
-            "style": style,
-            "content": result,
-            "word_count_target": word_count
-        }
+        return {"topic": topic, "style": style, "content": result, "word_count_target": word_count}
 
     def summarize_content(self, content: str, summary_type: str = "executive") -> str:
         """
@@ -247,8 +241,8 @@ class MarketResearchAgent(InternetAgent):
 
     def __init__(self, **kwargs):
         """Initialize market research agent."""
-        kwargs.setdefault('agent_type', 'tool_calling')
-        kwargs.setdefault('max_iterations', 15)
+        kwargs.setdefault("agent_type", "tool_calling")
+        kwargs.setdefault("max_iterations", 15)
         super().__init__(**kwargs)
 
     def analyze_competitor(self, company_name: str, aspects: list[str] | None = None) -> dict[str, Any]:
@@ -282,11 +276,7 @@ class MarketResearchAgent(InternetAgent):
 
         result = self.run(task)
 
-        return {
-            "company": company_name,
-            "aspects_analyzed": aspects_list,
-            "analysis": result
-        }
+        return {"company": company_name, "aspects_analyzed": aspects_list, "analysis": result}
 
     def market_trends(self, industry: str, timeframe: str = "current") -> dict[str, Any]:
         """
@@ -315,11 +305,7 @@ class MarketResearchAgent(InternetAgent):
 
         result = self.run(task)
 
-        return {
-            "industry": industry,
-            "timeframe": timeframe,
-            "trends": result
-        }
+        return {"industry": industry, "timeframe": timeframe, "trends": result}
 
 
 class TechnicalSupportAgent(InternetAgent):
@@ -329,7 +315,7 @@ class TechnicalSupportAgent(InternetAgent):
 
     def __init__(self, **kwargs):
         """Initialize technical support agent."""
-        kwargs.setdefault('agent_type', 'code')
+        kwargs.setdefault("agent_type", "code")
         super().__init__(**kwargs)
 
     def troubleshoot(self, problem_description: str, system_info: dict[str, str] | None = None) -> dict[str, Any]:
@@ -360,14 +346,9 @@ class TechnicalSupportAgent(InternetAgent):
 
         result = self.run(task)
 
-        return {
-            "problem": problem_description,
-            "system_info": system_info,
-            "solution": result
-        }
+        return {"problem": problem_description, "system_info": system_info, "solution": result}
 
-    def code_review(self, code: str, language: str = "python",
-                    focus_areas: list[str] | None = None) -> dict[str, Any]:
+    def code_review(self, code: str, language: str = "python", focus_areas: list[str] | None = None) -> dict[str, Any]:
         """
         Review code and provide feedback.
 
@@ -398,8 +379,4 @@ class TechnicalSupportAgent(InternetAgent):
 
         result = self.run(task)
 
-        return {
-            "language": language,
-            "focus_areas": focus_areas or ["general"],
-            "review": result
-        }
+        return {"language": language, "focus_areas": focus_areas or ["general"], "review": result}

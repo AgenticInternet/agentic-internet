@@ -34,8 +34,7 @@ class APIKeyMissingError(AgenticInternetError):
     def __init__(self, provider: str):
         self.provider = provider
         super().__init__(
-            f"No API key found for provider '{provider}'. "
-            f"Set the appropriate environment variable in your .env file."
+            f"No API key found for provider '{provider}'. Set the appropriate environment variable in your .env file."
         )
 
 
@@ -102,6 +101,4 @@ class MCPNotAvailableError(MCPError):
     """Raised when MCP packages are not installed."""
 
     def __init__(self) -> None:
-        super().__init__(
-            "MCP packages not installed. Install with: pip install smolagents mcp"
-        )
+        super().__init__("MCP packages not installed. Install with: pip install smolagents mcp")

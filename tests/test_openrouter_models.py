@@ -15,8 +15,7 @@ def test_openrouter_id_normalization_round_trip():
     assert normalize_openrouter_model_id("anthropic/claude-opus-4.8") == "anthropic/claude-opus-4.8"
     assert to_litellm_openrouter_model_id("anthropic/claude-opus-4.8") == "openrouter/anthropic/claude-opus-4.8"
     assert (
-        to_litellm_openrouter_model_id("openrouter/anthropic/claude-opus-4.8")
-        == "openrouter/anthropic/claude-opus-4.8"
+        to_litellm_openrouter_model_id("openrouter/anthropic/claude-opus-4.8") == "openrouter/anthropic/claude-opus-4.8"
     )
 
 

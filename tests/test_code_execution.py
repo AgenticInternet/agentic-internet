@@ -1,6 +1,5 @@
 """Tests for the PythonExecutorTool and DataAnalysisTool."""
 
-
 from agentic_internet.tools.code_execution import (
     DataAnalysisTool,
     PythonExecutorTool,
@@ -14,6 +13,7 @@ class TestASTSafetyValidator:
 
     def _violations(self, code: str) -> list[str]:
         import ast
+
         tree = ast.parse(code)
         return self.validator.validate(tree)
 

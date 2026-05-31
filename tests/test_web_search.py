@@ -39,9 +39,7 @@ class TestSearchSerpapi:
     @patch("agentic_internet.tools.web_search.GoogleSearch")
     def test_returns_formatted_results(self, mock_search_cls):
         mock_search_cls.return_value.get_dict.return_value = {
-            "organic_results": [
-                {"title": "Test Title", "snippet": "Test snippet", "link": "https://example.com"}
-            ]
+            "organic_results": [{"title": "Test Title", "snippet": "Test snippet", "link": "https://example.com"}]
         }
         result = _search_serpapi("test query", "fake_key")
         assert result is not None
@@ -75,9 +73,7 @@ class TestSearchDdgs:
         mock_ctx = MagicMock()
         mock_ctx.__enter__ = MagicMock(return_value=mock_ctx)
         mock_ctx.__exit__ = MagicMock(return_value=False)
-        mock_ctx.text.return_value = [
-            {"title": "DDG Title", "body": "DDG body", "href": "https://ddg.com"}
-        ]
+        mock_ctx.text.return_value = [{"title": "DDG Title", "body": "DDG body", "href": "https://ddg.com"}]
         mock_ddgs_cls.return_value = mock_ctx
 
         result = _search_ddgs("test query")

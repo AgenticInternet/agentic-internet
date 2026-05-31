@@ -39,13 +39,19 @@ def _create_model_for_provider(
             if not model_id.startswith("openrouter/"):
                 model_id = f"openrouter/{model_id}"
             return LiteLLMModel(
-                model_id=model_id, api_key=api_key,
-                temperature=temp, max_tokens=tokens, top_p=tp,
+                model_id=model_id,
+                api_key=api_key,
+                temperature=temp,
+                max_tokens=tokens,
+                top_p=tp,
             )
         elif provider in ("openai", "anthropic"):
             return LiteLLMModel(
-                model_id=model_id, api_key=api_key,
-                temperature=temp, max_tokens=tokens, top_p=tp,
+                model_id=model_id,
+                api_key=api_key,
+                temperature=temp,
+                max_tokens=tokens,
+                top_p=tp,
             )
         elif provider == "huggingface":
             return InferenceClientModel(model_id=model_id, token=api_key)
@@ -84,8 +90,12 @@ def initialize_model(
 
     try:
         return _create_model_for_provider(
-            provider, model_id, api_key,
-            temperature=temperature, max_tokens=max_tokens, top_p=top_p,
+            provider,
+            model_id,
+            api_key,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            top_p=top_p,
         )
     except ModelInitializationError as e:
         logger.warning("Failed to initialize model: %s", e)
@@ -137,7 +147,7 @@ def get_model_info(model: Any) -> dict[str, Any]:
     }
 
 
-def list_available_models() -> list[dict[str, str]]:
+def list_available_models() -> list[dict[str, Any]]:
     """List all models that can be initialized with current API keys."""
     available_by_provider = settings.list_available_models()
 

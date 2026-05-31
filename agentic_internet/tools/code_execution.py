@@ -102,29 +102,77 @@ ALLOWED_MODULES = {
 class _ASTSafetyValidator(ast.NodeVisitor):
     """AST-based validator that walks the tree to detect unsafe operations."""
 
-    BLOCKED_ATTRIBUTES = frozenset({
-        "__subclasses__", "__bases__", "__mro__", "__class__",
-        "__globals__", "__code__", "__func__", "__self__",
-        "__dict__", "__init_subclass__", "__set_name__",
-        "__del__", "__delattr__", "__reduce__", "__reduce_ex__",
-        "__getattribute__", "__setattr__",
-    })
+    BLOCKED_ATTRIBUTES = frozenset(
+        {
+            "__subclasses__",
+            "__bases__",
+            "__mro__",
+            "__class__",
+            "__globals__",
+            "__code__",
+            "__func__",
+            "__self__",
+            "__dict__",
+            "__init_subclass__",
+            "__set_name__",
+            "__del__",
+            "__delattr__",
+            "__reduce__",
+            "__reduce_ex__",
+            "__getattribute__",
+            "__setattr__",
+        }
+    )
 
-    BLOCKED_NAMES = frozenset({
-        "__import__", "exec", "eval", "compile",
-        "open", "input", "raw_input",
-        "globals", "locals", "vars", "dir",
-        "breakpoint", "exit", "quit",
-        "getattr", "setattr", "delattr",  # blocked at AST level; safe versions in namespace
-    })
+    BLOCKED_NAMES = frozenset(
+        {
+            "__import__",
+            "exec",
+            "eval",
+            "compile",
+            "open",
+            "input",
+            "raw_input",
+            "globals",
+            "locals",
+            "vars",
+            "dir",
+            "breakpoint",
+            "exit",
+            "quit",
+            "getattr",
+            "setattr",
+            "delattr",  # blocked at AST level; safe versions in namespace
+        }
+    )
 
-    BLOCKED_MODULES = frozenset({
-        "os", "sys", "subprocess", "importlib", "shutil",
-        "pathlib", "socket", "ctypes", "signal", "threading",
-        "multiprocessing", "webbrowser", "code", "codeop",
-        "pickle", "shelve", "marshal", "tempfile", "glob",
-        "fnmatch", "io", "builtins", "__builtin__",
-    })
+    BLOCKED_MODULES = frozenset(
+        {
+            "os",
+            "sys",
+            "subprocess",
+            "importlib",
+            "shutil",
+            "pathlib",
+            "socket",
+            "ctypes",
+            "signal",
+            "threading",
+            "multiprocessing",
+            "webbrowser",
+            "code",
+            "codeop",
+            "pickle",
+            "shelve",
+            "marshal",
+            "tempfile",
+            "glob",
+            "fnmatch",
+            "io",
+            "builtins",
+            "__builtin__",
+        }
+    )
 
     def __init__(self) -> None:
         self.violations: list[str] = []
@@ -299,7 +347,7 @@ class DataAnalysisTool(Tool):
 
         try:
             if op == "describe":
-                return df.describe().to_string()
+                return str(df.describe().to_string())
             elif op == "info":
                 buffer = io.StringIO()
                 df.info(buf=buffer)
@@ -308,7 +356,7 @@ class DataAnalysisTool(Tool):
                 numeric_df = df.select_dtypes(include=[np.number])
                 if numeric_df.empty:
                     return "No numeric columns found for correlation analysis."
-                return numeric_df.corr().to_string()
+                return str(numeric_df.corr().to_string())
             elif op == "summary":
                 parts = [
                     f"Shape: {df.shape}",

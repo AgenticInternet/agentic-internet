@@ -13,15 +13,18 @@ logger = logging.getLogger(__name__)
 
 try:
     from serpapi import GoogleSearch
+
     HAS_SERPAPI = True
 except ImportError:
     HAS_SERPAPI = False
 
 try:
     from duckduckgo_search import DDGS
+
     HAS_DDGS = True
 except ImportError:
     HAS_DDGS = False
+
 
 def _search_serpapi(query: str, serpapi_key: str, *, tbm: str | None = None, num: int = 5) -> str | None:
     """Shared SerpAPI search logic. Returns formatted results or None on failure."""
@@ -96,9 +99,7 @@ def _search_ddgs(query: str, *, news: bool = False, num: int = 5) -> str:
         return f"Error performing DuckDuckGo search: {e}"
 
 
-def _search_with_fallback(
-    query: str, serpapi_key: str | None, *, tbm: str | None = None, news: bool = False
-) -> str:
+def _search_with_fallback(query: str, serpapi_key: str | None, *, tbm: str | None = None, news: bool = False) -> str:
     """Try SerpAPI first, fall back to DuckDuckGo."""
     if serpapi_key:
         result = _search_serpapi(query, serpapi_key, tbm=tbm)
