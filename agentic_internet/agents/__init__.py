@@ -11,6 +11,7 @@ from .specialized_agents import (
     MarketResearchAgent,
     TechnicalSupportAgent,
 )
+from .use_cases import UseCaseRecipe, WorkerRecipe, get_use_case_recipe, list_use_case_recipes
 
 __all__ = [
     "BasicAgent",
@@ -23,6 +24,10 @@ __all__ = [
     "SearchOrchestrator",
     "TechnicalSupportAgent",
     "ToolFacade",
+    "UseCaseRecipe",
+    "WorkerRecipe",
     "create_code_mode_agent",
     "create_search_orchestrator",
+    "get_use_case_recipe",
+    "list_use_case_recipes",
 ]

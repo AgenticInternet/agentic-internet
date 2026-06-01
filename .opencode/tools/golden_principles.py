@@ -5,7 +5,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[2]
 
 REQUIRED_FILES = [
@@ -22,7 +21,9 @@ REQUIRED_FILES = [
     "docs/design-docs/index.md",
     "docs/design-docs/core-beliefs.md",
     "docs/exec-plans/_template.md",
-    "docs/exec-plans/active/2026-05-30-initial-setup.md",
+    "docs/exec-plans/active",
+    "docs/exec-plans/completed",
+    "docs/exec-plans/completed/2026-05-30-initial-setup.md",
     "docs/product-specs/index.md",
     "docs/references/README.md",
     ".opencode/AGENTS.md",

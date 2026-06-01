@@ -384,6 +384,16 @@ async def run_analysis():
 result = asyncio.run(run_analysis())
 ```
 
+The CLI can also run named K-LLM use-case recipes. A recipe defines the worker
+roles, model role preferences, tool bundles, runtime limits, and output contract
+for a task family:
+
+```bash
+agentic-internet multi "Assess this repo idea" --use-case technical_due_diligence
+agentic-internet multi "Analyze this product category" --use-case market_intelligence --worker-model commerce_analyst=gemini-pro
+agentic-internet tools --use-cases
+```
+
 #### Available SerpAPI Tools:
 - **google_search**: Advanced Google search with filters
 - **google_shopping**: Product search with pricing

@@ -16,6 +16,8 @@ from rich.table import Table
 
 from .agents.internet_agent import InternetAgent, ResearchAgent
 from .agents.multi_model_serpapi import MultiModelSerpAPISystem
+from .agents.orchestration_runtime import parse_worker_model_overrides
+from .agents.use_cases import get_use_case_recipe, list_use_case_recipes
 from .config.settings import settings
 from .utils.openrouter_models import fetch_openrouter_models, recent_agentic_models, summarize_openrouter_model
 
@@ -146,6 +148,10 @@ def config(
 def multi(
     task: str = typer.Argument(..., help="The task to execute with multi-model system"),
     models: list[str] | None = typer.Option(None, "--models", "-m", help="Models to use (can specify multiple)"),
+    use_case: str = typer.Option("research", "--use-case", "-u", help="Use-case recipe to run"),
+    worker_model: list[str] | None = typer.Option(
+        None, "--worker-model", help="Override a worker model as worker=model"
+    ),
     verbose: bool = typer.Option(True, "--verbose/--quiet", "-v/-q", help="Enable verbose output"),
     output: Path | None = typer.Option(None, "--output", "-o", help="Save output to file"),
     use_news: bool = typer.Option(False, "--news", "-n", help="Include news research models"),
@@ -154,6 +160,8 @@ def multi(
     """Run a task using the multi-model orchestration system."""
     try:
         # Initialize the multi-model system
+        recipe = get_use_case_recipe(use_case)
+        worker_model_overrides = parse_worker_model_overrides(worker_model)
         with Progress(
             SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console
         ) as progress:
@@ -166,10 +174,15 @@ def multi(
             system = MultiModelSerpAPISystem(serpapi_key=os.getenv("SERPAPI_API_KEY"), context_window_size=16384)
             # Setup workers with the specified model if provided
             default_model = models[0] if models else None
-            system.setup_multi_model_workers(default_model=default_model)
+            system.setup_use_case_workers(
+                use_case_id=recipe.id,
+                default_model=default_model,
+                worker_model_overrides=worker_model_overrides,
+            )
 
         # Run the task
         console.print(f"\n[bold cyan]Executing task:[/bold cyan] {task}")
+        console.print(f"[bold cyan]Use case:[/bold cyan] {recipe.id} ({recipe.k} workers)")
         if models:
             console.print(f"[bold green]Using model:[/bold green] {models[0]}")
 
@@ -179,9 +192,14 @@ def multi(
             progress.add_task("Processing with multiple models...", total=None)
 
             # Run asynchronously
-            orchestrator_model = models[0] if models else "claude-opus-4.5"
+            orchestrator_model = models[0] if models else recipe.coordinator_model_role
             result = asyncio.run(
-                system.execute_multi_model_workflow(task, timeout=600, orchestrator_model=orchestrator_model)
+                system.execute_multi_model_workflow(
+                    task,
+                    timeout=recipe.timeout_seconds,
+                    orchestrator_model=orchestrator_model,
+                    use_case_id=recipe.id,
+                )
             )
 
         # Display results
@@ -195,7 +213,13 @@ def multi(
 
         # Save output if requested
         if output:
-            output_data = {"task": task, "models": models, "results": result}
+            output_data = {
+                "task": task,
+                "models": models,
+                "use_case": recipe.id,
+                "worker_model_overrides": worker_model_overrides,
+                "results": result,
+            }
             output.write_text(json.dumps(output_data, indent=2, default=str))
             console.print(f"\n[green]Output saved to {output}[/green]")
 
@@ -253,9 +277,19 @@ def orchestrate(
 def tools(
     list_tools: bool = typer.Option(True, "--list", "-l", help="List available tools"),
     multi_model: bool = typer.Option(False, "--multi", "-m", help="Show multi-model tools"),
+    use_cases: bool = typer.Option(False, "--use-cases", help="Show multi-model use-case recipes"),
 ):
     """Manage and display available tools."""
-    if list_tools:
+    if use_cases:
+        table = Table(title="K-LLM Use Cases")
+        table.add_column("Use Case", style="cyan", no_wrap=True)
+        table.add_column("K", style="magenta")
+        table.add_column("Workers", style="green")
+        table.add_column("Purpose", style="white")
+        for recipe in list_use_case_recipes():
+            table.add_row(recipe.id, str(recipe.k), ", ".join(recipe.worker_names()), recipe.description)
+        console.print(table)
+    elif list_tools:
         if multi_model:
             # Show multi-model tools
             console.print(Panel.fit("[bold cyan]Multi-Model SerpAPI Tools[/bold cyan]", title="Tools"))
