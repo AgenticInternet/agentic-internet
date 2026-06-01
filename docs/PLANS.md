@@ -6,7 +6,7 @@ Exec-plans capture non-trivial work before implementation and preserve handoff c
 
 | Plan | Area | Status |
 |------|------|--------|
-| [Initial Project Setup](exec-plans/active/2026-05-30-initial-setup.md) | Global project foundation | in_progress |
+| _None_ | - | - |
 
 ## Status Maps
 
@@ -18,6 +18,8 @@ Exec-plans capture non-trivial work before implementation and preserve handoff c
 
 | Plan | Area | Status |
 |------|------|--------|
+| [K-LLM Use-Case Recipes](exec-plans/completed/2026-06-01-k-llm-use-case-recipes.md) | Multi-model orchestration | completed |
+| [Initial Project Setup](exec-plans/completed/2026-05-30-initial-setup.md) | Global project foundation | completed |
 | [Code Mode MCP Agent](exec-plans/completed/2026-02-23-feat-code-mode-mcp-agent-plan.md) | Code mode and MCP integration | completed |
 
 ## Legacy Plan Location

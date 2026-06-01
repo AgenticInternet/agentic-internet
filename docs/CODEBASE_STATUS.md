@@ -1,6 +1,6 @@
 # Codebase Status
 
-Status date: 2026-05-31
+Status date: 2026-06-01
 
 This map captures the current repository state, recent committed updates, unfinished local work, and external ecosystem changes that should drive the next implementation pass.
 
@@ -54,8 +54,8 @@ flowchart TD
 | Code Mode MCP agent | `agentic_internet/agents/code_mode.py`, `agentic_internet/cli.py`, exports, focused tests, CLI smoke test, and completed exec-plan | Implemented in current pass | Add live MCP integration smoke test when a local server fixture is available |
 | Code Mode acceptance criteria | `tests/test_code_mode.py` covers facade, meta-tools, factory, and E2B fallback; `tests/test_cli_mcp.py` covers `mcp run --agent-type code --structured-output` routing | Covered by focused tests | Add a real local MCP server fixture for process-level smoke coverage |
 | Model catalog freshness | `settings.py` refreshed and `agentic_internet/utils/openrouter_models.py` added | Dynamic live listing available via `models --live` | Add cached snapshot writing command if offline catalog automation is needed |
-| Initial harness setup | `docs/exec-plans/active/2026-05-30-initial-setup.md` remains `in_progress` | Partially complete | Close once `bd`, `uv`, and `mypy` are restored for complete release gates |
-| Local quality gates | `.venv` provides `pytest` and `ruff`; `uv`, `mypy`, and `bd` are still missing from PATH | Partially unblocked | Use `.venv/bin/pytest` and `.venv/bin/ruff`; restore `uv`, `mypy`, and `bd` for full gates |
+| Initial harness setup | `docs/exec-plans/completed/2026-05-30-initial-setup.md` is complete | Closed | Keep future completed plans under `docs/exec-plans/completed/` |
+| Local quality gates | `uv`, `ruff`, `mypy`, and `pytest` run via local PATH setup; `bd` is still missing from PATH | Mostly unblocked | Restore `bd` so bead sync hooks run during commit and push |
 | Legacy plan location | Completed Code Mode plan migrated to `docs/exec-plans/completed/` | Resolved for current pass | Keep future plans in `docs/exec-plans/active/` or `docs/exec-plans/completed/` |
 
 ## External Findings

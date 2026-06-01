@@ -1,10 +1,10 @@
 ---
 title: "Initial Project Setup"
 area: "Global - project foundation"
-status: in_progress
+status: complete
 risk: low
 created: 2026-05-30
-updated: 2026-05-30
+updated: 2026-06-01
 author: agent
 ---
 
@@ -27,7 +27,7 @@ Adapt Agentic Internet with a harness engineering structure so agents and humans
 - [x] Golden-principles linter stub created
 - [x] CI skeleton created
 - [x] README references AGENTS.md and core docs
-- [ ] First real feature exec-plan created
+- [x] First real feature exec-plan created
 
 ## Non-Goals
 
@@ -48,3 +48,4 @@ Adapt Agentic Internet with a harness engineering structure so agents and humans
 | Date | Update |
 |------|--------|
 | 2026-05-30 | Repository adapted with harness engineering structure |
+| 2026-06-01 | Moved to completed after the K-LLM feature exec-plan was created, implemented, tested, pushed, and opened for review. |

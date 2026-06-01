@@ -21,7 +21,12 @@ from smolagents import (
     ToolCallingAgent,
 )
 
+from agentic_internet.tools.code_execution import DataAnalysisTool, PythonExecutorTool
+from agentic_internet.tools.web_search import NewsSearchTool, WebScraperTool, WebSearchTool
+
 from .basic_agent import BasicAgent
+from .orchestration_runtime import ResolvedUseCaseTools, resolve_use_case_tools, summarize_use_case
+from .use_cases import UseCaseRecipe, get_use_case_recipe
 
 load_dotenv()
 
@@ -963,6 +968,8 @@ class MultiModelSerpAPISystem(ContextEngineeringMixin):
         self.workers: dict[str, Union[CodeAgent, ToolCallingAgent]] = {}
         self.worker_tools: dict[str, AgentTool] = {}  # Store wrapped agents as tools
         self.model_performance_tracker: dict[str, Any] = {}
+        self.active_use_case_recipe: UseCaseRecipe | None = None
+        self.active_use_case_tools: ResolvedUseCaseTools | None = None
 
     def create_serpapi_tools(self) -> list[Tool]:
         """Create comprehensive SerpAPI tool suite"""
@@ -977,6 +984,18 @@ class MultiModelSerpAPISystem(ContextEngineeringMixin):
             GoogleScholarTool(self.serpapi_key, self),
             MultiEngineSearchTool(self.serpapi_key, self),
         ]
+
+    def create_use_case_tool_inventory(self) -> list[Tool]:
+        """Create the tool inventory that use-case recipes can resolve against."""
+        tools: list[Tool] = [
+            WebSearchTool(),
+            WebScraperTool(),
+            NewsSearchTool(),
+            PythonExecutorTool(),
+            DataAnalysisTool(),
+        ]
+        tools.extend(self.create_serpapi_tools())
+        return tools
 
     def _check_model_tool_support(self, model) -> bool:
         """Check if a model supports tool calling"""
@@ -1146,62 +1165,52 @@ MODEL-OPTIMIZED APPROACH:
         Args:
             default_model: Model to use for all workers (if not specified, uses role-based assignment)
         """
+        self.setup_use_case_workers("research", default_model=default_model)
 
-        # Create specialized tool sets
-        serpapi_tools = self.create_serpapi_tools()
+    def setup_use_case_workers(
+        self,
+        use_case_id: str = "research",
+        default_model: str | None = None,
+        worker_model_overrides: dict[str, str] | None = None,
+    ) -> UseCaseRecipe:
+        """Setup workers from a declarative K-LLM use-case recipe."""
+        recipe = get_use_case_recipe(use_case_id)
+        tool_inventory = self.create_use_case_tool_inventory()
+        resolved_tools = resolve_use_case_tools(recipe, tool_inventory)
 
-        if not serpapi_tools:
-            logger.warning("No SerpAPI tools available. System will have limited functionality.")
-            return
+        self.workers = {}
+        self.worker_tools = {}
+        self.active_use_case_recipe = recipe
+        self.active_use_case_tools = resolved_tools
 
-        # 🧠 Strategic Research Orchestrator
-        research_tools = [
-            t for t in serpapi_tools if t.name in ["google_search", "google_scholar", "multi_engine_search"]
-        ]
-        if research_tools:
+        overrides = worker_model_overrides or {}
+        for worker in recipe.workers:
+            model_override = overrides.get(worker.name) or default_model or worker.model_role
             self.create_specialized_worker(
-                name="search_researcher",
-                description="Strategic research specialist with multi-engine search and cross-validation capabilities.",
-                tools=research_tools,
-                agent_type="ToolCallingAgent",
-                model_override=default_model,  # Use the passed model if available
+                name=worker.name,
+                description=worker.description,
+                tools=resolved_tools.worker_tools.get(worker.name, []),
+                agent_type=worker.agent_type,
+                model_override=model_override,
             )
 
-        # 💰 E-commerce Intelligence Specialist
-        ecommerce_tools = [t for t in serpapi_tools if t.name in ["google_shopping", "google_search"]]
-        if ecommerce_tools:
-            self.create_specialized_worker(
-                name="ecommerce_analyst",
-                description="E-commerce and market analysis specialist with pricing intelligence.",
-                tools=ecommerce_tools,
-                agent_type="ToolCallingAgent",
-                model_override=default_model,  # Use the passed model if available
-            )
+        if not self.workers:
+            logger.warning("No workers were created for use case %s", recipe.id)
 
-        # 📍 Local Business Intelligence
-        local_tools = [t for t in serpapi_tools if t.name in ["google_maps_local", "google_search"]]
-        if local_tools:
-            self.create_specialized_worker(
-                name="local_business_analyst",
-                description="Local market and business intelligence specialist.",
-                tools=local_tools,
-                agent_type="ToolCallingAgent",
-                model_override=default_model,  # Use the passed model if available
-            )
+        return recipe
 
-        # 📚 Academic Research Specialist
-        academic_tools = [t for t in serpapi_tools if t.name in ["google_scholar", "google_search"]]
-        if academic_tools:
-            self.create_specialized_worker(
-                name="academic_researcher",
-                description="Academic research and citation analysis specialist.",
-                tools=academic_tools,
-                agent_type="ToolCallingAgent",
-                model_override=default_model,  # Use the passed model if available
-            )
+    def get_active_use_case_summary(self) -> dict[str, Any] | None:
+        """Return a summary for the active use-case setup."""
+        if not self.active_use_case_recipe or not self.active_use_case_tools:
+            return None
+        return summarize_use_case(self.active_use_case_recipe, self.active_use_case_tools)
 
     async def execute_multi_model_workflow(
-        self, task: str, timeout: float | None = None, orchestrator_model: str = "orchestrator"
+        self,
+        task: str,
+        timeout: float | None = None,
+        orchestrator_model: str = "orchestrator",
+        use_case_id: str = "research",
     ) -> str:
         """Execute workflow with multi-model coordination and optimization"""
 
@@ -1209,9 +1218,10 @@ MODEL-OPTIMIZED APPROACH:
         task_id = f"multimodel_task_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         self.current_task_context = TaskContext(task_id=task_id, objective=task, total_steps=10)
 
+        recipe = self.active_use_case_recipe or get_use_case_recipe(use_case_id)
         if not self.workers:
             # Use the same model for all workers as the orchestrator for consistency
-            self.setup_multi_model_workers(default_model=orchestrator_model)
+            recipe = self.setup_use_case_workers(use_case_id, default_model=orchestrator_model)
 
         if not self.workers:
             return json.dumps({"error": "No workers available. Please check API keys and configuration.", "task": task})
@@ -1226,7 +1236,11 @@ MODEL-OPTIMIZED APPROACH:
             # Prepare multi-model orchestrator context
             orchestrator_context = self.prepare_agent_context(task, "orchestrator")
 
-            available_specialists = "\n".join([f"- {name}: specialized agent" for name in self.workers])
+            recipe_workers = [worker for worker in recipe.workers if worker.name in self.workers]
+            available_specialists = "\n".join([f"- {worker.name}: {worker.description}" for worker in recipe_workers])
+            usage_examples = "\n".join(
+                [f'- {worker.name}(task="...") - {worker.description}' for worker in recipe_workers]
+            )
 
             # Enhanced orchestrator with multi-model awareness
             orchestrator_prompt = f"""
@@ -1234,15 +1248,18 @@ You are a CODE-BASED ORCHESTRATOR managing a team of AI specialist agents throug
 
 {orchestrator_context}
 
+USE CASE:
+- id: {recipe.id}
+- description: {recipe.description}
+- routing policy: {recipe.routing_policy}
+- output contract: {recipe.output_contract}
+
 AVAILABLE SPECIALIST AGENT TOOLS (call them as functions):
 {available_specialists}
 
 HOW TO USE THE AGENTS:
 Each specialist agent is available as a tool that can be called like a function:
-- academic_researcher(task="research query") - for historical/academic research
-- search_researcher(task="search query") - for general web research
-- ecommerce_analyst(task="product/market query") - for commerce analysis
-- local_business_analyst(task="business query") - for local business research
+{usage_examples}
 
 IMPORTANT INSTRUCTIONS:
 1. You MUST write Python code to call these agent tools
@@ -1255,9 +1272,9 @@ IMPORTANT INSTRUCTIONS:
 
 Example:
 ```python
-result = academic_researcher(task="Who was the biggest merchant in medieval Mali")
+result = {recipe_workers[0].name if recipe_workers else "search_researcher"}(task="Research the most important evidence")
 print(result)
-final_answer("Mansa Musa was the biggest merchant in medieval Mali, controlling vast gold and salt trade networks")
+final_answer("Complete answer that follows the use-case output contract")
 ```
 
 CURRENT TASK CONTEXT:
@@ -1267,7 +1284,7 @@ Write Python code to execute the task. Remember to STOP after providing the fina
 """
 
             # Create multi-model orchestrator with both SerpAPI tools and wrapped agent tools
-            orchestrator_tools = self.create_serpapi_tools()[:2] if self.serpapi_key else []
+            orchestrator_tools = list(self.active_use_case_tools.direct_tools) if self.active_use_case_tools else []
 
             # Add the wrapped worker agents as tools for the orchestrator
             orchestrator_tools.extend(list(self.worker_tools.values()))
@@ -1313,18 +1330,20 @@ Write Python code to execute the task. Remember to STOP after providing the fina
                     "math",
                     "statistics",
                 ],
-                max_steps=10,  # Reduced from 50 to prevent infinite loops
+                max_steps=recipe.max_steps,
             )
 
             # Execute with comprehensive tracking
-            if timeout:
-                result = await asyncio.wait_for(asyncio.to_thread(orchestrator.run, task), timeout=timeout)
+            effective_timeout = timeout if timeout is not None else recipe.timeout_seconds
+            if effective_timeout:
+                result = await asyncio.wait_for(asyncio.to_thread(orchestrator.run, task), timeout=effective_timeout)
             else:
                 result = await asyncio.to_thread(orchestrator.run, task)
 
             # Enhanced result processing
             final_result = {
                 "primary_result": result,
+                "use_case": self.get_active_use_case_summary(),
                 "search_performance": self.analyze_search_performance(),
                 "cross_engine_analysis": self._analyze_cross_engine_results(),
             }

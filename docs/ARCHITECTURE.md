@@ -69,3 +69,22 @@ GP-6: Architecture changes move with documentation. Update this document, design
 - Code execution: constrained Python execution and data analysis helpers.
 - MCP integration: MCP server/client examples and tool bridging.
 - Multi-model orchestration: model selection, specialized workers, and search engine comparison.
+
+## K-LLM Use-Case Recipes
+
+Multi-model orchestration can be configured through use-case recipes. A recipe
+defines K worker roles, model role preferences, tool bundles, routing policy,
+runtime limits, and an output contract.
+
+```mermaid
+flowchart LR
+    Task["User task"] --> Recipe["Use-case recipe"]
+    Recipe --> Coordinator["Coordinator LLM"]
+    Recipe --> Workers["K worker roles"]
+    Recipe --> Bundles["Tool bundles"]
+    Bundles --> Tools["Resolved tools"]
+    Workers --> AgentTools["Workers exposed as tools"]
+    Tools --> Coordinator
+    AgentTools --> Coordinator
+    Coordinator --> Result["Structured result"]
+```
