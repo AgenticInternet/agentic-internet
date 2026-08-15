@@ -1,6 +1,7 @@
 """Code execution tool for agents."""
 
 import ast
+import builtins
 import io
 import json
 import logging
@@ -20,7 +21,30 @@ from ..exceptions import CodeExecutionError, UnsafeCodeError
 
 logger = logging.getLogger(__name__)
 
+_BUILTIN_IMPORT = builtins.__import__
+
+
+def _guarded_import(
+    name: str,
+    globals_: dict[str, Any] | None = None,
+    locals_: dict[str, Any] | None = None,
+    fromlist: tuple[str, ...] = (),
+    level: int = 0,
+) -> Any:
+    """Restricted ``__import__`` for executed code.
+
+    C extensions (e.g. numpy reductions) import submodules at runtime through
+    the frame's ``__builtins__``; without this entry they crash with
+    ``KeyError: '__import__'``. The guard enforces the same module blocklist
+    as the AST validator, so aliased indirect imports stay blocked.
+    """
+    if name.split(".")[0] in _ASTSafetyValidator.BLOCKED_MODULES:
+        raise ImportError(f"import of blocked module '{name}' is not allowed")
+    return _BUILTIN_IMPORT(name, globals_, locals_, fromlist, level)
+
+
 ALLOWED_BUILTINS = {
+    "__import__": _guarded_import,
     "print": print,
     "len": len,
     "range": range,
