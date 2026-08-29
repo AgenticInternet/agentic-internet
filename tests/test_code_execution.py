@@ -107,6 +107,16 @@ class TestPythonExecutorTool:
         result = self.tool.forward("x = ().__class__.__bases__[0].__subclasses__()")
         assert "Error" in result
 
+    def test_indirect_import_alias_blocked(self):
+        # Aliasing __import__ bypasses the AST call check; the runtime guard must still block.
+        result = self.tool.forward('f = __import__\nresult = f("os")')
+        assert "blocked module" in result
+
+    def test_allowed_runtime_import(self):
+        # Allowed modules must still import through the guarded __import__.
+        result = self.tool.forward("import math\nresult = math.sqrt(4)")
+        assert "2.0" in result
+
 
 class TestDataAnalysisTool:
     def setup_method(self):
