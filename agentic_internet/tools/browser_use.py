@@ -10,7 +10,7 @@ from smolagents import Tool
 logger = logging.getLogger(__name__)
 
 try:
-    from browser_use_sdk import AsyncBrowserUse, BrowserUse
+    from browser_use_sdk.v4 import AsyncBrowserUse, BrowserUse
 
     HAS_BROWSER_USE = True
 except ImportError:
@@ -60,10 +60,13 @@ class BrowserUseTool(Tool):
             return "Browser Use not available. Check API key and browser-use-sdk installation."
 
         try:
-            result = self.client.tasks.run(task=task)
-            if result.done_output:
-                return result.done_output
-            return f"Task completed but no output was returned. Status: {getattr(result, 'status', 'unknown')}"
+            created = self.client.runs.create(task)
+            result = self.client.runs.wait_for_completion(created.id)
+            if result.result:
+                return str(result.result)
+            if result.error:
+                return f"Browser automation failed: {result.error}"
+            return f"Task completed but no output was returned. Status: {result.status.value}"
         except Exception as e:
             logger.error("Browser automation failed: %s", e)
             return f"Browser automation failed: {e}"
@@ -113,33 +116,21 @@ class AsyncBrowserUseTool(Tool):
     async def _run_simple(self, task: str) -> str:
         """Run a simple async task."""
         assert self.client is not None  # guaranteed by forward()
-        result = await self.client.tasks.run(task=task)
-        if result.done_output:
-            return result.done_output
-        return f"Task completed. Status: {getattr(result, 'status', 'completed')}"
+        created = await self.client.runs.create(task)
+        result = await self.client.runs.wait_for_completion(created.id)
+        if result.result:
+            return str(result.result)
+        if result.error:
+            return f"Browser automation failed: {result.error}"
+        return f"Task completed. Status: {result.status.value}"
 
     async def _run_with_stream(self, task: str) -> str:
         """Run a task with streaming updates."""
         assert self.client is not None  # guaranteed by forward()
-        # Create the task
-        created_task = await self.client.tasks.create(task=task)
-
-        updates = []
-        # Stream updates
-        async for update in self.client.tasks.stream(created_task.id):
-            if len(update.steps) > 0:
-                last_step = update.steps[-1]
-                updates.append(
-                    f"Step: {last_step.url if hasattr(last_step, 'url') else 'processing'} - {last_step.next_goal if hasattr(last_step, 'next_goal') else 'working'}"
-                )
-
-            if update.status == "finished":
-                if update.done_output:
-                    return update.done_output
-                else:
-                    return "Task completed.\nSteps performed:\n" + "\n".join(updates)
-
-        return "Task stream ended without completion."
+        # V4 exposes incremental events via polling. The Tool API returns only
+        # once, so wait on the lightweight status endpoint and return the final
+        # run summary without buffering potentially sensitive event payloads.
+        return await self._run_simple(task)
 
 
 class StructuredBrowserUseTool(Tool):
@@ -189,14 +180,16 @@ class StructuredBrowserUseTool(Tool):
     async def _extract_structured_data(self, task: str, schema: str | None = None) -> str:
         """Extract structured data from web pages."""
         assert self.client is not None  # guaranteed by forward()
-        # For now, we'll use the standard run method
-        # In a real implementation, you'd parse the schema and use it
-        result = await self.client.tasks.run(task=task)
+        # The schema is not sent until this tool validates and converts it into
+        # a V4 output contract; preserve today's free-form behavior for now.
+        created = await self.client.runs.create(task)
+        result = await self.client.runs.wait_for_completion(created.id)
 
-        if result.done_output:
-            return result.done_output
-        else:
-            return "No structured data extracted."
+        if result.result:
+            return str(result.result)
+        if result.error:
+            return f"Browser automation failed: {result.error}"
+        return "No structured data extracted."
 
 
 # Example Pydantic models for common extraction tasks
