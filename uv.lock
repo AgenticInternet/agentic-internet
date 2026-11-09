@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.11"
 resolution-markers = [
     "python_full_version >= '3.12'",
@@ -27,7 +27,7 @@ wheels = [
 [[package]]
 name = "agentic-internet"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "accelerate" },
     { name = "beautifulsoup4" },
@@ -1311,10 +1311,10 @@ resolution-markers = [
     "python_full_version < '3.12'",
 ]
 dependencies = [
-    { name = "jsonref", marker = "python_full_version < '3.12'" },
-    { name = "mcp", extra = ["ws"], marker = "python_full_version < '3.12'" },
-    { name = "pydantic", marker = "python_full_version < '3.12'" },
-    { name = "python-dotenv", marker = "python_full_version < '3.12'" },
+    { name = "jsonref" },
+    { name = "mcp", extra = ["ws"] },
+    { name = "pydantic" },
+    { name = "python-dotenv" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/d0/28/64fc666fa5d86bb1b048c167975d4ea19210f9f8571b64b26563739774ac/mcpadapt-0.1.19.tar.gz", hash = "sha256:dfab84fc75cc84a49a40bd61079773b1faf840227b74b82c71a7755b9c1957c5", size = 4227721, upload-time = "2025-10-16T07:11:56.736Z" }
 wheels = [
@@ -1329,10 +1329,10 @@ resolution-markers = [
     "python_full_version >= '3.12'",
 ]
 dependencies = [
-    { name = "jsonref", marker = "python_full_version >= '3.12'" },
-    { name = "mcp", extra = ["ws"], marker = "python_full_version >= '3.12'" },
-    { name = "pydantic", marker = "python_full_version >= '3.12'" },
-    { name = "python-dotenv", marker = "python_full_version >= '3.12'" },
+    { name = "jsonref" },
+    { name = "mcp", extra = ["ws"] },
+    { name = "pydantic" },
+    { name = "python-dotenv" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/e3/71/1bbbe157e55d30ab4a74fa878f6942cc0586e9820f03e03451a3d2297e9b/mcpadapt-0.1.20.tar.gz", hash = "sha256:4047c0da61e481dd0673a48936a427da9e6547c6cf0d580ff4e4761dcf058ed1", size = 4203656, upload-time = "2025-10-24T15:35:02.135Z" }
 wheels = [

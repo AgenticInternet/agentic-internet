@@ -28,6 +28,32 @@ app = typer.Typer(
 )
 console = Console()
 
+# Keep this list explicit: new secret fields must be covered by the CLI regression test.
+SENSITIVE_SETTINGS_FIELDS = frozenset(
+    {
+        "huggingface_token",
+        "openai_api_key",
+        "anthropic_api_key",
+        "openrouter_api_key",
+        "browser_use_api_key",
+        "exa_api_key",
+    }
+)
+CONFIG_REDACTION_MARKER = "<redacted>"
+
+
+def _redact_config_for_display(config: dict[str, Any]) -> dict[str, Any]:
+    """Return a configuration copy with all known credential fields masked."""
+    redacted = config.copy()
+    for field_name in SENSITIVE_SETTINGS_FIELDS:
+        if redacted.get(field_name) is not None:
+            redacted[field_name] = CONFIG_REDACTION_MARKER
+
+    model_config = redacted.get("model")
+    if isinstance(model_config, dict) and model_config.get("api_key") is not None:
+        model_config["api_key"] = CONFIG_REDACTION_MARKER
+    return redacted
+
 
 @app.command()
 def chat(
@@ -127,7 +153,7 @@ def config(
     """Manage configuration settings."""
     if show:
         # Display current configuration
-        config_dict = settings.model_dump()
+        config_dict = _redact_config_for_display(settings.model_dump())
         # Convert Path objects to strings for JSON serialization
         if "cache_dir" in config_dict and hasattr(config_dict["cache_dir"], "__fspath__"):
             config_dict["cache_dir"] = str(config_dict["cache_dir"])

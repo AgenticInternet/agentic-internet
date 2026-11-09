@@ -21,6 +21,7 @@ from smolagents import (
     ToolCallingAgent,
 )
 
+from agentic_internet.config.settings import settings
 from agentic_internet.tools.code_execution import DataAnalysisTool, PythonExecutorTool
 from agentic_internet.tools.web_search import NewsSearchTool, WebScraperTool, WebSearchTool
 
@@ -278,6 +279,9 @@ class ImageResult(BaseModel):
 
 
 # Context Engineering Components
+NON_REUSABLE_SEARCH_PARAMS = frozenset({"api_key", "q", "query"})
+
+
 @dataclass
 class ContextWindow:
     """Manages context window size and content prioritization"""
@@ -339,7 +343,11 @@ class AgentMemory:
             pattern["success_count"] += 1
             pattern["avg_results"] = (pattern["avg_results"] + success_metrics.get("result_count", 0)) / 2
             if success_metrics.get("params"):
-                pattern["best_params"] = success_metrics["params"]
+                pattern["best_params"] = {
+                    key: value
+                    for key, value in success_metrics["params"].items()
+                    if key not in NON_REUSABLE_SEARCH_PARAMS
+                }
 
     def get_search_recommendations(self, query_type: str, engine: str) -> dict[str, Any]:
         """Get recommendations based on past search patterns"""
@@ -436,7 +444,7 @@ class GoogleSearchTool(Tool):
             if self.context_engine:
                 recommendations = self.context_engine.memory.get_search_recommendations("web_search", "google")
                 if recommendations.get("best_params"):
-                    params.update(recommendations["best_params"])
+                    params = {**recommendations["best_params"], **params}
 
             search = GoogleSearch(params)
             results = search.get_dict()
@@ -991,9 +999,9 @@ class MultiModelSerpAPISystem(ContextEngineeringMixin):
             WebSearchTool(),
             WebScraperTool(),
             NewsSearchTool(),
-            PythonExecutorTool(),
-            DataAnalysisTool(),
         ]
+        if settings.tools.code_execution_enabled:
+            tools.extend([PythonExecutorTool(), DataAnalysisTool()])
         tools.extend(self.create_serpapi_tools())
         return tools
 

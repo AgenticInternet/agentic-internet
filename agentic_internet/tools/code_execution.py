@@ -1,6 +1,7 @@
 """Code execution tool for agents."""
 
 import ast
+import importlib
 import io
 import json
 import logging
@@ -9,6 +10,7 @@ import re
 import traceback
 from contextlib import redirect_stderr, redirect_stdout
 from datetime import datetime, timedelta
+from types import ModuleType
 from typing import Any
 
 import numpy as np
@@ -20,7 +22,27 @@ from ..exceptions import CodeExecutionError, UnsafeCodeError
 
 logger = logging.getLogger(__name__)
 
+ALLOWED_IMPORT_MODULES = frozenset({"numpy", "pandas", "requests", "datetime", "json", "re", "math"})
+
+
+def _restricted_import(
+    name: str,
+    globals: dict[str, Any] | None = None,
+    locals: dict[str, Any] | None = None,
+    fromlist: tuple[str, ...] = (),
+    level: int = 0,
+) -> ModuleType:
+    """Import only explicitly approved absolute module names."""
+    if level != 0:
+        raise ImportError("Relative imports are not permitted")
+    module_root = name.split(".", 1)[0]
+    if module_root not in ALLOWED_IMPORT_MODULES:
+        raise ImportError(f"Import of module '{name}' is not permitted")
+    return importlib.import_module(name)
+
+
 ALLOWED_BUILTINS = {
+    "__import__": _restricted_import,
     "print": print,
     "len": len,
     "range": range,
@@ -146,48 +168,22 @@ class _ASTSafetyValidator(ast.NodeVisitor):
         }
     )
 
-    BLOCKED_MODULES = frozenset(
-        {
-            "os",
-            "sys",
-            "subprocess",
-            "importlib",
-            "shutil",
-            "pathlib",
-            "socket",
-            "ctypes",
-            "signal",
-            "threading",
-            "multiprocessing",
-            "webbrowser",
-            "code",
-            "codeop",
-            "pickle",
-            "shelve",
-            "marshal",
-            "tempfile",
-            "glob",
-            "fnmatch",
-            "io",
-            "builtins",
-            "__builtin__",
-        }
-    )
-
     def __init__(self) -> None:
         self.violations: list[str] = []
 
     def visit_Import(self, node: ast.Import) -> None:
         for alias in node.names:
             module_root = alias.name.split(".")[0]
-            if module_root in self.BLOCKED_MODULES:
+            if module_root not in ALLOWED_IMPORT_MODULES:
                 self.violations.append(f"import of blocked module '{alias.name}'")
         self.generic_visit(node)
 
     def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
-        if node.module:
+        if node.level:
+            self.violations.append("relative imports are not permitted")
+        elif node.module:
             module_root = node.module.split(".")[0]
-            if module_root in self.BLOCKED_MODULES:
+            if module_root not in ALLOWED_IMPORT_MODULES:
                 self.violations.append(f"import from blocked module '{node.module}'")
         self.generic_visit(node)
 

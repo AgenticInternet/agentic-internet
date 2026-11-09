@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from dotenv import load_dotenv
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 load_dotenv()
 
@@ -154,8 +154,7 @@ class ModelConfig(BaseModel):
         description="Fallback models for each provider",
     )
 
-    class Config:
-        protected_namespaces = ()
+    model_config = ConfigDict(protected_namespaces=())
 
 
 class AgentConfig(BaseModel):
@@ -167,8 +166,7 @@ class AgentConfig(BaseModel):
     tool_choice: str = Field(default="auto", description="Tool selection strategy")
     planning_enabled: bool = Field(default=True, description="Enable multi-step planning")
 
-    class Config:
-        protected_namespaces = ()
+    model_config = ConfigDict(protected_namespaces=())
 
 
 class ToolConfig(BaseModel):
@@ -180,8 +178,7 @@ class ToolConfig(BaseModel):
     file_operations_enabled: bool = Field(default=True, description="Enable file operations")
     max_search_results: int = Field(default=5, description="Maximum search results")
 
-    class Config:
-        protected_namespaces = ()
+    model_config = ConfigDict(protected_namespaces=())
 
 
 class Settings(BaseModel):
@@ -223,8 +220,7 @@ class Settings(BaseModel):
     )
     log_level: str = Field(default="INFO", description="Logging level")
 
-    class Config:
-        protected_namespaces = ()
+    model_config = ConfigDict(protected_namespaces=())
 
     def model_post_init(self, __context):
         """Ensure cache directory exists."""

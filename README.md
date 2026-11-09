@@ -22,7 +22,7 @@ Core project docs:
 - **🔍 Web Search & Scraping**: Search the web, scrape content, and gather information
 - **🌍 Browser Use**: Interact with websites, fill forms, click buttons, and extract structured data in the cloud using the Browser Use Cloud SDK
 - **📰 News Analysis**: Find and analyze recent news on any topic
-- **💻 Code Execution**: Execute Python code safely in a sandboxed environment
+- **💻 Code Execution**: Execute Python with restricted builtins and an import allowlist; use a remote or container sandbox for untrusted code
 - **📊 Data Analysis**: Analyze datasets and generate insights
 - **🔬 Research Agent**: Conduct multi-depth research on any topic
 - **🛠️ Extensible Tools**: Easy to add custom tools and capabilities
@@ -434,7 +434,7 @@ agentic-internet/
 │   ├── utils/               # Utilities
 │   │   └── model_utils.py
 │   └── examples/            # Usage examples
-├── tests/                   # Test suite (102 tests)
+├── tests/                   # Pytest suite
 ├── pyproject.toml           # Project configuration
 ├── README.md
 └── .env                     # Environment variables
@@ -510,7 +510,7 @@ All models are accessed via [OpenRouter](https://openrouter.ai/) for unified API
 
 ### Running Tests
 ```bash
-# Run all tests (102 tests)
+# Run all tests
 uv run pytest
 
 # Run with verbose output

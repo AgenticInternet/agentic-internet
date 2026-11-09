@@ -72,6 +72,8 @@ Run from the worktree root. Install/sync once before implementation; subsequent 
 - `agentic_internet/agents/internet_agent.py`
 - `agentic_internet/agents/multi_model_serpapi.py`
 - `pyproject.toml`
+- `MANIFEST.in` (create; exclude tests from the sdist)
+- `uv.lock` (uv-generated metadata only: project source `virtual` → `editable`, lock-format revision, and equivalent marker normalization; no package/version/resolved-dependency changes)
 - `README.md`
 - `docs/QUALITY_SCORE.md`
 - `docs/exec-plans/active/.gitkeep` (create)
@@ -84,7 +86,7 @@ Run from the worktree root. Install/sync once before implementation; subsequent 
 
 **Out of scope:**
 
-- `uv.lock` and all dependency version changes/removals.
+- All dependency version changes/removals. The sole `uv.lock` exception is the uv-generated metadata update described above.
 - Timeout/cancellation/process isolation, shared-state concurrency, model routing/catalogs, MCP trust/environment, scraper SSRF, Browser Use, E2B serialization, and broad CLI output/flag redesign.
 - CI action version changes and Dependabot configuration.
 - Any `.env` file, credential values, ignored artifacts, or main-checkout files ending in ` 2`.
@@ -165,11 +167,11 @@ In `MultiModelSerpAPISystem.create_use_case_tool_inventory`:
 
 ### Step 6: Restore packaging and the golden directory
 
-- Add an explicit PEP 517 build system using `setuptools.build_meta` and a current setuptools lower bound. Configure package discovery so only `agentic_internet*` packages are included; do not add runtime dependencies or edit `uv.lock`.
+- Add an explicit PEP 517 build system using `setuptools.build_meta` and a current setuptools lower bound. Configure package discovery so only `agentic_internet*` packages are included and use a minimal `MANIFEST.in` to keep tests out of the sdist; do not add runtime dependencies. If uv changes the project source from virtual to editable and normalizes lock metadata, permit only those metadata updates.
 - Create tracked empty `docs/exec-plans/active/.gitkeep` so a clean checkout satisfies the existing golden check.
 - Run `uv sync --frozen --dev` once after the build-system change so the project and console script are installed.
 
-**Verify**: `python3 .opencode/tools/golden_principles.py`, `uv lock --check`, `uv build`, and `uv run agentic-internet --help` → all succeed. Confirm `git status` shows no `uv.lock` modification.
+**Verify**: `python3 .opencode/tools/golden_principles.py`, `uv lock --check`, `uv build`, and `uv run agentic-internet --help` → all succeed. Confirm the `uv.lock` diff contains no package/version/resolved-dependency changes beyond uv-generated metadata and equivalent marker normalization.
 
 ### Step 7: Correct live documentation metrics and safety wording
 
@@ -208,7 +210,7 @@ Inspect `git status` and the full diff. Only in-scope files may change. Commit a
 - [ ] Every listed Step 1 regression has a meaningful test and passes after the fix.
 - [ ] `make check` equivalent commands listed in Step 8 all exit 0.
 - [ ] `uv build` succeeds and `uv run agentic-internet --help` exits 0.
-- [ ] `uv.lock` is unchanged.
+- [ ] `uv.lock` contains only uv-generated metadata changes; all package versions and resolved dependency identities are unchanged.
 - [ ] No out-of-scope file is modified; no secret value or ignored artifact is staged.
 - [ ] The implementation commit exists on `fix/stabilization-baseline`.
 
@@ -219,7 +221,7 @@ Stop and report if:
 - Any in-scope source file differs from the described baseline before edits.
 - A verification step fails twice after a reasonable focused fix.
 - The import fix seems to require unrestricted builtins, a new runtime dependency, or changes outside the listed file.
-- Package build configuration pulls test/example/root-level legacy modules into the distribution or requires editing `uv.lock`.
+- Package build configuration pulls test/example/root-level legacy modules into the distribution or requires dependency/version changes beyond uv-generated metadata updates.
 - A test requires real credentials or external network calls.
 - The implementation would benefit from changing timeout, concurrency, model-routing, MCP, Browser Use, or E2B behavior.
 

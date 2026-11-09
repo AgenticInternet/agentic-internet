@@ -56,6 +56,15 @@ class TestASTSafetyValidator:
     def test_allows_math_operations(self):
         assert self._violations("import math\nresult = math.sqrt(4)") == []
 
+    def test_blocks_module_outside_allowlist(self):
+        violations = self._violations("import urllib.request")
+        assert len(violations) > 0
+        assert "urllib.request" in violations[0]
+
+    def test_blocks_relative_import(self):
+        violations = self._violations("from . import local_module")
+        assert violations == ["relative imports are not permitted"]
+
     def test_blocks_chained_dunder_access(self):
         violations = self._violations("().__class__.__bases__[0].__subclasses__()")
         assert len(violations) > 0
@@ -77,6 +86,21 @@ class TestPythonExecutorTool:
         # np is pre-loaded in the namespace (no import needed)
         result = self.tool.forward("result = np.array([1,2,3]).sum()")
         assert "6" in result
+
+    def test_allowed_import_execution(self):
+        result = self.tool.forward("import math\nresult = math.sqrt(4)")
+        assert "Result:" in result
+        assert "2.0" in result
+
+    def test_allowed_from_import_execution(self):
+        result = self.tool.forward("from math import sqrt\nresult = sqrt(9)")
+        assert "Result:" in result
+        assert "3.0" in result
+
+    def test_blocks_unapproved_import(self):
+        result = self.tool.forward("import urllib.request")
+        assert result.startswith("Error:")
+        assert "urllib.request" in result
 
     def test_blocks_os_import(self):
         result = self.tool.forward("import os\nos.system('ls')")
