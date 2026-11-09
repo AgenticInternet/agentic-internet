@@ -16,6 +16,8 @@ Status date: 2026-11-09
 
 - Plan 001 restored allowlisted generated-code imports, CLI credential redaction, safe SerpAPI parameter memory, explicit agent tool/step controls, and package build behavior. Its full quality and packaging gates passed.
 - Plan 002 refreshed the OpenRouter mappings, added CLI/central catalog parity and exact ModelManager routing, and validated the live key/catalog without exposing credentials.
+- Plan 003 consolidated examples, architecture diagrams, and exec-plans into canonical locations and removed obsolete root/generated files without changing production behavior.
+- Plan 004 split 18 multi-model classes into focused modules with original-path compatibility. Independent AST comparison confirmed identical implementations, and 249 tests plus one opt-in skip passed.
 - Packaging metadata normalization preserved dependency versions and resolved dependency identities. The static catalog remains an offline fallback; `models --live` is the dynamic inventory path.
 
 ## OpenRouter Catalog
@@ -27,4 +29,4 @@ The curated catalog contains **65 aliases**, focused on standard GPT-6 Terra, So
 - **Execution lifecycle:** process isolation, resource limits, cancellation, concurrent-execution safety, and provider timeout/outage policy still require design and implementation.
 - **CLI:** decomposition and behavior-coverage improvements remain; preserve existing command behavior while restructuring.
 - **Dependencies:** review advisory reachability and compatibility before targeted upgrades rather than applying blanket version changes; Python 3.11 remains supported.
-- **Structure and routing:** Plan 004 covers the compatibility-preserving multi-model split. Full model-registry consolidation and provider fallback attribution remain separate follow-ups.
+- **Structure and routing:** The compatibility-preserving multi-model split is complete. Full model-registry consolidation and provider fallback attribution remain separate follow-ups.

@@ -4,7 +4,7 @@ Initial grades are intentionally conservative. Raise them with evidence from tes
 
 | Area | Grade | Evidence | Next Step |
 |------|-------|----------|-----------|
-| Architecture | C | Clear modules, layer rules documented, golden_principles + mypy clean; multi-model implementations are split into focused modules, but no ADRs and orchestration behavior coverage remains limited | Add ADRs and deepen orchestration behavior coverage |
+| Architecture | B | Focused multi-model modules with original-path compatibility, golden_principles + mypy clean, and 18 classes verified equivalent by AST; no ADRs and orchestration behavior coverage remains limited | Add ADRs and deepen orchestration behavior coverage |
 | Tests | C | The tracked pytest suite and on-demand coverage reports provide verification; multi_model and CLI behavior coverage remain the main gaps | Cover the multi_model package and CLI, and split unit/integration gates in CI |
 | Typing | B | Mypy passes with zero errors across package source files and is enforced as a CI gate; remaining `Any` boundaries tracked via scoped type-ignores | Tighten remaining tool/agent `Any` return boundaries |
 | Reliability | C | Fallback providers exist in places; orchestrator now 80% covered, but no timeout/outage policy | Define provider outage behavior and timeouts |
