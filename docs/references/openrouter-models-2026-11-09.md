@@ -4,7 +4,7 @@
 
 - Source: [OpenRouter model overview](https://openrouter.ai/docs/guides/overview/models) and [`GET /api/v1/models`](https://openrouter.ai/api/v1/models).
 - Live inventory: 461 models at review time.
-- Static project aliases after refresh: 65, including the unchanged default and OpenRouter fallback.
+- Static project aliases after refresh: 64, including the unchanged default and OpenRouter fallback.
 - Every configured alias was checked against the live inventory with `OPENROUTER_LIVE_TESTS=1 uv run --frozen --no-sync pytest -p no:cacheprovider -m integration tests/test_openrouter_models.py`.
 - The operator-provided OpenRouter key was validated through `/api/v1/key` with HTTP 200; its value was not printed or stored.
 
@@ -33,9 +33,8 @@ The following 20 aliases were absent from the live catalog and were removed:
 | Alias | OpenRouter ID |
 |-------|---------------|
 | `gpt-6.1-terra` | `openai/gpt-6.1-terra` |
-| `gpt-6.1-terra-pro` | `openai/gpt-6.1-terra-pro` |
+| `gpt-6.1-sol` | `openai/gpt-6.1-sol` |
 | `gpt-6-luna` | `openai/gpt-6-luna` |
-| `gpt-6-luna-pro` | `openai/gpt-6-luna-pro` |
 | `claude-sonnet-5.5` | `anthropic/claude-sonnet-5.5` |
 | `claude-haiku-5.5` | `anthropic/claude-haiku-5.5` |
 | `gemini-4-argon` | `google/gemini-4-argon` |
@@ -57,7 +56,7 @@ The following 20 aliases were absent from the live catalog and were removed:
 | `openrouter-auto` | `openrouter/auto` |
 | `openrouter-auto-code` | `openrouter/auto-code` |
 
-The LiteLLM-facing values in `ModelConfig.openrouter_models` prepend `openrouter/` to these provider IDs.
+The LiteLLM-facing values in `ModelConfig.openrouter_models` prepend `openrouter/` to these provider IDs. Pro variants are intentionally excluded to control provider costs; the curated GPT-6 choices are standard Terra, Sol, and Luna only.
 
 ## Routing and default behavior
 

@@ -16,6 +16,7 @@ def test_static_cli_catalog_uses_central_aliases():
 def test_curated_recent_aliases_are_configured():
     recent = {
         "gpt-6.1-terra",
+        "gpt-6.1-sol",
         "gpt-6-luna",
         "claude-sonnet-5.5",
         "claude-haiku-5.5",
@@ -39,6 +40,13 @@ def test_curated_recent_aliases_are_configured():
         "openrouter-auto-code",
     }
     assert recent <= settings.model.openrouter_models.keys()
+
+
+def test_pro_variants_are_not_configured():
+    configured = settings.model.openrouter_models
+    assert "gpt-6.1-terra-pro" not in configured
+    assert "gpt-6.1-sol-pro" not in configured
+    assert "gpt-6-luna-pro" not in configured
 
 
 def test_default_and_fallback_remain_in_central_catalog():

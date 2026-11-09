@@ -14,7 +14,7 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED | REJECTED
 ## Dependency notes
 
 - Plan 001 completed with 213 passing tests, clean Ruff/mypy/golden checks, and verified wheel/sdist/console-script behavior.
-- Plan 002 completed with 65 live-validated aliases, exact ModelManager routing, and 220 passing tests plus one opt-in skip. Live key and catalog checks passed; bounded free-provider response limitations are documented without a paid retry.
+- Plan 002 completed with exact ModelManager routing and live key/catalog checks. A follow-up cost constraint removed Pro variants and added standard Sol, leaving 64 live-validated aliases focused on Terra, Sol, and Luna. Bounded free-provider response limitations are documented without a paid retry.
 - Packaging required uv-generated lock metadata normalization and a minimal `MANIFEST.in`; no dependency versions or resolved dependency identities changed.
 - Broader dependency modernization, model-registry consolidation, and execution lifecycle redesign must follow this baseline. They are intentionally outside Plan 001.
 

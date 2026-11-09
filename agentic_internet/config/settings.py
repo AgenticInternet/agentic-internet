@@ -47,9 +47,8 @@ class ModelConfig(BaseModel):
             "gpt-oss-120b": "openrouter/openai/gpt-oss-120b",
             "o3": "openrouter/openai/o3",
             "gpt-6.1-terra": "openrouter/openai/gpt-6.1-terra",
-            "gpt-6.1-terra-pro": "openrouter/openai/gpt-6.1-terra-pro",
+            "gpt-6.1-sol": "openrouter/openai/gpt-6.1-sol",
             "gpt-6-luna": "openrouter/openai/gpt-6-luna",
-            "gpt-6-luna-pro": "openrouter/openai/gpt-6-luna-pro",
             # Google
             "gemini-3.5-flash": "openrouter/google/gemini-3.5-flash",
             "gemini-3.1-flash-lite": "openrouter/google/gemini-3.1-flash-lite",

@@ -492,7 +492,7 @@ The static catalog is a curated offline fallback. Run `agentic-internet models -
 | Provider | Models | Best For |
 |----------|--------|----------|
 | Anthropic | Claude Opus 4.8, Sonnet 5.5, Haiku 5.5 | Reasoning, planning, orchestration |
-| OpenAI | GPT-6.1 Terra/Pro, GPT-6 Luna/Pro, GPT-5.2 | General tasks, coding, reasoning |
+| OpenAI | GPT-6.1 Terra, GPT-6.1 Sol, GPT-6 Luna, GPT-5.2 | General tasks, coding, reasoning |
 | Google | Gemini 4 Argon, Gemini 3.5 Flash, Gemini 2.5 Pro | Multimodal analysis, fast responses |
 | DeepSeek | V4.1 Flash, V3.2, R1 | Efficient and open-weight reasoning |
 | Qwen | Qwen3.8 Max Prime, Qwen3.7 Max, Qwen3 Coder | Coding, multilingual synthesis |

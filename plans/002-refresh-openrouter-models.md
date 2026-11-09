@@ -29,8 +29,8 @@ A live 2026-11-09 comparison found 461 OpenRouter models and 20 stale aliases am
 
 Preserve every currently valid existing alias not listed for removal. Add a focused recent set including at least:
 
-- `gpt-6.1-terra` and `gpt-6.1-terra-pro` → `openai/gpt-6.1-terra` and `openai/gpt-6.1-terra-pro`
-- `gpt-6-luna` and `gpt-6-luna-pro` → `openai/gpt-6-luna` and `openai/gpt-6-luna-pro`
+- `gpt-6.1-terra` and `gpt-6.1-sol` → `openai/gpt-6.1-terra` and `openai/gpt-6.1-sol`
+- `gpt-6-luna` → `openai/gpt-6-luna`
 - `claude-sonnet-5.5` and `claude-haiku-5.5` → corresponding `anthropic/` IDs
 - `gemini-4-argon` → `google/gemini-4-argon`
 - `kimi-k3.1-pro` → `moonshotai/kimi-k3.1-pro`
@@ -144,3 +144,7 @@ Source `~/.zshenv` only for commands needing the key. Do not print its value. Ve
 - Static aliases are an offline convenience, not a guarantee of provider availability. `models --live` remains the dynamic inventory path.
 - Future catalog updates should preserve CLI/central parity and rerun the opt-in live alias test.
 - Actual provider fallback attribution and full registry consolidation remain follow-up work.
+
+## Follow-up: standard GPT-6 tiers only
+
+To control provider costs, `gpt-6.1-terra-pro` and `gpt-6-luna-pro` were removed after the initial refresh. `gpt-6.1-sol` was added, so the curated GPT-6 choices are standard Terra, Sol, and Luna only. A regression test excludes all Pro variants.

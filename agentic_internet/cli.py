@@ -436,7 +436,7 @@ STATIC_MODEL_CATALOG: dict[str, list[dict[str, Any]]] = {
     ],
     "research": [
         {"name": "claude-sonnet-5.5", "provider": "openrouter", "desc": "Claude Sonnet 5.5 - research synthesis"},
-        {"name": "gpt-6.1-terra-pro", "provider": "openrouter", "desc": "GPT-6.1 Terra Pro - deep analysis"},
+        {"name": "gpt-6.1-sol", "provider": "openrouter", "desc": "GPT-6.1 Sol - deep analysis"},
         {"name": "gemini-4-argon", "provider": "openrouter", "desc": "Gemini 4 Argon - multimodal research"},
         {"name": "qwen3.8-max-prime", "provider": "openrouter", "desc": "Qwen3.8 Max Prime - evidence synthesis"},
         {"name": "command-a-plus", "provider": "openrouter", "desc": "Cohere Command A Plus - grounded research"},
@@ -451,7 +451,7 @@ STATIC_MODEL_CATALOG: dict[str, list[dict[str, Any]]] = {
     ],
     "science": [
         {"name": "claude-sonnet-5.5", "provider": "openrouter", "desc": "Claude Sonnet 5.5 - technical reasoning"},
-        {"name": "gpt-6.1-terra-pro", "provider": "openrouter", "desc": "GPT-6.1 Terra Pro - scientific analysis"},
+        {"name": "gpt-6.1-sol", "provider": "openrouter", "desc": "GPT-6.1 Sol - scientific analysis"},
         {"name": "glm-5.3-prime", "provider": "openrouter", "desc": "GLM 5.3 Prime - technical synthesis"},
         {"name": "step-5-preview", "provider": "openrouter", "desc": "Step 5 Preview - reasoning and tools"},
         {"name": "command-a-plus", "provider": "openrouter", "desc": "Command A Plus - research and citations"},
