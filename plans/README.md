@@ -8,6 +8,8 @@ Generated during the repository improvement review on 2026-11-09. Execute plans 
 |------|-------|----------|--------|------------|--------|
 | [001](001-stabilization-baseline.md) | Restore a safe, testable stabilization baseline | P1 | M | — | DONE |
 | [002](002-refresh-openrouter-models.md) | Refresh and validate OpenRouter model mappings | P1 | M | 001 | DONE |
+| [003](003-repository-hygiene.md) | Consolidate repository hygiene and documentation structure | P1 | M | 002 | IN PROGRESS |
+| [004](004-split-multi-model.md) | Split multi-model orchestration into focused modules | P2 | L | 003 | TODO |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED | REJECTED
 
