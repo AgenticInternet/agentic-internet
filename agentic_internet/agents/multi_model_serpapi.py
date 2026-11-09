@@ -42,6 +42,7 @@ class ModelManager:
     def __init__(self):
         # Initialize comprehensive model suite
         api_key = os.environ.get("OPENROUTER_API_KEY")
+        self.api_key = api_key
         if not api_key:
             logger.warning("OPENROUTER_API_KEY not found. Model initialization will be skipped.")
             self.models_available = False
@@ -57,29 +58,29 @@ class ModelManager:
             logger.warning("Failed to initialize Claude model: %s", e)
             self.claude = None
 
-        # Initialize all other models with error handling (updated Feb 2026)
+        # Initialize all other models with error handling (updated November 2026)
         models_config = [
             ("deepseek", "openrouter/deepseek/deepseek-r1-0528", 0.6),
             ("deepseek_chat", "openrouter/deepseek/deepseek-v3.2", 0.6),
-            ("deepseek_speciale", "openrouter/deepseek/deepseek-v3.2-speciale", 0.6),
+            ("deepseek_speciale", "openrouter/deepseek/deepseek-v4.1-flash-1017", 0.6),
             ("mistral_small", "openrouter/mistralai/mistral-small-3.2-24b-instruct", 0.8),
             ("sonar", "openrouter/perplexity/sonar-pro", 0.8),
             ("sonar_reasoning", "openrouter/perplexity/sonar-reasoning-pro", None),
-            ("openai_o4", "openrouter/openai/o4-mini", None),
+            ("openai_o4", "openrouter/openai/gpt-6-luna", None),
             ("mistral_large", "openrouter/mistralai/mistral-large-2512", 0.8),
             ("gemini", "openrouter/google/gemini-3-flash-preview", 0.7),
             ("gpt_oss", "openrouter/openai/gpt-oss-120b", None),
-            ("gemini_pro", "openrouter/google/gemini-3-pro-preview", 0.6),
+            ("gemini_pro", "openrouter/google/gemini-4-argon", 0.6),
             ("chatgpt", "openrouter/openai/gpt-5.2-chat", 0.5),
             ("qwen3_coder", "openrouter/qwen/qwen3-coder", 0.6),
-            ("qwen_big", "openrouter/qwen/qwen3-235b-a22b", 0.6),
+            ("qwen_big", "openrouter/qwen/qwen3.8-max-prime", 0.6),
             ("llama4", "openrouter/meta-llama/llama-4-maverick", 0.6),
-            ("xai", "openrouter/x-ai/grok-4.1-fast", 0.8),
+            ("xai", "openrouter/x-ai/grok-4.3", 0.8),
             ("gpt5", "openrouter/openai/gpt-5.2", 0.6),
             ("kimi", "openrouter/moonshotai/kimi-k2.5", 0.6),
             ("devstral", "openrouter/mistralai/devstral-2512", 0.6),
-            ("mimo", "openrouter/xiaomi/mimo-v2-flash", 0.7),
-            ("minimax", "openrouter/minimax/minimax-m2.1", 0.6),
+            ("mimo", "openrouter/liquid/lfm-3-1.7b", 0.7),
+            ("minimax", "openrouter/minimax/minimax-m3.1-flash", 0.6),
         ]
 
         for attr_name, model_id, temp in models_config:
@@ -97,6 +98,21 @@ class ModelManager:
         """Strategic model assignment based on agent role and capabilities"""
         if not self.models_available:
             return None
+
+        # Resolve explicit aliases centrally so a requested model is never replaced by an older fallback.
+        configured_model_id = settings.model.openrouter_models.get(role.lower())
+        if configured_model_id:
+            try:
+                return LiteLLMModel(
+                    model_id=configured_model_id,
+                    api_key=self.api_key,
+                    temperature=settings.model.temperature,
+                    max_tokens=settings.model.max_tokens,
+                    top_p=settings.model.top_p,
+                )
+            except Exception as e:
+                logger.warning("Failed to initialize configured model %s: %s", role, e)
+                return None
 
         # First check if the role corresponds to a direct model name
         # This allows users to specify models like 'gpt-5', 'claude-4', etc.

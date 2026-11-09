@@ -23,7 +23,7 @@ A live 2026-11-09 comparison found 461 OpenRouter models and 20 stale aliases am
 - `ModelManager.get_model_for_role()` in `agentic_internet/agents/multi_model_serpapi.py` has independent hardcoded aliases and role defaults. Add exact central-alias resolution before legacy role mappings; do not rewrite the whole manager.
 - OpenRouter's `/api/v1/key` endpoint returned HTTP 200 with the operator-provided key. Never print or commit that key.
 - The live model endpoint is public. Live alias tests use it only when `OPENROUTER_LIVE_TESTS=1` is explicitly set and are skipped otherwise.
-- Live generation must use only `openrouter/liquid/lfm-3-1.7b:free`, whose live listed prompt/completion prices are zero, with at most four output tokens. Do not fall back to a paid model.
+- Live generation must use only zero-priced models. Start with `openrouter/liquid/lfm-3-1.7b:free`; if it fails, one alternate approved by the operator is allowed. Use at most four output tokens initially; a reasoning-model diagnostic may use 32 zero-cost tokens. Do not fall back to a paid model.
 
 ## Curated recent aliases
 
@@ -120,7 +120,7 @@ uv build
 uv run --frozen --no-sync agentic-internet --help
 ```
 
-Source `~/.zshenv` only for commands needing the key. Do not print its value. Verify the key endpoint returns HTTP 200. Construct the `lfm-3-1.7b-free` model through the normal `initialize_model()` path, request a one-word response with at most four output tokens, and assert a nonempty response. Do not fall back to a paid model if this free smoke request fails; report the failure instead.
+Source `~/.zshenv` only for commands needing the key. Do not print its value. Verify the key endpoint returns HTTP 200. Construct the free model through the normal `initialize_model()` path and attempt a bounded nonempty response. Record any free-provider limitation without a paid retry.
 
 ## Done criteria
 

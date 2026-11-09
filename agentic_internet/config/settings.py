@@ -25,17 +25,17 @@ class ModelConfig(BaseModel):
     max_tokens: int = Field(default=2048, description="Maximum tokens for generation")
     top_p: float = Field(default=0.95, description="Top-p sampling parameter")
 
-    # Model provider configurations (refreshed from OpenRouter snapshot on 2026-05-31)
+    # Model provider configurations (refreshed from OpenRouter snapshot on 2026-11-09)
     openrouter_models: dict[str, str] = Field(
         default={
             # Anthropic
             "claude-opus-4.8": "openrouter/anthropic/claude-opus-4.8",
-            "claude-opus-4.8-fast": "openrouter/anthropic/claude-opus-4.8-fast",
-            "claude-opus-4.7-fast": "openrouter/anthropic/claude-opus-4.7-fast",
             "claude-opus-4.5": "openrouter/anthropic/claude-opus-4.5",
             "claude-sonnet-4.5": "openrouter/anthropic/claude-sonnet-4.5",
             "claude-opus-4.1": "openrouter/anthropic/claude-opus-4.1",
             "claude-haiku-4.5": "openrouter/anthropic/claude-haiku-4.5",
+            "claude-sonnet-5.5": "openrouter/anthropic/claude-sonnet-5.5",
+            "claude-haiku-5.5": "openrouter/anthropic/claude-haiku-5.5",
             # OpenAI
             "gpt-chat-latest": "openrouter/openai/gpt-chat-latest",
             "gpt-5.2": "openrouter/openai/gpt-5.2",
@@ -45,65 +45,67 @@ class ModelConfig(BaseModel):
             "gpt-5.1": "openrouter/openai/gpt-5.1",
             "gpt-5": "openrouter/openai/gpt-5",
             "gpt-oss-120b": "openrouter/openai/gpt-oss-120b",
-            "o4-mini": "openrouter/openai/o4-mini",
             "o3": "openrouter/openai/o3",
-            "o3-mini": "openrouter/openai/o3-mini",
+            "gpt-6.1-terra": "openrouter/openai/gpt-6.1-terra",
+            "gpt-6.1-terra-pro": "openrouter/openai/gpt-6.1-terra-pro",
+            "gpt-6-luna": "openrouter/openai/gpt-6-luna",
+            "gpt-6-luna-pro": "openrouter/openai/gpt-6-luna-pro",
             # Google
             "gemini-3.5-flash": "openrouter/google/gemini-3.5-flash",
             "gemini-3.1-flash-lite": "openrouter/google/gemini-3.1-flash-lite",
             "gemini-3-flash": "openrouter/google/gemini-3-flash-preview",
-            "gemini-3-pro": "openrouter/google/gemini-3-pro-preview",
             "gemini-2.5-pro": "openrouter/google/gemini-2.5-pro",
             "gemini-2.5-flash": "openrouter/google/gemini-2.5-flash",
+            "gemini-4-argon": "openrouter/google/gemini-4-argon",
             # DeepSeek
             "deepseek-v3.2": "openrouter/deepseek/deepseek-v3.2",
-            "deepseek-v3.2-speciale": "openrouter/deepseek/deepseek-v3.2-speciale",
             "deepseek-r1": "openrouter/deepseek/deepseek-r1-0528",
+            "deepseek-v4.1-flash": "openrouter/deepseek/deepseek-v4.1-flash-1017",
             # xAI
             "grok-4.3": "openrouter/x-ai/grok-4.3",
             "grok-build-0.1": "openrouter/x-ai/grok-build-0.1",
-            "grok-4.1-fast": "openrouter/x-ai/grok-4.1-fast",
-            "grok-4": "openrouter/x-ai/grok-4",
-            "grok-4-fast": "openrouter/x-ai/grok-4-fast",
-            "grok-code-fast": "openrouter/x-ai/grok-code-fast-1",
             # Mistral
             "mistral-medium-3.5": "openrouter/mistralai/mistral-medium-3-5",
             "devstral-2": "openrouter/mistralai/devstral-2512",
             "mistral-large": "openrouter/mistralai/mistral-large-2512",
             "mistral-medium-3.1": "openrouter/mistralai/mistral-medium-3.1",
             "mistral-small": "openrouter/mistralai/mistral-small-3.2-24b-instruct",
-            "magistral-medium": "openrouter/mistralai/magistral-medium-2506",
+            "mistral-large-4": "openrouter/mistralai/mistral-large-4-0",
             # Qwen
             "qwen3-coder": "openrouter/qwen/qwen3-coder",
-            "qwen3-coder-plus": "openrouter/qwen/qwen3-coder-plus",
             "qwen3-coder-flash": "openrouter/qwen/qwen3-coder-flash",
             "qwen3-coder-next": "openrouter/qwen/qwen3-coder-next",
-            "qwen3-235b": "openrouter/qwen/qwen3-235b-a22b",
-            "qwen3-max": "openrouter/qwen/qwen3-max",
             "qwen3.7-max": "openrouter/qwen/qwen3.7-max",
+            "qwen3.8-max-prime": "openrouter/qwen/qwen3.8-max-prime",
             # Meta
             "llama-4-maverick": "openrouter/meta-llama/llama-4-maverick",
             "llama-4-scout": "openrouter/meta-llama/llama-4-scout",
             # MoonshotAI
             "kimi-k2.5": "openrouter/moonshotai/kimi-k2.5",
             "kimi-k2": "openrouter/moonshotai/kimi-k2",
+            "kimi-k3.1-pro": "openrouter/moonshotai/kimi-k3.1-pro",
             # Perplexity
             "sonar-pro": "openrouter/perplexity/sonar-pro",
             "sonar": "openrouter/perplexity/sonar",
             "sonar-reasoning-pro": "openrouter/perplexity/sonar-reasoning-pro",
             "sonar-deep-research": "openrouter/perplexity/sonar-deep-research",
             # MiniMax
-            "minimax-m2.1": "openrouter/minimax/minimax-m2.1",
-            # Xiaomi
-            "mimo-v2-flash": "openrouter/xiaomi/mimo-v2-flash",
-            # Alibaba
-            "tongyi-deepsearch": "openrouter/alibaba/tongyi-deepresearch-30b-a3b",
-            # Recent agentic / multimodal models
+            "minimax-m3.1-flash": "openrouter/minimax/minimax-m3.1-flash",
+            # Other agentic / multimodal models
             "step-3.7-flash": "openrouter/stepfun/step-3.7-flash",
-            "ring-2.6-1t": "openrouter/inclusionai/ring-2.6-1t",
+            "step-5-preview": "openrouter/stepfun/step-5-preview",
             "perceptron-mk1": "openrouter/perceptron/perceptron-mk1",
-            "granite-4.1-8b": "openrouter/ibm-granite/granite-4.1-8b",
-            "owl-alpha": "openrouter/openrouter/owl-alpha",
+            "perceptron-mk1.5": "openrouter/perceptron/perceptron-mk1.5",
+            "glm-5.3-prime": "openrouter/z-ai/glm-5.3-prime",
+            "command-a-plus": "openrouter/cohere/command-a-plus",
+            "solar-mini4": "openrouter/upstage/solar-mini4",
+            "lfm-3-1.7b": "openrouter/liquid/lfm-3-1.7b",
+            "lfm-3-1.7b-free": "openrouter/liquid/lfm-3-1.7b:free",
+            "nemotron-3.5-super-vl-free": "openrouter/nvidia/nemotron-3.5-super-vl:free",
+            "hy4": "openrouter/tencent/hy4",
+            "particle-1": "openrouter/particle-ai/particle-1",
+            "openrouter-auto": "openrouter/openrouter/auto",
+            "openrouter-auto-code": "openrouter/openrouter/auto-code",
         },
         description="Available OpenRouter models",
     )

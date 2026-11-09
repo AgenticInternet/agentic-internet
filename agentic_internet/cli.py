@@ -406,6 +406,59 @@ def news(
         raise typer.Exit(1) from e
 
 
+STATIC_MODEL_CATALOG: dict[str, list[dict[str, Any]]] = {
+    "general": [
+        {
+            "name": "claude-opus-4.8",
+            "provider": "openrouter",
+            "desc": "Anthropic Claude Opus 4.8 - top reasoning & planning",
+            "default": True,
+        },
+        {"name": "gpt-6.1-terra", "provider": "openrouter", "desc": "OpenAI GPT-6.1 Terra - general agent work"},
+        {"name": "claude-sonnet-5.5", "provider": "openrouter", "desc": "Anthropic Claude Sonnet 5.5 - reasoning"},
+        {"name": "gemini-4-argon", "provider": "openrouter", "desc": "Google Gemini 4 Argon - multimodal agents"},
+        {"name": "kimi-k3.1-pro", "provider": "openrouter", "desc": "Moonshot Kimi K3.1 Pro - long-context agents"},
+        {"name": "qwen3.8-max-prime", "provider": "openrouter", "desc": "Qwen3.8 Max Prime - synthesis and coding"},
+        {"name": "deepseek-v4.1-flash", "provider": "openrouter", "desc": "DeepSeek V4.1 Flash - efficient reasoning"},
+    ],
+    "code": [
+        {
+            "name": "openrouter-auto-code",
+            "provider": "openrouter",
+            "desc": "OpenRouter automatic coding model selection",
+        },
+        {"name": "gpt-6.1-terra", "provider": "openrouter", "desc": "OpenAI GPT-6.1 Terra - agentic coding"},
+        {"name": "kimi-k3.1-pro", "provider": "openrouter", "desc": "Moonshot Kimi K3.1 Pro - code and reasoning"},
+        {"name": "qwen3.8-max-prime", "provider": "openrouter", "desc": "Qwen3.8 Max Prime - coding and analysis"},
+        {"name": "deepseek-v4.1-flash", "provider": "openrouter", "desc": "DeepSeek V4.1 Flash - efficient coding"},
+        {"name": "mistral-large-4", "provider": "openrouter", "desc": "Mistral Large 4 - code and tool use"},
+        {"name": "qwen3-coder", "provider": "openrouter", "desc": "Qwen3 Coder - established coding model"},
+    ],
+    "research": [
+        {"name": "claude-sonnet-5.5", "provider": "openrouter", "desc": "Claude Sonnet 5.5 - research synthesis"},
+        {"name": "gpt-6.1-terra-pro", "provider": "openrouter", "desc": "GPT-6.1 Terra Pro - deep analysis"},
+        {"name": "gemini-4-argon", "provider": "openrouter", "desc": "Gemini 4 Argon - multimodal research"},
+        {"name": "qwen3.8-max-prime", "provider": "openrouter", "desc": "Qwen3.8 Max Prime - evidence synthesis"},
+        {"name": "command-a-plus", "provider": "openrouter", "desc": "Cohere Command A Plus - grounded research"},
+        {"name": "sonar-deep-research", "provider": "openrouter", "desc": "Perplexity Sonar Deep Research"},
+    ],
+    "news": [
+        {"name": "sonar-pro", "provider": "openrouter", "desc": "Perplexity Sonar Pro - real-time web search"},
+        {"name": "claude-haiku-5.5", "provider": "openrouter", "desc": "Claude Haiku 5.5 - fast summarization"},
+        {"name": "gpt-6-luna", "provider": "openrouter", "desc": "GPT-6 Luna - efficient news analysis"},
+        {"name": "gemini-4-argon", "provider": "openrouter", "desc": "Gemini 4 Argon - multimodal current events"},
+        {"name": "minimax-m3.1-flash", "provider": "openrouter", "desc": "MiniMax M3.1 Flash - fast analysis"},
+    ],
+    "science": [
+        {"name": "claude-sonnet-5.5", "provider": "openrouter", "desc": "Claude Sonnet 5.5 - technical reasoning"},
+        {"name": "gpt-6.1-terra-pro", "provider": "openrouter", "desc": "GPT-6.1 Terra Pro - scientific analysis"},
+        {"name": "glm-5.3-prime", "provider": "openrouter", "desc": "GLM 5.3 Prime - technical synthesis"},
+        {"name": "step-5-preview", "provider": "openrouter", "desc": "Step 5 Preview - reasoning and tools"},
+        {"name": "command-a-plus", "provider": "openrouter", "desc": "Command A Plus - research and citations"},
+    ],
+}
+
+
 @app.command()
 def models(
     list_all: bool = typer.Option(True, "--list", "-l", help="List all available models"),
@@ -451,101 +504,7 @@ def models(
             console.print("[dim]Source: https://openrouter.ai/api/v1/models[/dim]")
             return
 
-    # Define model categories with default configuration (refreshed May 2026)
-    model_catalog: dict[str, list[dict[str, Any]]] = {
-        "general": [
-            {
-                "name": "claude-opus-4.8",
-                "provider": "openrouter",
-                "desc": "Anthropic Claude Opus 4.8 - top reasoning & planning",
-                "default": True,
-            },
-            {"name": "gemini-3.5-flash", "provider": "openrouter", "desc": "Google Gemini 3.5 Flash - fast multimodal"},
-            {"name": "qwen3.7-max", "provider": "openrouter", "desc": "Qwen3.7 Max - long-context agent workloads"},
-            {
-                "name": "gpt-chat-latest",
-                "provider": "openrouter",
-                "desc": "OpenAI GPT Chat Latest - stable latest chat alias",
-            },
-            {"name": "deepseek-v3.2", "provider": "openrouter", "desc": "DeepSeek V3.2 - strong open-weight model"},
-            {
-                "name": "grok-4.3",
-                "provider": "openrouter",
-                "desc": "xAI Grok 4.3 - reasoning and instruction following",
-            },
-            {"name": "step-3.7-flash", "provider": "openrouter", "desc": "StepFun Step 3.7 Flash - multimodal MoE"},
-            {"name": "kimi-k2.5", "provider": "openrouter", "desc": "Moonshot Kimi K2.5 - long context specialist"},
-            {"name": "sonar-pro", "provider": "openrouter", "desc": "Perplexity Sonar Pro - search-optimized"},
-        ],
-        "code": [
-            {"name": "grok-build-0.1", "provider": "openrouter", "desc": "xAI Grok Build 0.1 - coding agents"},
-            {"name": "qwen3.7-max", "provider": "openrouter", "desc": "Qwen3.7 Max - agent-centric coding"},
-            {"name": "qwen3-coder", "provider": "openrouter", "desc": "Qwen3 Coder - top coding model"},
-            {"name": "qwen3-coder-plus", "provider": "openrouter", "desc": "Qwen3 Coder Plus - enhanced coding"},
-            {"name": "devstral-2", "provider": "openrouter", "desc": "Mistral Devstral 2 - agentic coding"},
-            {"name": "gpt-5.2-codex", "provider": "openrouter", "desc": "OpenAI GPT-5.2 Codex - code generation"},
-            {
-                "name": "deepseek-v3.2-speciale",
-                "provider": "openrouter",
-                "desc": "DeepSeek V3.2 Speciale - specialized tasks",
-            },
-            {"name": "grok-code-fast", "provider": "openrouter", "desc": "xAI Grok Code Fast - rapid code generation"},
-            {
-                "name": "granite-4.1-8b",
-                "provider": "openrouter",
-                "desc": "IBM Granite 4.1 8B - efficient enterprise coding",
-            },
-        ],
-        "research": [
-            {
-                "name": "claude-opus-4.8",
-                "provider": "openrouter",
-                "desc": "Anthropic Claude Opus 4.8 - high-end reasoning",
-            },
-            {
-                "name": "gemini-3.5-flash",
-                "provider": "openrouter",
-                "desc": "Google Gemini 3.5 Flash - multimodal analysis",
-            },
-            {"name": "perceptron-mk1", "provider": "openrouter", "desc": "Perceptron Mk1 - vision/video reasoning"},
-            {"name": "ring-2.6-1t", "provider": "openrouter", "desc": "inclusionAI Ring 2.6 1T - thinking model"},
-            {
-                "name": "deepseek-r1",
-                "provider": "openrouter",
-                "desc": "DeepSeek R1 - advanced reasoning chain-of-thought",
-            },
-            {"name": "sonar-deep-research", "provider": "openrouter", "desc": "Perplexity Sonar Deep Research"},
-            {"name": "sonar-reasoning-pro", "provider": "openrouter", "desc": "Perplexity Sonar Reasoning Pro"},
-        ],
-        "news": [
-            {"name": "sonar-pro", "provider": "openrouter", "desc": "Perplexity Sonar Pro - real-time web search"},
-            {"name": "sonar", "provider": "openrouter", "desc": "Perplexity Sonar - fast web search"},
-            {"name": "gemini-3.5-flash", "provider": "openrouter", "desc": "Google Gemini 3.5 Flash - fast multimodal"},
-            {"name": "llama-4-scout", "provider": "openrouter", "desc": "Meta Llama 4 Scout - open source"},
-            {"name": "mistral-small", "provider": "openrouter", "desc": "Mistral Small 3.2 - efficient & fast"},
-            {"name": "mistral-medium-3.5", "provider": "openrouter", "desc": "Mistral Medium 3.5 - business analysis"},
-        ],
-        "science": [
-            {"name": "deepseek-r1", "provider": "openrouter", "desc": "DeepSeek R1 - advanced reasoning"},
-            {
-                "name": "claude-opus-4.8",
-                "provider": "openrouter",
-                "desc": "Anthropic Claude Opus 4.8 - advanced reasoning",
-            },
-            {
-                "name": "gemini-3.5-flash",
-                "provider": "openrouter",
-                "desc": "Google Gemini 3.5 Flash - multimodal analysis",
-            },
-            {
-                "name": "perceptron-mk1",
-                "provider": "openrouter",
-                "desc": "Perceptron Mk1 - video and embodied reasoning",
-            },
-            {"name": "qwen3-235b", "provider": "openrouter", "desc": "Qwen3 235B - massive context synthesis"},
-            {"name": "magistral-medium", "provider": "openrouter", "desc": "Mistral Magistral Medium - specialized"},
-        ],
-    }
+    model_catalog = STATIC_MODEL_CATALOG
 
     if list_all:
         # Create a table for models
