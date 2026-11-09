@@ -7,6 +7,7 @@ Generated during the repository improvement review on 2026-11-09. Execute plans 
 | Plan | Title | Priority | Effort | Depends on | Status |
 |------|-------|----------|--------|------------|--------|
 | [001](001-stabilization-baseline.md) | Restore a safe, testable stabilization baseline | P1 | M | — | DONE |
+| [002](002-refresh-openrouter-models.md) | Refresh and validate OpenRouter model mappings | P1 | M | 001 | IN PROGRESS |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED | REJECTED
 
