@@ -19,3 +19,4 @@ Store durable library and provider notes here, including `llms.txt` files or sho
 | [OpenRouter models - 2026-11-09](openrouter-models-2026-11-09.md) | Latest verified OpenRouter inventory, stale-alias cleanup, recent mappings, and live validation |
 | [OpenRouter models - 2026-05-31](openrouter-models-2026-05-31.md) | Historical OpenRouter inventory and repo model-catalog gaps |
 | [SmolAgents features - 2026-05-31](smolagents-features-2026-05-31.md) | Current SmolAgents features and Code Mode implications |
+| [LiteLLM and uv security review - 2026-11-09](security/litellm-uv-cve-review-2026-11-09.md) | Recent advisory verification, client/proxy reachability, and remediation priorities |
