@@ -6,7 +6,7 @@ Exec-plans capture non-trivial work before implementation and preserve handoff c
 
 | Plan | Area | Depends on | Status |
 |------|------|------------|--------|
-| _None_ | - | - | - |
+| [005: Upgrade LiteLLM and pin uv security tooling](exec-plans/active/2026-11-09-litellm-dependency-security.md) | Security, dependencies, CI | 004 | IN PROGRESS |
 
 ## Status Maps
 
