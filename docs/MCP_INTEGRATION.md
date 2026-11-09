@@ -197,7 +197,7 @@ print(f"Servers: {manager.list_servers()}")
 
 ### Example FastMCP Server
 
-See `agentic_internet/examples/example_mcp_server.py` for a complete example.
+See `examples/example_mcp_server.py` for a complete example.
 
 ```python
 from fastmcp import FastMCP
@@ -225,10 +225,10 @@ if __name__ == "__main__":
 
 ```bash
 # For stdio (used by AgenticInternet)
-python example_mcp_server.py
+python examples/example_mcp_server.py
 
 # For HTTP (testing/debugging)
-fastmcp run example_mcp_server.py --transport http --port 8000
+fastmcp run examples/example_mcp_server.py --transport http --port 8000
 ```
 
 ## Integration with InternetAgent
@@ -384,7 +384,7 @@ with mcp_tools(server_path="./server.py", trust_remote_code=True) as tools:
 
 ## Examples
 
-See the `agentic_internet/examples/` directory for complete examples:
+See the `examples/` directory for complete examples:
 
 - `example_mcp_server.py`: Sample MCP server with various tools
 - `example_mcp_usage.py`: Comprehensive usage examples
@@ -393,10 +393,10 @@ Run the examples:
 
 ```bash
 # Run usage examples
-python -m agentic_internet.examples.example_mcp_usage
+python examples/example_mcp_usage.py
 
 # Run the example server (for testing)
-python -m agentic_internet.examples.example_mcp_server
+python examples/example_mcp_server.py
 ```
 
 ## API Reference

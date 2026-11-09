@@ -13,6 +13,7 @@ Core project docs:
 | Doc | Purpose |
 |-----|---------|
 | [Architecture](docs/ARCHITECTURE.md) | System layers, dependency direction, golden principles |
+| [Codebase diagrams](docs/CODEBASE_DIAGRAM.md) | Mermaid system diagrams and code anchors |
 | [Design](docs/DESIGN.md) | Python conventions, API patterns, logging |
 | [Security](docs/SECURITY.md) | Secret handling, input validation, data classes |
 | [Plans](docs/PLANS.md) | Active and completed exec-plans |
@@ -309,6 +310,13 @@ MultiEngineSearchTool
 
 ## 💡 Examples
 
+Standalone scripts live in [`examples/`](examples/). Run them from the repository root, for example:
+
+```bash
+python examples/basic_usage.py
+python examples/advanced_usage.py
+```
+
 ### Web Research
 ```python
 from agentic_internet import ResearchAgent
@@ -431,9 +439,9 @@ agentic-internet/
 │   │   └── mcp_integration.py
 │   ├── config/              # Configuration
 │   │   └── settings.py
-│   ├── utils/               # Utilities
-│   │   └── model_utils.py
-│   └── examples/            # Usage examples
+│   └── utils/               # Utilities
+│       └── model_utils.py
+├── examples/                # Usage examples
 ├── tests/                   # Pytest suite
 ├── pyproject.toml           # Project configuration
 ├── README.md

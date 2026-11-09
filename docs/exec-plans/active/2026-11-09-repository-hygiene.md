@@ -96,7 +96,7 @@ Use `git mv` for the diagram and all plan files listed above. Merge status/depen
 
 ### Step 4: Refresh current status and validate
 
-Update `docs/CODEBASE_STATUS.md` with current 2026-11-09 status, current 64-alias catalog, completed stabilization work, and remaining execution-lifecycle/CLI/dependency follow-ups. Then run:
+Update `docs/CODEBASE_STATUS.md` with current 2026-11-09 status, current 65-alias catalog, completed stabilization work, and remaining execution-lifecycle/CLI/dependency follow-ups. Then run:
 
 ```bash
 uv run --frozen --no-sync ruff check agentic_internet tests

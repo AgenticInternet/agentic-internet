@@ -10,8 +10,9 @@
 | Document | Purpose |
 |----------|---------|
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System shape, layer rules, golden principles |
+| [docs/CODEBASE_DIAGRAM.md](docs/CODEBASE_DIAGRAM.md) | Mermaid codebase diagrams and code anchors |
 | [docs/DESIGN.md](docs/DESIGN.md) | Python conventions, API patterns, logging conventions |
-| [docs/PLANS.md](docs/PLANS.md) | Active exec-plans index |
+| [docs/PLANS.md](docs/PLANS.md) | Canonical active and completed exec-plans index |
 | [docs/QUALITY_SCORE.md](docs/QUALITY_SCORE.md) | Domain health grades and tech debt tracker |
 | [docs/RELIABILITY.md](docs/RELIABILITY.md) | Critical paths, SLO placeholders, rollback policy |
 | [docs/SECURITY.md](docs/SECURITY.md) | Security invariants, auth/secrets guidance, data classes |
@@ -22,8 +23,11 @@
 ```text
 AGENTS.md                          <- you are here
 ├── agentic_internet/               <- package source
+├── examples/                       <- usage examples
 ├── tests/                          <- pytest suite
 ├── docs/ARCHITECTURE.md            <- layer model and dependency rules
+├── docs/CODEBASE_DIAGRAM.md        <- Mermaid codebase diagrams
+├── docs/PLANS.md                   <- canonical exec-plan index
 ├── docs/design-docs/index.md       <- architectural decisions
 ├── docs/exec-plans/active/         <- in-flight plans
 ├── docs/product-specs/index.md     <- product specs

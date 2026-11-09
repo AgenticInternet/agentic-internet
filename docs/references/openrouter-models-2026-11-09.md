@@ -4,7 +4,7 @@
 
 - Source: [OpenRouter model overview](https://openrouter.ai/docs/guides/overview/models) and [`GET /api/v1/models`](https://openrouter.ai/api/v1/models).
 - Live inventory: 461 models at review time.
-- Static project aliases after refresh: 64, including the unchanged default and OpenRouter fallback.
+- Static project aliases after refresh: 65, including the unchanged default and OpenRouter fallback.
 - Every configured alias was checked against the live inventory with `OPENROUTER_LIVE_TESTS=1 uv run --frozen --no-sync pytest -p no:cacheprovider -m integration tests/test_openrouter_models.py`.
 - The operator-provided OpenRouter key was validated through `/api/v1/key` with HTTP 200; its value was not printed or stored.
 
