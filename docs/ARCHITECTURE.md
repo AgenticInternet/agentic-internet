@@ -27,7 +27,7 @@ flowchart LR
 | Configuration | `agentic_internet/config/`, `.env.example` | Environment-derived settings and provider configuration |
 | Tools | `agentic_internet/tools/` | Search, browser, MCP, and code execution capabilities |
 | Agents | `agentic_internet/agents/` | Agent behaviors built from smolagents and project tools |
-| Orchestration | `search_orchestrator.py`, `multi_model_serpapi.py`, `code_mode.py` | Multi-step routing, worker selection, and task coordination |
+| Orchestration | `search_orchestrator.py`, `multi_model/`, `multi_model_serpapi.py` (compatibility), `code_mode.py` | Multi-step routing, worker selection, and task coordination |
 | Runtime surfaces | `agentic_internet/cli.py`, `agentic_internet/__main__.py`, `examples/` | Human-facing CLI and runnable examples |
 | Verification | `tests/`, `test_*.py` | Behavioral and regression coverage |
 
@@ -69,6 +69,21 @@ GP-6: Architecture changes move with documentation. Update this document, design
 - Code execution: constrained Python execution and data analysis helpers.
 - MCP integration: MCP server/client examples and tool bridging.
 - Multi-model orchestration: model selection, specialized workers, and search engine comparison.
+
+## Multi-Model Package Layout
+
+The original orchestration is preserved while its implementations are organized by responsibility:
+
+| Path | Contents |
+|------|----------|
+| `agentic_internet/agents/multi_model/model_manager.py` | `ModelManager`, exact aliases, and role defaults |
+| `agentic_internet/agents/multi_model/schemas.py` | SerpAPI result schemas |
+| `agentic_internet/agents/multi_model/context.py` | Context, memory, task tracking, and the context-engineering mixin |
+| `agentic_internet/agents/multi_model/tools.py` | SerpAPI adapters and `AgentTool` |
+| `agentic_internet/agents/multi_model/system.py` | `MultiModelSerpAPISystem` recipe setup and workflow execution |
+| `agentic_internet/agents/multi_model_serpapi.py` | Compatibility re-exports for the original import path |
+
+The package's canonical re-exports and the compatibility module reference the same objects; this split does not redesign orchestration behavior.
 
 ## K-LLM Use-Case Recipes
 

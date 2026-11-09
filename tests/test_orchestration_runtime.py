@@ -61,7 +61,7 @@ def test_summarize_use_case_includes_k_and_workers():
 
 @pytest.mark.parametrize(("enabled", "expected"), [(False, False), (True, True)])
 def test_use_case_inventory_respects_code_execution_setting(monkeypatch, enabled, expected):
-    monkeypatch.setattr("agentic_internet.agents.multi_model_serpapi.ModelManager", lambda: SimpleNamespace())
+    monkeypatch.setattr("agentic_internet.agents.multi_model.system.ModelManager", lambda: SimpleNamespace())
     monkeypatch.setattr(settings.tools, "code_execution_enabled", enabled)
     system = MultiModelSerpAPISystem(serpapi_key="")
 

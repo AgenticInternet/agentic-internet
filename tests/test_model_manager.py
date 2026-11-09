@@ -16,7 +16,7 @@ def test_model_manager_resolves_central_alias_exactly(alias):
 
     with (
         patch.dict(os.environ, {"OPENROUTER_API_KEY": "synthetic-key"}),
-        patch("agentic_internet.agents.multi_model_serpapi.LiteLLMModel") as model_cls,
+        patch("agentic_internet.agents.multi_model.model_manager.LiteLLMModel") as model_cls,
     ):
         model_cls.side_effect = lambda **kwargs: SimpleNamespace(**kwargs)
         manager = ModelManager()

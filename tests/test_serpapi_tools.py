@@ -24,7 +24,7 @@ def test_sequential_searches_preserve_current_query_and_explicit_params():
     engine = ContextEngineeringMixin()
     tool = GoogleSearchTool(api_key="synthetic-key", context_engine=engine)
 
-    with patch("agentic_internet.agents.multi_model_serpapi.GoogleSearch", FakeGoogleSearch):
+    with patch("agentic_internet.agents.multi_model.tools.GoogleSearch", FakeGoogleSearch):
         tool.forward("first-query", language="en")
         tool.forward("second-query", language="fr")
 

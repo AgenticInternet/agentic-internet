@@ -4,8 +4,8 @@ Initial grades are intentionally conservative. Raise them with evidence from tes
 
 | Area | Grade | Evidence | Next Step |
 |------|-------|----------|-----------|
-| Architecture | C | Clear modules, layer rules documented, golden_principles + mypy clean; no ADRs and `multi_model_serpapi.py` is a 1.3k-line module with limited behavior coverage | Add ADRs and decompose the orchestration god-module |
-| Tests | C | The tracked pytest suite and on-demand coverage reports provide verification; multi_model and CLI behavior coverage remain the main gaps | Cover multi_model_serpapi/cli and split unit/integration gates in CI |
+| Architecture | C | Clear modules, layer rules documented, golden_principles + mypy clean; multi-model implementations are split into focused modules, but no ADRs and orchestration behavior coverage remains limited | Add ADRs and deepen orchestration behavior coverage |
+| Tests | C | The tracked pytest suite and on-demand coverage reports provide verification; multi_model and CLI behavior coverage remain the main gaps | Cover the multi_model package and CLI, and split unit/integration gates in CI |
 | Typing | B | Mypy passes with zero errors across package source files and is enforced as a CI gate; remaining `Any` boundaries tracked via scoped type-ignores | Tighten remaining tool/agent `Any` return boundaries |
 | Reliability | C | Fallback providers exist in places; orchestrator now 80% covered, but no timeout/outage policy | Define provider outage behavior and timeouts |
 | Security | C | Secret placeholders documented and trufflehog secret scan runs in CI | Audit code execution and browser automation boundaries |
@@ -17,7 +17,7 @@ Initial grades are intentionally conservative. Raise them with evidence from tes
 |----|------|-------|-------|--------|
 | QS-1 | Typing | mypy errors (was 67 across 16 files) | TBD | closed |
 | QS-2 | Style | `ruff format --check` reformat drift (was 21 files) | TBD | closed |
-| QS-3 | Tests | Coverage remains uneven; multi_model_serpapi and CLI behavior coverage need improvement | TBD | open |
+| QS-3 | Tests | Coverage remains uneven; multi_model package and CLI behavior coverage need improvement | TBD | open |
 
 ## Grading Rubric
 

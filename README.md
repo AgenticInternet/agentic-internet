@@ -429,7 +429,13 @@ agentic-internet/
 │   ├── agents/              # Agent implementations
 │   │   ├── internet_agent.py
 │   │   ├── basic_agent.py
-│   │   ├── multi_model_serpapi.py
+│   │   ├── multi_model/       # Focused multi-model implementations
+│   │   │   ├── model_manager.py
+│   │   │   ├── schemas.py
+│   │   │   ├── context.py
+│   │   │   ├── tools.py
+│   │   │   └── system.py
+│   │   ├── multi_model_serpapi.py  # Compatibility re-exports
 │   │   ├── search_orchestrator.py
 │   │   └── specialized_agents.py
 │   ├── tools/               # Custom tools

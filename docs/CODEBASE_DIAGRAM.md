@@ -195,9 +195,9 @@ flowchart TB
 | `specialized` | `agentic_internet/agents/specialized_agents.py` |
 | `search_orch` | `agentic_internet/agents/search_orchestrator.py` (`SearchOrchestrator`) |
 | `search_wrap` | `agentic_internet/agents/search_orchestrator.py` (`SearchAgentWrapper`) |
-| `model_manager` | `agentic_internet/agents/multi_model_serpapi.py` (`ModelManager`) |
-| `mm_system` | `agentic_internet/agents/multi_model_serpapi.py` (`MultiModelSerpAPISystem`) |
-| `context_eng` | `agentic_internet/agents/multi_model_serpapi.py` (`ContextEngineeringMixin`) |
+| `model_manager` | `agentic_internet/agents/multi_model/model_manager.py` (`ModelManager`) |
+| `mm_system` | `agentic_internet/agents/multi_model/system.py` (`MultiModelSerpAPISystem`) |
+| `context_eng` | `agentic_internet/agents/multi_model/context.py` (`ContextEngineeringMixin`) |
 | `use_cases` | `agentic_internet/agents/use_cases.py` |
 | `orch_runtime` | `agentic_internet/agents/orchestration_runtime.py` |
 | `code_mode` | `agentic_internet/agents/code_mode.py` |
@@ -205,7 +205,7 @@ flowchart TB
 | `exa_tools` | `agentic_internet/tools/exa_search.py` |
 | `browser_tools` | `agentic_internet/tools/browser_use.py` |
 | `code_tools` | `agentic_internet/tools/code_execution.py` |
-| `serpapi_tools` | `agentic_internet/agents/multi_model_serpapi.py` |
+| `serpapi_tools` | `agentic_internet/agents/multi_model/tools.py` |
 | `mcp_tools_group` | `agentic_internet/tools/mcp_integration.py` |
 | `settings` | `agentic_internet/config/settings.py` (`Settings`) |
 | `model_config` | `agentic_internet/config/settings.py` (`ModelConfig`) |
@@ -265,7 +265,7 @@ flowchart TB
 - Agent composition: `agentic_internet/agents/internet_agent.py` (`_create_agent`)
 - Specialized inheritance: `agentic_internet/agents/specialized_agents.py`
 - Search wrappers: `agentic_internet/agents/search_orchestrator.py`
-- Multi-model inheritance: `agentic_internet/agents/multi_model_serpapi.py`
+- Multi-model inheritance: `agentic_internet/agents/multi_model/system.py` (`MultiModelSerpAPISystem`) and `agentic_internet/agents/multi_model/context.py` (`ContextEngineeringMixin`)
 - Code Mode facade: `agentic_internet/agents/code_mode.py`
 
 ---
@@ -318,9 +318,9 @@ flowchart LR
 |------|------|
 | `recipes` | `agentic_internet/agents/use_cases.py` (`BUILT_IN_USE_CASES`) |
 | `runtime` | `agentic_internet/agents/orchestration_runtime.py` |
-| `mgr` | `agentic_internet/agents/multi_model_serpapi.py` (`ModelManager.get_model_for_role`) |
-| `workers` | `agentic_internet/agents/multi_model_serpapi.py` (`setup_use_case_workers`) |
-| `orch_code` | `agentic_internet/agents/multi_model_serpapi.py` (`execute_multi_model_workflow`) |
+| `mgr` | `agentic_internet/agents/multi_model/model_manager.py` (`ModelManager.get_model_for_role`) |
+| `workers` | `agentic_internet/agents/multi_model/system.py` (`setup_use_case_workers`) |
+| `orch_code` | `agentic_internet/agents/multi_model/system.py` (`execute_multi_model_workflow`) |
 
 ---
 
@@ -522,7 +522,7 @@ flowchart TB
 | `_create_model_for_provider` | `agentic_internet/utils/model_utils.py` |
 | `initialize_model` | `agentic_internet/utils/model_utils.py` |
 | `get_any_available_model` | `agentic_internet/utils/model_utils.py` |
-| Exact multi-model aliases | `agentic_internet/agents/multi_model_serpapi.py` (`ModelManager.get_model_for_role`) |
+| Exact multi-model aliases | `agentic_internet/agents/multi_model/model_manager.py` (`ModelManager.get_model_for_role`) |
 | Current OpenRouter snapshot | `docs/references/openrouter-models-2026-11-09.md` |
 
 ---
@@ -611,7 +611,7 @@ flowchart TB
 | No message queue or event bus | Confirmed | ThreadPoolExecutor and asyncio are used for concurrent/async flows. |
 | smolagents is the core framework | Confirmed | ToolCallingAgent, CodeAgent, Tool, and model adapters come from smolagents. `BasicAgent` is a project-local fallback, not a smolagents class. |
 | OpenRouter is the primary model gateway | Confirmed | The default is `openrouter/anthropic/claude-opus-4.8`; direct OpenAI, Anthropic, and HuggingFace paths also exist. |
-| SerpAPI tools remain coupled to multi-model code | Confirmed | Search/Shopping/Maps/Scholar/MultiEngine tools live in `agents/multi_model_serpapi.py`, not the tools package. |
+| SerpAPI tools remain outside the shared tools package | Confirmed | Search/Shopping/Maps/Scholar/MultiEngine tools live in `agents/multi_model/tools.py`; the original module path only re-exports them. |
 | Local Python execution is not a security sandbox | Confirmed | `PythonExecutorTool` uses AST checks and an import allowlist, but its own documentation says determined attackers may escape. Use remote/container isolation for untrusted code. |
 | Browser Use v4 structured output is incomplete | Confirmed | `StructuredBrowserUseTool` accepts a schema but currently returns free-form output without sending or validating that schema. |
 | No authentication or user management | Confirmed | The package is a single-user CLI/library with provider-key authentication only. |
