@@ -9,7 +9,7 @@
 - **Risk**: MED (large import/re-export refactor)
 - **Depends on**: plans/003-repository-hygiene.md (DONE)
 - **Category**: tech-debt, architecture, tests
-- **Planned at**: commit `9181cbc`, 2026-11-09
+- **Planned at**: commit `7b761cb`, 2026-11-09
 
 ## Why this matters
 
