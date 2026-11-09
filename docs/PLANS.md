@@ -6,7 +6,7 @@ Exec-plans capture non-trivial work before implementation and preserve handoff c
 
 | Plan | Area | Depends on | Status |
 |------|------|------------|--------|
-| [005: Upgrade LiteLLM and pin uv security tooling](exec-plans/active/2026-11-09-litellm-dependency-security.md) | Security, dependencies, CI | 004 | IN PROGRESS |
+| _None_ | - | - | - |
 
 ## Status Maps
 
@@ -22,6 +22,7 @@ Exec-plans capture non-trivial work before implementation and preserve handoff c
 | [002: Refresh and validate OpenRouter model mappings](exec-plans/completed/2026-11-09-refresh-openrouter-models.md) | OpenRouter catalog and routing | 001 | DONE |
 | [003: Consolidate repository hygiene and documentation structure](exec-plans/completed/2026-11-09-repository-hygiene.md) | Tech debt, DX, docs | 002 | DONE |
 | [004: Split multi-model orchestration into focused modules](exec-plans/completed/2026-11-09-split-multi-model.md) | Multi-model orchestration | 003 | DONE |
+| [005: Upgrade LiteLLM and pin uv security tooling](exec-plans/completed/2026-11-09-litellm-dependency-security.md) | Security, dependencies, CI | 004 | DONE |
 | [K-LLM Use-Case Recipes](exec-plans/completed/2026-06-01-k-llm-use-case-recipes.md) | Multi-model orchestration | — | completed |
 | [Initial Project Setup](exec-plans/completed/2026-05-30-initial-setup.md) | Global project foundation | — | completed |
 | [Code Mode MCP Agent](exec-plans/completed/2026-02-23-feat-code-mode-mcp-agent-plan.md) | Code mode and MCP integration | — | completed |
@@ -32,7 +33,8 @@ Exec-plans capture non-trivial work before implementation and preserve handoff c
 - Plan 002 completed with exact ModelManager routing and live key/catalog checks. A follow-up cost constraint removed Pro variants and added standard Sol, leaving 65 live-validated aliases focused on Terra, Sol, and Luna. Bounded free-provider response limitations are documented without a paid retry.
 - Plan 003 consolidated specs/plans/examples into canonical locations and removed obsolete root/generated files without changing production modules.
 - Plan 004 split 18 multi-model classes into focused modules with original-path compatibility. All 249 tests plus one opt-in skip and an independent AST equivalence check passed.
-- Packaging required uv-generated lock metadata normalization and a minimal `MANIFEST.in`; no dependency versions or resolved dependency identities changed.
+- Plan 005 upgraded LiteLLM to 1.108.3 with no other direct dependency changes, pinned setup-uv v10.3.3 by full SHA with uv 0.13.7, and documented destination controls. All 250 tests plus one opt-in skip passed; uv audit reports no LiteLLM advisory entry.
+- Plans 001-004 preserved dependency versions and resolved dependency identities. Plan 005 changed only LiteLLM and its resolved transitive requirements.
 - Broader dependency modernization, model-registry consolidation, and execution lifecycle redesign must follow this baseline. They were intentionally outside Plan 001.
 
 ## Legacy Plan Location

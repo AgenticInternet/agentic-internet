@@ -8,7 +8,7 @@ Initial grades are intentionally conservative. Raise them with evidence from tes
 | Tests | C | The tracked pytest suite and on-demand coverage reports provide verification; multi_model and CLI behavior coverage remain the main gaps | Cover the multi_model package and CLI, and split unit/integration gates in CI |
 | Typing | B | Mypy passes with zero errors across package source files and is enforced as a CI gate; remaining `Any` boundaries tracked via scoped type-ignores | Tighten remaining tool/agent `Any` return boundaries |
 | Reliability | C | Fallback providers exist in places; orchestrator now 80% covered, but no timeout/outage policy | Define provider outage behavior and timeouts |
-| Security | C | Secret placeholders documented and trufflehog secret scan runs in CI | Audit code execution and browser automation boundaries |
+| Security | C | LiteLLM 1.108.3, setup-uv v10.3.3 full SHA with uv 0.13.7, destination controls documented, and trufflehog secret scan runs in CI | Audit code execution and browser automation boundaries |
 | Documentation | B | README, MCP docs, and AGENTS.md map exist and are linked; docs KB maintained | Keep docs linked from AGENTS.md and PLANS.md |
 
 ## Tech Debt Tracker

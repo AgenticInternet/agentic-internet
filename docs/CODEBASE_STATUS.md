@@ -18,6 +18,7 @@ Status date: 2026-11-09
 - Plan 002 refreshed the OpenRouter mappings, added CLI/central catalog parity and exact ModelManager routing, and validated the live key/catalog without exposing credentials.
 - Plan 003 consolidated examples, architecture diagrams, and exec-plans into canonical locations and removed obsolete root/generated files without changing production behavior.
 - Plan 004 split 18 multi-model classes into focused modules with original-path compatibility. Independent AST comparison confirmed identical implementations, and 249 tests plus one opt-in skip passed.
+- Plan 005 upgraded LiteLLM to 1.108.3 with no other direct dependency changes, pinned setup-uv v10.3.3 by full SHA with uv 0.13.7, documented destination controls, and added a CI regression test. The full suite now reports 250 tests plus one opt-in skip.
 - Packaging metadata normalization preserved dependency versions and resolved dependency identities. The static catalog remains an offline fallback; `models --live` is the dynamic inventory path.
 
 ## OpenRouter Catalog
