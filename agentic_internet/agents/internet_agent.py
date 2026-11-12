@@ -63,7 +63,7 @@ class InternetAgent:
         self.model = self._initialize_model(model_id)
 
         # Initialize tools
-        self.tools = tools or self._get_default_tools()
+        self.tools = self._get_default_tools() if tools is None else tools
 
         # Create the appropriate agent type
         self.agent = self._create_agent()
@@ -92,6 +92,7 @@ class InternetAgent:
 
     def _create_agent(self):
         """Create the appropriate agent based on agent_type."""
+        planning_interval = 1 if self.planning_enabled else None
         if self.agent_type == "code":
             # CodeAgent can execute Python code and use tools
             default_imports = [
@@ -112,11 +113,17 @@ class InternetAgent:
                 tools=self.tools,
                 model=self.model,
                 max_steps=self.max_iterations,
+                planning_interval=planning_interval,
                 additional_authorized_imports=default_imports + self.additional_authorized_imports,
             )
         else:
             # Default to ToolCallingAgent
-            return ToolCallingAgent(tools=self.tools, model=self.model)
+            return ToolCallingAgent(
+                tools=self.tools,
+                model=self.model,
+                max_steps=self.max_iterations,
+                planning_interval=planning_interval,
+            )
 
     def _get_default_tools(self) -> list[Tool]:
         """Get the default set of tools for the agent."""

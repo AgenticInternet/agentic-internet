@@ -1,6 +1,12 @@
 """Tests for OpenRouter model inventory helpers."""
 
+import os
+
+import pytest
+
+from agentic_internet.config.settings import settings
 from agentic_internet.utils.openrouter_models import (
+    fetch_openrouter_models,
     normalize_openrouter_model_id,
     recent_agentic_models,
     sort_models_by_created,
@@ -59,3 +65,17 @@ def test_supports_parameter_and_sorting_helpers():
         "b",
         "a",
     ]
+
+
+@pytest.mark.integration
+@pytest.mark.skipif(os.getenv("OPENROUTER_LIVE_TESTS") != "1", reason="live OpenRouter validation is opt-in")
+def test_static_aliases_exist_in_live_catalog():
+    models = fetch_openrouter_models()
+    live_ids = {model["id"] for model in models}
+    assert live_ids, "OpenRouter model inventory was unavailable"
+
+    configured_ids = set(settings.model.openrouter_models.values())
+    missing = sorted(model_id for model_id in configured_ids if normalize_openrouter_model_id(model_id) not in live_ids)
+    assert not missing, f"Configured aliases missing from live OpenRouter: {missing}"
+    assert normalize_openrouter_model_id(settings.model.name) in live_ids
+    assert normalize_openrouter_model_id(settings.model.fallback_models["openrouter"]) in live_ids

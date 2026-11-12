@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "agentic-internet"
 version = "0.1.0"
@@ -24,7 +28,7 @@ dependencies = [
     "pandas>=2.0.0",
     "google-search-results>=2.4.0",
     "exa-py>=2.0.0",
-    "litellm>=1.0.0",
+    "litellm>=1.108.3,<2",
     "dotenv>=0.9.9",
     "browser-use-sdk>=3.11.1",
     "mcp>=1.0.0",
@@ -33,6 +37,8 @@ dependencies = [
 [tool.rye]
 managed = true
 
+[tool.setuptools.packages.find]
+include = ["agentic_internet*"]
 
 [project.scripts]
 agentic-internet = "agentic_internet.cli:app"

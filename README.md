@@ -13,6 +13,7 @@ Core project docs:
 | Doc | Purpose |
 |-----|---------|
 | [Architecture](docs/ARCHITECTURE.md) | System layers, dependency direction, golden principles |
+| [Codebase diagrams](docs/CODEBASE_DIAGRAM.md) | Mermaid system diagrams and code anchors |
 | [Design](docs/DESIGN.md) | Python conventions, API patterns, logging |
 | [Security](docs/SECURITY.md) | Secret handling, input validation, data classes |
 | [Plans](docs/PLANS.md) | Active and completed exec-plans |
@@ -22,7 +23,7 @@ Core project docs:
 - **🔍 Web Search & Scraping**: Search the web, scrape content, and gather information
 - **🌍 Browser Use**: Interact with websites, fill forms, click buttons, and extract structured data in the cloud using the Browser Use Cloud SDK
 - **📰 News Analysis**: Find and analyze recent news on any topic
-- **💻 Code Execution**: Execute Python code safely in a sandboxed environment
+- **💻 Code Execution**: Execute Python with restricted builtins and an import allowlist; use a remote or container sandbox for untrusted code
 - **📊 Data Analysis**: Analyze datasets and generate insights
 - **🔬 Research Agent**: Conduct multi-depth research on any topic
 - **🛠️ Extensible Tools**: Easy to add custom tools and capabilities
@@ -135,7 +136,7 @@ uv run python -m agentic_internet.cli --help
 uv run python -m agentic_internet.cli chat --verbose
 
 # Use a specific model
-uv run python -m agentic_internet.cli run "Write a short story on GPT-5 models" --model gpt-5.2 --verbose
+uv run python -m agentic_internet.cli run "Compare recent agent frameworks" --model gpt-6.1-terra --verbose
 
 # Quiet mode (less verbose)
 uv run python -m agentic_internet.cli run "Describe the latest AI breakthroughs" --model gemini-3-flash --verbose --quiet
@@ -151,7 +152,7 @@ uv run python -m agentic_internet.cli run "Search for Python tutorials" --verbos
 uv run python -m agentic_internet.cli run "Analyze crypto market trends" --output results.txt --verbose
 
 # Specify model and iterations
-uv run python -m agentic_internet.cli run "Complex research task" --model claude-opus-4.5 --max-iterations 15 --verbose
+uv run python -m agentic_internet.cli run "Complex research task" --model claude-sonnet-5.5 --max-iterations 15 --verbose
 ```
 
 ### Research Mode
@@ -170,7 +171,7 @@ uv run python -m agentic_internet.cli research "climate change" --format json --
 
 ```bash
 # Multi-model task
-uv run python -m agentic_internet.cli multi "Analyze the impact of AI on healthcare" --models gpt-5.2 --models claude-opus-4.5 --workers 3 --output results.json
+uv run python -m agentic_internet.cli multi "Analyze the impact of AI on healthcare" --models gpt-6.1-terra --models claude-sonnet-5.5 --workers 3 --output results.json
 
 # News analysis
 uv run python -m agentic_internet.cli news "artificial intelligence breakthroughs" --time 7d --sources "TechCrunch" --sources "Wired" --limit 20 --format markdown --output news_report.md
@@ -180,7 +181,7 @@ uv run python -m agentic_internet.cli news "artificial intelligence breakthrough
 
 ```bash
 # Orchestrated task
-uv run python -m agentic_internet.cli orchestrate "Develop a business plan for an AI startup" --coordinator gpt-5.2 --workers claude-opus-4.5 --output business_plan.json
+uv run python -m agentic_internet.cli orchestrate "Develop a business plan for an AI startup" --coordinator gpt-6.1-terra --workers claude-sonnet-5.5 --output business_plan.json
 ```
 
 
@@ -309,6 +310,13 @@ MultiEngineSearchTool
 
 ## 💡 Examples
 
+Standalone scripts live in [`examples/`](examples/). Run them from the repository root, for example:
+
+```bash
+python examples/basic_usage.py
+python examples/advanced_usage.py
+```
+
 ### Web Research
 ```python
 from agentic_internet import ResearchAgent
@@ -421,7 +429,13 @@ agentic-internet/
 │   ├── agents/              # Agent implementations
 │   │   ├── internet_agent.py
 │   │   ├── basic_agent.py
-│   │   ├── multi_model_serpapi.py
+│   │   ├── multi_model/       # Focused multi-model implementations
+│   │   │   ├── model_manager.py
+│   │   │   ├── schemas.py
+│   │   │   ├── context.py
+│   │   │   ├── tools.py
+│   │   │   └── system.py
+│   │   ├── multi_model_serpapi.py  # Compatibility re-exports
 │   │   ├── search_orchestrator.py
 │   │   └── specialized_agents.py
 │   ├── tools/               # Custom tools
@@ -431,10 +445,10 @@ agentic-internet/
 │   │   └── mcp_integration.py
 │   ├── config/              # Configuration
 │   │   └── settings.py
-│   ├── utils/               # Utilities
-│   │   └── model_utils.py
-│   └── examples/            # Usage examples
-├── tests/                   # Test suite (102 tests)
+│   └── utils/               # Utilities
+│       └── model_utils.py
+├── examples/                # Usage examples
+├── tests/                   # Pytest suite
 ├── pyproject.toml           # Project configuration
 ├── README.md
 └── .env                     # Environment variables
@@ -486,31 +500,35 @@ agent = InternetAgent(tools=[MyCustomTool()])
 All models are accessed via [OpenRouter](https://openrouter.ai/) for unified API access, with optional direct provider APIs.
 
 ### Flagship Models
-| Provider | Model | Best For |
-|----------|-------|----------|
-| Anthropic | Claude Opus 4.5, Sonnet 4.5, Haiku 4.5 | Reasoning, planning, orchestration |
-| OpenAI | GPT-5.2, GPT-5.1, O4-Mini, O3 | General tasks, coding, reasoning |
-| Google | Gemini 3 Pro, Gemini 3 Flash | Multimodal, fast responses |
-| DeepSeek | V3.2, V3.2 Speciale, R1 | Open-weight reasoning, specialized |
-| xAI | Grok 4.1 Fast, Grok 4, Grok Code Fast | Creative tasks, fast coding |
-| Mistral | Large 2512, Devstral 2, Magistral Medium | Business analysis, agentic coding |
-| Qwen | Qwen3 Coder, Qwen3 Max, Qwen3 235B | Coding, multilingual, synthesis |
-| Meta | Llama 4 Maverick, Llama 4 Scout | Open source general tasks |
-| MoonshotAI | Kimi K2.5 | Long context specialist |
-| Perplexity | Sonar Pro, Sonar Reasoning Pro | Search-optimized research |
-| MiniMax | M2.1 | Balanced reasoning |
-| Xiaomi | MiMo V2 Flash | Cost-effective coding |
+
+The static catalog is a curated offline fallback. Run `agentic-internet models --live` for the freshest OpenRouter inventory, capability flags, context lengths, and pricing metadata.
+
+| Provider | Models | Best For |
+|----------|--------|----------|
+| Anthropic | Claude Opus 4.8, Sonnet 5.5, Haiku 5.5 | Reasoning, planning, orchestration |
+| OpenAI | GPT-6.1 Terra, GPT-6.1 Sol, GPT-6 Luna, GPT-5.2 | General tasks, coding, reasoning |
+| Google | Gemini 4 Argon, Gemini 3.5 Flash, Gemini 2.5 Pro | Multimodal analysis, fast responses |
+| DeepSeek | V4.1 Flash, V3.2, R1 | Efficient and open-weight reasoning |
+| Qwen | Qwen3.8 Max Prime, Qwen3.7 Max, Qwen3 Coder | Coding, multilingual synthesis |
+| MoonshotAI | Kimi K3.1 Pro, Kimi K2.5 | Long-context and agentic tasks |
+| Mistral | Large 4, Large 2512, Devstral 2 | Business analysis, agentic coding |
+| MiniMax | M3.1 Flash | Fast, balanced agent workflows |
+| xAI | Grok 4.3, Grok Build 0.1 | Reasoning and coding |
+| Perplexity | Sonar Pro, Sonar Reasoning Pro, Sonar Deep Research | Search-optimized research |
+| Other | Liquid LFM 3, Tencent HY4, Cohere Command A Plus, Step 5 Preview | Efficient and specialized agent workflows |
+
+Free variants `lfm-3-1.7b-free` and `nemotron-3.5-super-vl-free` are available for bounded provider smoke tests. Free availability and final response quality remain provider-dependent; no paid fallback is implicit.
 
 ### Direct Provider APIs
-- **OpenAI**: GPT-5.2, GPT-5.1, GPT-5, GPT-4.1, O4-Mini, O3 (via OpenAI API)
-- **Anthropic**: Claude Opus 4.5, Sonnet 4.5, Opus 4.1, Haiku 4.5 (via Anthropic API)
+- **OpenAI**: GPT-5.2, GPT-5.1, GPT-5, GPT-4.1, O3 (via OpenAI API)
+- **Anthropic**: Claude Opus 4.8, Opus 4.5, Sonnet 4.5, Opus 4.1, Haiku 4.5 (via Anthropic API)
 - **HuggingFace**: Llama 4 Scout/Maverick, Qwen3 235B (via HuggingFace API)
 
 ## 🧪 Development
 
 ### Running Tests
 ```bash
-# Run all tests (102 tests)
+# Run all tests
 uv run pytest
 
 # Run with verbose output

@@ -6,6 +6,7 @@ from typing import cast
 import pytest
 from smolagents import Tool
 
+from agentic_internet.agents.multi_model_serpapi import MultiModelSerpAPISystem
 from agentic_internet.agents.orchestration_runtime import (
     parse_worker_model_overrides,
     resolve_tool_bundles,
@@ -13,6 +14,7 @@ from agentic_internet.agents.orchestration_runtime import (
     summarize_use_case,
 )
 from agentic_internet.agents.use_cases import get_use_case_recipe
+from agentic_internet.config.settings import settings
 
 
 def _tool(name: str) -> Tool:
@@ -55,3 +57,16 @@ def test_summarize_use_case_includes_k_and_workers():
         "code_analyst",
         "risk_synthesizer",
     ]
+
+
+@pytest.mark.parametrize(("enabled", "expected"), [(False, False), (True, True)])
+def test_use_case_inventory_respects_code_execution_setting(monkeypatch, enabled, expected):
+    monkeypatch.setattr("agentic_internet.agents.multi_model.system.ModelManager", lambda: SimpleNamespace())
+    monkeypatch.setattr(settings.tools, "code_execution_enabled", enabled)
+    system = MultiModelSerpAPISystem(serpapi_key="")
+
+    names = {tool.name for tool in system.create_use_case_tool_inventory()}
+
+    assert ("python_executor" in names) is expected
+    assert ("data_analysis" in names) is expected
+    assert "web_search" in names

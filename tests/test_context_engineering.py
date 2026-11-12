@@ -67,6 +67,19 @@ class TestAgentMemory:
         rec = mem.get_search_recommendations("web", "bing")
         assert rec["best_params"] == {"hl": "en"}
 
+    def test_best_params_excludes_credentials_and_queries(self):
+        mem = AgentMemory()
+        mem.remember_search_pattern(
+            "web",
+            "google",
+            {
+                "success": True,
+                "params": {"api_key": "synthetic-key", "q": "first", "query": "second", "hl": "en"},
+            },
+        )
+        rec = mem.get_search_recommendations("web", "google")
+        assert rec["best_params"] == {"hl": "en"}
+
     def test_unknown_pattern_returns_empty(self):
         mem = AgentMemory()
         assert mem.get_search_recommendations("missing", "engine") == {}
